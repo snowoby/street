@@ -48,16 +48,9 @@ func (tu *TokenUpdate) SetType(s string) *TokenUpdate {
 	return tu
 }
 
-// SetLifelong sets the "lifelong" field.
-func (tu *TokenUpdate) SetLifelong(i int) *TokenUpdate {
-	tu.mutation.ResetLifelong()
-	tu.mutation.SetLifelong(i)
-	return tu
-}
-
-// AddLifelong adds i to the "lifelong" field.
-func (tu *TokenUpdate) AddLifelong(i int) *TokenUpdate {
-	tu.mutation.AddLifelong(i)
+// SetExpireAt sets the "expire_at" field.
+func (tu *TokenUpdate) SetExpireAt(t time.Time) *TokenUpdate {
+	tu.mutation.SetExpireAt(t)
 	return tu
 }
 
@@ -209,18 +202,11 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: token.FieldType,
 		})
 	}
-	if value, ok := tu.mutation.Lifelong(); ok {
+	if value, ok := tu.mutation.ExpireAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldLifelong,
-		})
-	}
-	if value, ok := tu.mutation.AddedLifelong(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: token.FieldLifelong,
+			Column: token.FieldExpireAt,
 		})
 	}
 	if tu.mutation.AccountCleared() {
@@ -295,16 +281,9 @@ func (tuo *TokenUpdateOne) SetType(s string) *TokenUpdateOne {
 	return tuo
 }
 
-// SetLifelong sets the "lifelong" field.
-func (tuo *TokenUpdateOne) SetLifelong(i int) *TokenUpdateOne {
-	tuo.mutation.ResetLifelong()
-	tuo.mutation.SetLifelong(i)
-	return tuo
-}
-
-// AddLifelong adds i to the "lifelong" field.
-func (tuo *TokenUpdateOne) AddLifelong(i int) *TokenUpdateOne {
-	tuo.mutation.AddLifelong(i)
+// SetExpireAt sets the "expire_at" field.
+func (tuo *TokenUpdateOne) SetExpireAt(t time.Time) *TokenUpdateOne {
+	tuo.mutation.SetExpireAt(t)
 	return tuo
 }
 
@@ -480,18 +459,11 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 			Column: token.FieldType,
 		})
 	}
-	if value, ok := tuo.mutation.Lifelong(); ok {
+	if value, ok := tuo.mutation.ExpireAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldLifelong,
-		})
-	}
-	if value, ok := tuo.mutation.AddedLifelong(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: token.FieldLifelong,
+			Column: token.FieldExpireAt,
 		})
 	}
 	if tuo.mutation.AccountCleared() {

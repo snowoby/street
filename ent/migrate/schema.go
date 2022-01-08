@@ -36,7 +36,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "body", Type: field.TypeString, Unique: true, Size: 320},
 		{Name: "type", Type: field.TypeString, Size: 16},
-		{Name: "lifelong", Type: field.TypeInt},
+		{Name: "expire_at", Type: field.TypeTime},
 		{Name: "account_token", Type: field.TypeUUID, Nullable: true},
 	}
 	// TokensTable holds the schema information for the "tokens" table.

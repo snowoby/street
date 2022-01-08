@@ -592,8 +592,7 @@ type TokenMutation struct {
 	updated_at     *time.Time
 	body           *string
 	_type          *string
-	lifelong       *int
-	addlifelong    *int
+	expire_at      *time.Time
 	clearedFields  map[string]struct{}
 	account        *uuid.UUID
 	clearedaccount bool
@@ -831,60 +830,40 @@ func (m *TokenMutation) ResetType() {
 	m._type = nil
 }
 
-// SetLifelong sets the "lifelong" field.
-func (m *TokenMutation) SetLifelong(i int) {
-	m.lifelong = &i
-	m.addlifelong = nil
+// SetExpireAt sets the "expire_at" field.
+func (m *TokenMutation) SetExpireAt(t time.Time) {
+	m.expire_at = &t
 }
 
-// Lifelong returns the value of the "lifelong" field in the mutation.
-func (m *TokenMutation) Lifelong() (r int, exists bool) {
-	v := m.lifelong
+// ExpireAt returns the value of the "expire_at" field in the mutation.
+func (m *TokenMutation) ExpireAt() (r time.Time, exists bool) {
+	v := m.expire_at
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLifelong returns the old "lifelong" field's value of the Token entity.
+// OldExpireAt returns the old "expire_at" field's value of the Token entity.
 // If the Token object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TokenMutation) OldLifelong(ctx context.Context) (v int, err error) {
+func (m *TokenMutation) OldExpireAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldLifelong is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldExpireAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldLifelong requires an ID field in the mutation")
+		return v, fmt.Errorf("OldExpireAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLifelong: %w", err)
+		return v, fmt.Errorf("querying old value for OldExpireAt: %w", err)
 	}
-	return oldValue.Lifelong, nil
+	return oldValue.ExpireAt, nil
 }
 
-// AddLifelong adds i to the "lifelong" field.
-func (m *TokenMutation) AddLifelong(i int) {
-	if m.addlifelong != nil {
-		*m.addlifelong += i
-	} else {
-		m.addlifelong = &i
-	}
-}
-
-// AddedLifelong returns the value that was added to the "lifelong" field in this mutation.
-func (m *TokenMutation) AddedLifelong() (r int, exists bool) {
-	v := m.addlifelong
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetLifelong resets all changes to the "lifelong" field.
-func (m *TokenMutation) ResetLifelong() {
-	m.lifelong = nil
-	m.addlifelong = nil
+// ResetExpireAt resets all changes to the "expire_at" field.
+func (m *TokenMutation) ResetExpireAt() {
+	m.expire_at = nil
 }
 
 // SetAccountID sets the "account" edge to the Account entity by id.
@@ -958,8 +937,8 @@ func (m *TokenMutation) Fields() []string {
 	if m._type != nil {
 		fields = append(fields, token.FieldType)
 	}
-	if m.lifelong != nil {
-		fields = append(fields, token.FieldLifelong)
+	if m.expire_at != nil {
+		fields = append(fields, token.FieldExpireAt)
 	}
 	return fields
 }
@@ -977,8 +956,8 @@ func (m *TokenMutation) Field(name string) (ent.Value, bool) {
 		return m.Body()
 	case token.FieldType:
 		return m.GetType()
-	case token.FieldLifelong:
-		return m.Lifelong()
+	case token.FieldExpireAt:
+		return m.ExpireAt()
 	}
 	return nil, false
 }
@@ -996,8 +975,8 @@ func (m *TokenMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldBody(ctx)
 	case token.FieldType:
 		return m.OldType(ctx)
-	case token.FieldLifelong:
-		return m.OldLifelong(ctx)
+	case token.FieldExpireAt:
+		return m.OldExpireAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Token field %s", name)
 }
@@ -1035,12 +1014,12 @@ func (m *TokenMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetType(v)
 		return nil
-	case token.FieldLifelong:
-		v, ok := value.(int)
+	case token.FieldExpireAt:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLifelong(v)
+		m.SetExpireAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Token field %s", name)
@@ -1049,21 +1028,13 @@ func (m *TokenMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TokenMutation) AddedFields() []string {
-	var fields []string
-	if m.addlifelong != nil {
-		fields = append(fields, token.FieldLifelong)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TokenMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case token.FieldLifelong:
-		return m.AddedLifelong()
-	}
 	return nil, false
 }
 
@@ -1072,13 +1043,6 @@ func (m *TokenMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TokenMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case token.FieldLifelong:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLifelong(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Token numeric field %s", name)
 }
@@ -1118,8 +1082,8 @@ func (m *TokenMutation) ResetField(name string) error {
 	case token.FieldType:
 		m.ResetType()
 		return nil
-	case token.FieldLifelong:
-		m.ResetLifelong()
+	case token.FieldExpireAt:
+		m.ResetExpireAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Token field %s", name)

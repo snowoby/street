@@ -26,8 +26,8 @@ type Token struct {
 	Body string `json:"body,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
-	// Lifelong holds the value of the "lifelong" field.
-	Lifelong int `json:"lifelong,omitempty"`
+	// ExpireAt holds the value of the "expire_at" field.
+	ExpireAt time.Time `json:"expire_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TokenQuery when eager-loading is set.
 	Edges         TokenEdges `json:"edges"`
@@ -62,11 +62,9 @@ func (*Token) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case token.FieldLifelong:
-			values[i] = new(sql.NullInt64)
 		case token.FieldBody, token.FieldType:
 			values[i] = new(sql.NullString)
-		case token.FieldCreatedAt, token.FieldUpdatedAt:
+		case token.FieldCreatedAt, token.FieldUpdatedAt, token.FieldExpireAt:
 			values[i] = new(sql.NullTime)
 		case token.FieldID:
 			values[i] = new(uuid.UUID)
@@ -117,11 +115,11 @@ func (t *Token) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				t.Type = value.String
 			}
-		case token.FieldLifelong:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field lifelong", values[i])
+		case token.FieldExpireAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expire_at", values[i])
 			} else if value.Valid {
-				t.Lifelong = int(value.Int64)
+				t.ExpireAt = value.Time
 			}
 		case token.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -171,8 +169,8 @@ func (t *Token) String() string {
 	builder.WriteString(t.Body)
 	builder.WriteString(", type=")
 	builder.WriteString(t.Type)
-	builder.WriteString(", lifelong=")
-	builder.WriteString(fmt.Sprintf("%v", t.Lifelong))
+	builder.WriteString(", expire_at=")
+	builder.WriteString(t.ExpireAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

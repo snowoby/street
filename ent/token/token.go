@@ -21,8 +21,8 @@ const (
 	FieldBody = "body"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
-	// FieldLifelong holds the string denoting the lifelong field in the database.
-	FieldLifelong = "lifelong"
+	// FieldExpireAt holds the string denoting the expire_at field in the database.
+	FieldExpireAt = "expire_at"
 	// EdgeAccount holds the string denoting the account edge name in mutations.
 	EdgeAccount = "account"
 	// Table holds the table name of the token in the database.
@@ -43,7 +43,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldBody,
 	FieldType,
-	FieldLifelong,
+	FieldExpireAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tokens"

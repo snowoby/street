@@ -122,10 +122,10 @@ func Type(v string) predicate.Token {
 	})
 }
 
-// Lifelong applies equality check predicate on the "lifelong" field. It's identical to LifelongEQ.
-func Lifelong(v int) predicate.Token {
+// ExpireAt applies equality check predicate on the "expire_at" field. It's identical to ExpireAtEQ.
+func ExpireAt(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLifelong), v))
+		s.Where(sql.EQ(s.C(FieldExpireAt), v))
 	})
 }
 
@@ -503,22 +503,22 @@ func TypeContainsFold(v string) predicate.Token {
 	})
 }
 
-// LifelongEQ applies the EQ predicate on the "lifelong" field.
-func LifelongEQ(v int) predicate.Token {
+// ExpireAtEQ applies the EQ predicate on the "expire_at" field.
+func ExpireAtEQ(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLifelong), v))
+		s.Where(sql.EQ(s.C(FieldExpireAt), v))
 	})
 }
 
-// LifelongNEQ applies the NEQ predicate on the "lifelong" field.
-func LifelongNEQ(v int) predicate.Token {
+// ExpireAtNEQ applies the NEQ predicate on the "expire_at" field.
+func ExpireAtNEQ(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLifelong), v))
+		s.Where(sql.NEQ(s.C(FieldExpireAt), v))
 	})
 }
 
-// LifelongIn applies the In predicate on the "lifelong" field.
-func LifelongIn(vs ...int) predicate.Token {
+// ExpireAtIn applies the In predicate on the "expire_at" field.
+func ExpireAtIn(vs ...time.Time) predicate.Token {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -530,12 +530,12 @@ func LifelongIn(vs ...int) predicate.Token {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldLifelong), v...))
+		s.Where(sql.In(s.C(FieldExpireAt), v...))
 	})
 }
 
-// LifelongNotIn applies the NotIn predicate on the "lifelong" field.
-func LifelongNotIn(vs ...int) predicate.Token {
+// ExpireAtNotIn applies the NotIn predicate on the "expire_at" field.
+func ExpireAtNotIn(vs ...time.Time) predicate.Token {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -547,35 +547,35 @@ func LifelongNotIn(vs ...int) predicate.Token {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldLifelong), v...))
+		s.Where(sql.NotIn(s.C(FieldExpireAt), v...))
 	})
 }
 
-// LifelongGT applies the GT predicate on the "lifelong" field.
-func LifelongGT(v int) predicate.Token {
+// ExpireAtGT applies the GT predicate on the "expire_at" field.
+func ExpireAtGT(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLifelong), v))
+		s.Where(sql.GT(s.C(FieldExpireAt), v))
 	})
 }
 
-// LifelongGTE applies the GTE predicate on the "lifelong" field.
-func LifelongGTE(v int) predicate.Token {
+// ExpireAtGTE applies the GTE predicate on the "expire_at" field.
+func ExpireAtGTE(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLifelong), v))
+		s.Where(sql.GTE(s.C(FieldExpireAt), v))
 	})
 }
 
-// LifelongLT applies the LT predicate on the "lifelong" field.
-func LifelongLT(v int) predicate.Token {
+// ExpireAtLT applies the LT predicate on the "expire_at" field.
+func ExpireAtLT(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLifelong), v))
+		s.Where(sql.LT(s.C(FieldExpireAt), v))
 	})
 }
 
-// LifelongLTE applies the LTE predicate on the "lifelong" field.
-func LifelongLTE(v int) predicate.Token {
+// ExpireAtLTE applies the LTE predicate on the "expire_at" field.
+func ExpireAtLTE(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLifelong), v))
+		s.Where(sql.LTE(s.C(FieldExpireAt), v))
 	})
 }
 

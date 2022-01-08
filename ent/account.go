@@ -24,7 +24,7 @@ type Account struct {
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Password holds the value of the "password" field.
-	Password string `json:"password,omitempty"`
+	Password string `json:"-"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountQuery when eager-loading is set.
 	Edges AccountEdges `json:"edges"`
@@ -143,8 +143,7 @@ func (a *Account) String() string {
 	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", email=")
 	builder.WriteString(a.Email)
-	builder.WriteString(", password=")
-	builder.WriteString(a.Password)
+	builder.WriteString(", password=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

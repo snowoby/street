@@ -62,9 +62,9 @@ func (tc *TokenCreate) SetType(s string) *TokenCreate {
 	return tc
 }
 
-// SetLifelong sets the "lifelong" field.
-func (tc *TokenCreate) SetLifelong(i int) *TokenCreate {
-	tc.mutation.SetLifelong(i)
+// SetExpireAt sets the "expire_at" field.
+func (tc *TokenCreate) SetExpireAt(t time.Time) *TokenCreate {
+	tc.mutation.SetExpireAt(t)
 	return tc
 }
 
@@ -194,8 +194,8 @@ func (tc *TokenCreate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "type": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.Lifelong(); !ok {
-		return &ValidationError{Name: "lifelong", err: errors.New(`ent: missing required field "lifelong"`)}
+	if _, ok := tc.mutation.ExpireAt(); !ok {
+		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "expire_at"`)}
 	}
 	if _, ok := tc.mutation.AccountID(); !ok {
 		return &ValidationError{Name: "account", err: errors.New("ent: missing required edge \"account\"")}
@@ -264,13 +264,13 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 		})
 		_node.Type = value
 	}
-	if value, ok := tc.mutation.Lifelong(); ok {
+	if value, ok := tc.mutation.ExpireAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldLifelong,
+			Column: token.FieldExpireAt,
 		})
-		_node.Lifelong = value
+		_node.ExpireAt = value
 	}
 	if nodes := tc.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

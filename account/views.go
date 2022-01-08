@@ -5,16 +5,8 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"street/errors"
+	"time"
 )
-
-//
-//type Email struct {
-//	Email string `json:"email" binding:"required,email"`
-//}
-//
-//type Password struct {
-//	Password string `json:"password" binding:"required"`
-//}
 
 type ID struct {
 	ID uuid.UUID `json:"id" binding:"required,uuid"`
@@ -85,7 +77,7 @@ func login(ctx *gin.Context, store *store) {
 		return
 	}
 
-	if !Validate(account.Password, account.Password) {
+	if !Validate(login.Password, account.Password) {
 		ctx.AbortWithStatusJSON(RecordNotMatchError.Code, RecordNotMatchError)
 		return
 	}
@@ -97,6 +89,6 @@ func login(ctx *gin.Context, store *store) {
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
 		return
 	}
-	ctx.SetCookie(RefreshToken, t.Body, t.Lifelong, "/", store.Config().Domain, false, true)
-	ctx.Status(http.StatusNoContent)
+	ctx.SetCookie(RefreshToken, t.Body, int(t.ExpireAt.Sub(time.Now()).Seconds()), "/refresh", store.Config().Domain, false, true)
+	ctx.AbortWithStatus(http.StatusNoContent)
 }

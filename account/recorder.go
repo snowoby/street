@@ -35,7 +35,11 @@ func (s *store) emailExists(ctx context.Context, email string) bool {
 	return user != nil
 }
 
-func (s *store) findToken(ctx context.Context, tokenBody string) (*ent.Token, error) {
+func (s *store) findToken(ctx context.Context, tokenBody, t string, validOnly bool) (*ent.Token, error) {
+	query := s.DB().Token.Query().Where(token.Body(tokenBody)).Where(token.Type(t)).WithAccount()
+	if validOnly {
+		query = query.Where(token.ExpireAtGT(time.Now()))
+	}
 	return s.DB().Token.Query().Where(token.Body(tokenBody)).WithAccount().Only(ctx)
 }
 
@@ -44,7 +48,7 @@ func (s *store) createToken(ctx context.Context, accountID uuid.UUID, tokenBody,
 		SetAccountID(accountID).
 		SetBody(tokenBody).
 		SetType(tokenType).
-		SetLifelong(int(lifelong.Seconds())).
+		SetExpireAt(time.Now().Add(lifelong)).
 		Save(ctx)
 	return t, err
 }

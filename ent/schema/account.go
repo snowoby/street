@@ -16,7 +16,7 @@ type Account struct {
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("email").Unique().MaxLen(320).NotEmpty(),
-		field.String("password"),
+		field.String("password").Sensitive(),
 	}
 }
 
