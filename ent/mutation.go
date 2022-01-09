@@ -25,7 +25,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAccount = "Account"
+	TypeAccount = "StringAccount"
 	TypeToken   = "Token"
 )
 
@@ -397,7 +397,7 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 	case account.FieldPassword:
 		return m.OldPassword(ctx)
 	}
-	return nil, fmt.Errorf("unknown Account field %s", name)
+	return nil, fmt.Errorf("unknown StringAccount field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
@@ -434,7 +434,7 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 		m.SetPassword(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Account field %s", name)
+	return fmt.Errorf("unknown StringAccount field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
@@ -456,7 +456,7 @@ func (m *AccountMutation) AddedField(name string) (ent.Value, bool) {
 func (m *AccountMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Account numeric field %s", name)
+	return fmt.Errorf("unknown StringAccount numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
@@ -475,7 +475,7 @@ func (m *AccountMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AccountMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Account nullable field %s", name)
+	return fmt.Errorf("unknown StringAccount nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
@@ -495,7 +495,7 @@ func (m *AccountMutation) ResetField(name string) error {
 		m.ResetPassword()
 		return nil
 	}
-	return fmt.Errorf("unknown Account field %s", name)
+	return fmt.Errorf("unknown StringAccount field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
@@ -568,7 +568,7 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 func (m *AccountMutation) ClearEdge(name string) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Account unique edge %s", name)
+	return fmt.Errorf("unknown StringAccount unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
@@ -579,7 +579,7 @@ func (m *AccountMutation) ResetEdge(name string) error {
 		m.ResetToken()
 		return nil
 	}
-	return fmt.Errorf("unknown Account edge %s", name)
+	return fmt.Errorf("unknown StringAccount edge %s", name)
 }
 
 // TokenMutation represents an operation that mutates the Token nodes in the graph.

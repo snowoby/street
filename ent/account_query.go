@@ -296,7 +296,7 @@ func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Account.Query().
+//	client.StringAccount.Query().
 //		GroupBy(account.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -322,7 +322,7 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.Account.Query().
+//	client.StringAccount.Query().
 //		Select(account.FieldCreatedAt).
 //		Scan(ctx, &v)
 //

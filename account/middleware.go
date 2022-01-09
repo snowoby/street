@@ -2,41 +2,32 @@ package account
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"street/db"
 	"street/ent"
 	"street/errors"
 	"time"
 )
 
-func AccessTokenMiddleware(ctx *gin.Context, s *store) {
-	at, err := cookieTokenValidate(ctx, s, AccessToken)
-	if err != nil {
+const StringAccount = "account"
+
+func AccessTokenMiddleware(dbStore db.Store) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		s := &store{dbStore}
+		at, err := cookieTokenValidate(ctx, s, StringAccessToken)
+		if err != nil {
+			return
+		}
+
+		ctx.Set(StringAccount, at.Edges.Account)
+		ctx.Set(StringAccessToken, at)
+		ctx.Next()
 		return
 	}
-
-	ctx.Set("account", at.Edges.Account)
-	ctx.Set("accessToken", at)
-	ctx.Next()
-	return
-
-}
-
-func RefreshTokenMiddleware(ctx *gin.Context, s *store) {
-	rt, err := cookieTokenValidate(ctx, s, RefreshToken)
-	if err != nil {
-		return
-	}
-
-	tokenBody := RandomString(128)
-	t, err := s.createToken(ctx, rt.Edges.Account.ID, tokenBody, AccessToken, s.Config().AccessTokenExpireTime)
-	ctx.SetCookie(AccessToken, t.Body, int(t.ExpireAt.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
-	ctx.AbortWithStatus(http.StatusCreated)
-	return
 
 }
 
 func cookieTokenValidate(ctx *gin.Context, store *store, tokenType string) (*ent.Token, error) {
-	tokenBody, err := ctx.Cookie(RefreshToken)
+	tokenBody, err := ctx.Cookie(tokenType)
 	if err != nil {
 		ctx.AbortWithStatusJSON(TokenNotExistsError.Code, TokenNotExistsError)
 		return nil, err

@@ -20,6 +20,14 @@ func BindingError(err error) HTTPError {
 		Message: err.Error(),
 	}
 }
+
+func WTF(info string) HTTPError {
+	return HTTPError{
+		Code:    http.StatusBadRequest,
+		Message: info,
+	}
+}
+
 func DatabaseError(err error) HTTPError {
 	code := http.StatusBadGateway
 	switch err.(type) {

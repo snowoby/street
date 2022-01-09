@@ -15,8 +15,8 @@ type store struct {
 }
 
 const (
-	RefreshToken = "refresh"
-	AccessToken  = "access"
+	StringRefreshToken = "refresh"
+	StringAccessToken  = "access"
 )
 
 func (s *store) findAccount(ctx context.Context, email string) (*ent.Account, error) {

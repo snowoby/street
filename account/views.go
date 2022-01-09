@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"street/ent"
 	"street/errors"
 	"time"
 )
@@ -17,7 +18,7 @@ type EmailPassword struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type RegisterResponse struct {
+type PublicResponse struct {
 	EmailPassword
 	ID
 	Password *struct{} `json:"password,omitempty"`
@@ -54,7 +55,7 @@ func register(ctx *gin.Context, store *store) {
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
 		return
 	}
-	var responseData = &RegisterResponse{}
+	var responseData = &PublicResponse{}
 	responseData.Email = user.Email
 	responseData.ID.ID = user.ID
 	ctx.JSON(http.StatusCreated, responseData)
@@ -83,12 +84,31 @@ func login(ctx *gin.Context, store *store) {
 	}
 
 	tokenBody := RandomString(128)
-	t, err := store.createToken(ctx, account.ID, tokenBody, RefreshToken, store.Config().RefreshTokenExpireTime)
+	t, err := store.createToken(ctx, account.ID, tokenBody, StringRefreshToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
 		return
 	}
-	ctx.SetCookie(RefreshToken, t.Body, int(t.ExpireAt.Sub(time.Now()).Seconds()), "/refresh", store.Config().Domain, false, true)
+	ctx.SetCookie(StringRefreshToken, t.Body, int(t.ExpireAt.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 	ctx.AbortWithStatus(http.StatusNoContent)
+}
+
+func refreshToken(ctx *gin.Context, s *store) {
+	rt, err := cookieTokenValidate(ctx, s, StringRefreshToken)
+	if err != nil {
+		return
+	}
+
+	tokenBody := RandomString(128)
+	t, err := s.createToken(ctx, rt.Edges.Account.ID, tokenBody, StringAccessToken, s.Config().AccessTokenExpireTime)
+	ctx.SetCookie(StringAccessToken, t.Body, int(t.ExpireAt.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
+	ctx.AbortWithStatus(http.StatusCreated)
+	return
+
+}
+
+func info(ctx *gin.Context, s *store) {
+	account := ctx.MustGet(StringAccount).(*ent.Account)
+	ctx.JSON(http.StatusOK, account)
 }

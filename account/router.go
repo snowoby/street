@@ -16,4 +16,7 @@ func Handle(s db.Store, handle Flatten) gin.HandlerFunc {
 func Routers(group *gin.RouterGroup, store db.Store) {
 	group.POST("/login", Handle(store, login))
 	group.POST("/register", Handle(store, register))
+	group.POST("/refresh", Handle(store, refreshToken))
+	group.GET("/", AccessTokenMiddleware(store), Handle(store, info))
+
 }

@@ -60,7 +60,7 @@ func (*Account) scanValues(columns []string) ([]interface{}, error) {
 		case account.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Account", columns[i])
+			return nil, fmt.Errorf("unexpected column %q for type StringAccount", columns[i])
 		}
 	}
 	return values, nil
@@ -126,7 +126,7 @@ func (a *Account) Update() *AccountUpdateOne {
 func (a *Account) Unwrap() *Account {
 	tx, ok := a.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Account is not a transactional entity")
+		panic("ent: StringAccount is not a transactional entity")
 	}
 	a.config.driver = tx.drv
 	return a
@@ -135,7 +135,7 @@ func (a *Account) Unwrap() *Account {
 // String implements the fmt.Stringer.
 func (a *Account) String() string {
 	var builder strings.Builder
-	builder.WriteString("Account(")
+	builder.WriteString("StringAccount(")
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
 	builder.WriteString(", created_at=")
 	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
