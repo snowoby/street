@@ -33,6 +33,8 @@ func DatabaseError(err error) HTTPError {
 	switch err.(type) {
 	case *ent.NotFoundError:
 		code = http.StatusNotFound
+	case *ent.ConstraintError:
+		code = http.StatusBadRequest
 	}
 
 	return HTTPError{

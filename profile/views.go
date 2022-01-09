@@ -32,6 +32,17 @@ func createProfile(ctx *gin.Context, store *db.Store) {
 		e := errors.BindingError(err)
 		ctx.AbortWithStatusJSON(e.Code, e)
 	}
+	exists, err := store.CallSignExists(ctx, profile.CallSign.CallSign)
+	if err != nil {
+		e := errors.DatabaseError(err)
+		ctx.AbortWithStatusJSON(e.Code, e)
+		return
+	}
+
+	if exists {
+		ctx.AbortWithStatusJSON(CallSignDuplicateError.Code, CallSignDuplicateError)
+		return
+	}
 
 	p, err := store.CreateProfile(ctx, profile.CallSign.CallSign, profile.Title, profile.Category, account.ID)
 	if err != nil {
@@ -62,7 +73,7 @@ func updateProfile(ctx *gin.Context, store *db.Store) {
 		ctx.AbortWithStatusJSON(e.Code, e)
 	}
 
-	ctx.JSON(http.StatusCreated, p)
+	ctx.JSON(http.StatusOK, p)
 
 }
 
@@ -90,5 +101,5 @@ func accountProfiles(ctx *gin.Context, store *db.Store) {
 		e := errors.DatabaseError(err)
 		ctx.AbortWithStatusJSON(e.Code, e)
 	}
-	ctx.JSON(http.StatusCreated, ps)
+	ctx.JSON(http.StatusOK, ps)
 }

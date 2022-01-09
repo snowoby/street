@@ -29,6 +29,9 @@ func (s *db) CreateProfile(ctx context.Context, callSign, title, category string
 
 func (s *db) CallSignExists(ctx context.Context, callSign string) (bool, error) {
 	result, err := s.FindProfile(ctx, callSign)
+	if ent.IsNotFound(err) {
+		err = nil
+	}
 	return result != nil, err
 }
 

@@ -105,7 +105,7 @@ func refreshToken(ctx *gin.Context, s *db.Store) {
 	tokenBody := RandomString(128)
 	t, err := s.CreateToken(ctx, rt.Edges.Account.ID, tokenBody, value.StringAccessToken, s.Config().AccessTokenExpireTime)
 	ctx.SetCookie(value.StringAccessToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
-	ctx.AbortWithStatus(http.StatusCreated)
+	ctx.AbortWithStatus(http.StatusNoContent)
 	return
 
 }
