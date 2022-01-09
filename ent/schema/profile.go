@@ -33,6 +33,7 @@ func (Profile) Mixin() []ent.Mixin {
 func (Profile) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("account", Account.Type).Ref("profile").Required().Unique(),
+		edge.To("episode", Episode.Type),
 	}
 }
 

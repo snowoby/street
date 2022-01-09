@@ -8,6 +8,7 @@ import (
 	"street/db/value"
 	"street/ent"
 	"street/errors"
+	"street/utils"
 	"time"
 )
 
@@ -28,35 +29,39 @@ type PublicResponse struct {
 
 func register(ctx *gin.Context, store *db.Store) {
 	var register EmailPassword
-	err := ctx.ShouldBindJSON(&register)
+	if !utils.MustBindJSON(ctx, &register) {
+		return
+	}
+
+	if err := utils.StrongPassword(register.Password); err != nil {
+		ctx.JSON(errors.WeakPasswordError.Code, errors.WeakPasswordError)
+		return
+	}
+
+	exists, err := store.EmailExists(ctx, register.Email)
 	if err != nil {
-		bindingError := errors.BindingError(err)
-		ctx.AbortWithStatusJSON(bindingError.Code, bindingError)
+		databaseError := errors.DatabaseError(err)
+		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
 
-	if err := StrongPassword(register.Password); err != nil {
-		ctx.AbortWithStatusJSON(WeakPasswordError.Code, WeakPasswordError)
-		return
-	}
-
-	exists := store.EmailExists(ctx, register.Email)
 	if exists {
-		ctx.AbortWithStatusJSON(DuplicateEmailError.Code, DuplicateEmailError)
+		ctx.JSON(errors.DuplicateEmailError.Code, errors.DuplicateEmailError)
 		return
 	}
 
-	encryptedPassword, err := Encrypt(register.Password)
+	encryptedPassword, err := utils.Encrypt(register.Password)
 	if err != nil {
-		ctx.AbortWithStatusJSON(PasswordHashError.Code, PasswordHashError)
+		ctx.JSON(errors.PasswordHashError.Code, errors.PasswordHashError)
 	}
 
 	user, err := store.CreateAccount(ctx, register.Email, encryptedPassword)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
+		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
+
 	var responseData = &PublicResponse{}
 	responseData.Email = user.Email
 	responseData.ID.ID = user.ID
@@ -66,48 +71,31 @@ func register(ctx *gin.Context, store *db.Store) {
 
 func login(ctx *gin.Context, store *db.Store) {
 	var login EmailPassword
-	err := ctx.ShouldBindJSON(&login)
-	if err != nil {
-		bindingError := errors.BindingError(err)
-		ctx.AbortWithStatusJSON(bindingError.Code, bindingError)
+	if !utils.MustBindJSON(ctx, &login) {
 		return
 	}
 
 	account, err := store.FindAccount(ctx, login.Email)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
+		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
 
-	if !Validate(login.Password, account.Password) {
-		ctx.AbortWithStatusJSON(RecordNotMatchError.Code, RecordNotMatchError)
+	if !utils.Validate(login.Password, account.Password) {
+		ctx.JSON(errors.RecordNotMatchError.Code, errors.RecordNotMatchError)
 		return
 	}
 
-	tokenBody := RandomString(128)
+	tokenBody := utils.RandomString(128)
 	t, err := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
+		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
 	ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
-	ctx.AbortWithStatus(http.StatusNoContent)
-}
-
-func refreshToken(ctx *gin.Context, s *db.Store) {
-	rt, err := cookieTokenValidate(ctx, s, value.StringRefreshToken)
-	if err != nil {
-		return
-	}
-
-	tokenBody := RandomString(128)
-	t, err := s.CreateToken(ctx, rt.Edges.Account.ID, tokenBody, value.StringAccessToken, s.Config().AccessTokenExpireTime)
-	ctx.SetCookie(value.StringAccessToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
-	ctx.AbortWithStatus(http.StatusNoContent)
-	return
-
+	ctx.Status(http.StatusNoContent)
 }
 
 func info(ctx *gin.Context, s *db.Store) {

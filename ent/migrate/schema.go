@@ -29,6 +29,29 @@ var (
 			},
 		},
 	}
+	// EpisodesColumns holds the columns for the "episodes" table.
+	EpisodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "title", Type: field.TypeString, Size: 64},
+		{Name: "content", Type: field.TypeString, Size: 2147483647},
+		{Name: "profile_episode", Type: field.TypeUUID, Nullable: true},
+	}
+	// EpisodesTable holds the schema information for the "episodes" table.
+	EpisodesTable = &schema.Table{
+		Name:       "episodes",
+		Columns:    EpisodesColumns,
+		PrimaryKey: []*schema.Column{EpisodesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "episodes_profiles_episode",
+				Columns:    []*schema.Column{EpisodesColumns[5]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// ProfilesColumns holds the columns for the "profiles" table.
 	ProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -99,12 +122,14 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
+		EpisodesTable,
 		ProfilesTable,
 		TokensTable,
 	}
 )
 
 func init() {
+	EpisodesTable.ForeignKeys[0].RefTable = ProfilesTable
 	ProfilesTable.ForeignKeys[0].RefTable = AccountsTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/episode"
 	"street/ent/profile"
 	"street/ent/token"
 
@@ -32,6 +33,7 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		account.Table: account.ValidColumn,
+		episode.Table: episode.ValidColumn,
 		profile.Table: profile.ValidColumn,
 		token.Table:   token.ValidColumn,
 	}

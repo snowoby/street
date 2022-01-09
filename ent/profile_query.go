@@ -4,10 +4,12 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
 	"street/ent/account"
+	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
 
@@ -28,6 +30,7 @@ type ProfileQuery struct {
 	predicates []predicate.Profile
 	// eager-loading edges.
 	withAccount *AccountQuery
+	withEpisode *EpisodeQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -80,6 +83,28 @@ func (pq *ProfileQuery) QueryAccount() *AccountQuery {
 			sqlgraph.From(profile.Table, profile.FieldID, selector),
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, profile.AccountTable, profile.AccountColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryEpisode chains the current query on the "episode" edge.
+func (pq *ProfileQuery) QueryEpisode() *EpisodeQuery {
+	query := &EpisodeQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, selector),
+			sqlgraph.To(episode.Table, episode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.EpisodeTable, profile.EpisodeColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,6 +294,7 @@ func (pq *ProfileQuery) Clone() *ProfileQuery {
 		order:       append([]OrderFunc{}, pq.order...),
 		predicates:  append([]predicate.Profile{}, pq.predicates...),
 		withAccount: pq.withAccount.Clone(),
+		withEpisode: pq.withEpisode.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -283,6 +309,17 @@ func (pq *ProfileQuery) WithAccount(opts ...func(*AccountQuery)) *ProfileQuery {
 		opt(query)
 	}
 	pq.withAccount = query
+	return pq
+}
+
+// WithEpisode tells the query-builder to eager-load the nodes that are connected to
+// the "episode" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProfileQuery) WithEpisode(opts ...func(*EpisodeQuery)) *ProfileQuery {
+	query := &EpisodeQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withEpisode = query
 	return pq
 }
 
@@ -352,8 +389,9 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 		nodes       = []*Profile{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			pq.withAccount != nil,
+			pq.withEpisode != nil,
 		}
 	)
 	if pq.withAccount != nil {
@@ -408,6 +446,35 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 			for i := range nodes {
 				nodes[i].Edges.Account = n
 			}
+		}
+	}
+
+	if query := pq.withEpisode; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Profile)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Episode = []*Episode{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Episode(func(s *sql.Selector) {
+			s.Where(sql.InValues(profile.EpisodeColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.profile_episode
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "profile_episode" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "profile_episode" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Episode = append(node.Edges.Episode, n)
 		}
 	}
 

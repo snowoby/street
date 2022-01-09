@@ -8,6 +8,7 @@ import (
 	"street/db/value"
 	"street/ent"
 	"street/errors"
+	"street/utils"
 )
 
 type CallSign struct {
@@ -27,50 +28,45 @@ type ID struct {
 func createProfile(ctx *gin.Context, store *db.Store) {
 	account := ctx.MustGet(value.StringAccount).(*ent.Account)
 	var profile Profile
-	err := ctx.ShouldBind(&profile)
-	if err != nil {
-		e := errors.BindingError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+	if !utils.MustBindJSON(ctx, &profile) {
+		return
 	}
+
 	exists, err := store.CallSignExists(ctx, profile.CallSign.CallSign)
 	if err != nil {
 		e := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+		ctx.JSON(e.Code, e)
 		return
 	}
 
 	if exists {
-		ctx.AbortWithStatusJSON(CallSignDuplicateError.Code, CallSignDuplicateError)
+		ctx.JSON(errors.CallSignDuplicateError.Code, errors.CallSignDuplicateError)
 		return
 	}
 
 	p, err := store.CreateProfile(ctx, profile.CallSign.CallSign, profile.Title, profile.Category, account.ID)
 	if err != nil {
 		e := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+		ctx.JSON(e.Code, e)
 	}
 	ctx.JSON(http.StatusCreated, p)
 }
 
 func updateProfile(ctx *gin.Context, store *db.Store) {
 	var id ID
-	err := ctx.ShouldBindUri(&id)
-	if err != nil {
-		e := errors.BindingError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+	if !utils.MustBindUri(ctx, &id) {
+		return
 	}
 
 	var profile Profile
-	err = ctx.ShouldBind(&profile)
-	if err != nil {
-		e := errors.BindingError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+	if !utils.MustBindJSON(ctx, &profile) {
+		return
 	}
 
 	p, err := store.UpdateProfile(ctx, id.ID, profile.Title, profile.CallSign.CallSign, profile.Category)
 	if err != nil {
 		e := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+		ctx.JSON(e.Code, e)
 	}
 
 	ctx.JSON(http.StatusOK, p)
@@ -79,16 +75,14 @@ func updateProfile(ctx *gin.Context, store *db.Store) {
 
 func getProfile(ctx *gin.Context, store *db.Store) {
 	var id ID
-	err := ctx.ShouldBindUri(&id)
-	if err != nil {
-		e := errors.BindingError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+	if !utils.MustBindUri(ctx, &id) {
+		return
 	}
 
 	ps, err := store.FindProfileByID(ctx, id.ID)
 	if err != nil {
 		e := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+		ctx.JSON(e.Code, e)
 	}
 	ctx.JSON(http.StatusOK, ps)
 }
@@ -99,7 +93,7 @@ func accountProfiles(ctx *gin.Context, store *db.Store) {
 	ps, err := store.FindProfilesByAccountID(ctx, account.ID)
 	if err != nil {
 		e := errors.DatabaseError(err)
-		ctx.AbortWithStatusJSON(e.Code, e)
+		ctx.JSON(e.Code, e)
 	}
 	ctx.JSON(http.StatusOK, ps)
 }

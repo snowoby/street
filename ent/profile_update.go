@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
 
@@ -58,6 +59,21 @@ func (pu *ProfileUpdate) SetAccount(a *Account) *ProfileUpdate {
 	return pu.SetAccountID(a.ID)
 }
 
+// AddEpisodeIDs adds the "episode" edge to the Episode entity by IDs.
+func (pu *ProfileUpdate) AddEpisodeIDs(ids ...uuid.UUID) *ProfileUpdate {
+	pu.mutation.AddEpisodeIDs(ids...)
+	return pu
+}
+
+// AddEpisode adds the "episode" edges to the Episode entity.
+func (pu *ProfileUpdate) AddEpisode(e ...*Episode) *ProfileUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return pu.AddEpisodeIDs(ids...)
+}
+
 // Mutation returns the ProfileMutation object of the builder.
 func (pu *ProfileUpdate) Mutation() *ProfileMutation {
 	return pu.mutation
@@ -67,6 +83,27 @@ func (pu *ProfileUpdate) Mutation() *ProfileMutation {
 func (pu *ProfileUpdate) ClearAccount() *ProfileUpdate {
 	pu.mutation.ClearAccount()
 	return pu
+}
+
+// ClearEpisode clears all "episode" edges to the Episode entity.
+func (pu *ProfileUpdate) ClearEpisode() *ProfileUpdate {
+	pu.mutation.ClearEpisode()
+	return pu
+}
+
+// RemoveEpisodeIDs removes the "episode" edge to Episode entities by IDs.
+func (pu *ProfileUpdate) RemoveEpisodeIDs(ids ...uuid.UUID) *ProfileUpdate {
+	pu.mutation.RemoveEpisodeIDs(ids...)
+	return pu
+}
+
+// RemoveEpisode removes "episode" edges to Episode entities.
+func (pu *ProfileUpdate) RemoveEpisode(e ...*Episode) *ProfileUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return pu.RemoveEpisodeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -242,6 +279,60 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pu.mutation.EpisodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.EpisodeTable,
+			Columns: []string{profile.EpisodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: episode.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedEpisodeIDs(); len(nodes) > 0 && !pu.mutation.EpisodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.EpisodeTable,
+			Columns: []string{profile.EpisodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: episode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.EpisodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.EpisodeTable,
+			Columns: []string{profile.EpisodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: episode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{profile.Label}
@@ -290,6 +381,21 @@ func (puo *ProfileUpdateOne) SetAccount(a *Account) *ProfileUpdateOne {
 	return puo.SetAccountID(a.ID)
 }
 
+// AddEpisodeIDs adds the "episode" edge to the Episode entity by IDs.
+func (puo *ProfileUpdateOne) AddEpisodeIDs(ids ...uuid.UUID) *ProfileUpdateOne {
+	puo.mutation.AddEpisodeIDs(ids...)
+	return puo
+}
+
+// AddEpisode adds the "episode" edges to the Episode entity.
+func (puo *ProfileUpdateOne) AddEpisode(e ...*Episode) *ProfileUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return puo.AddEpisodeIDs(ids...)
+}
+
 // Mutation returns the ProfileMutation object of the builder.
 func (puo *ProfileUpdateOne) Mutation() *ProfileMutation {
 	return puo.mutation
@@ -299,6 +405,27 @@ func (puo *ProfileUpdateOne) Mutation() *ProfileMutation {
 func (puo *ProfileUpdateOne) ClearAccount() *ProfileUpdateOne {
 	puo.mutation.ClearAccount()
 	return puo
+}
+
+// ClearEpisode clears all "episode" edges to the Episode entity.
+func (puo *ProfileUpdateOne) ClearEpisode() *ProfileUpdateOne {
+	puo.mutation.ClearEpisode()
+	return puo
+}
+
+// RemoveEpisodeIDs removes the "episode" edge to Episode entities by IDs.
+func (puo *ProfileUpdateOne) RemoveEpisodeIDs(ids ...uuid.UUID) *ProfileUpdateOne {
+	puo.mutation.RemoveEpisodeIDs(ids...)
+	return puo
+}
+
+// RemoveEpisode removes "episode" edges to Episode entities.
+func (puo *ProfileUpdateOne) RemoveEpisode(e ...*Episode) *ProfileUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return puo.RemoveEpisodeIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -490,6 +617,60 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: account.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.EpisodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.EpisodeTable,
+			Columns: []string{profile.EpisodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: episode.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedEpisodeIDs(); len(nodes) > 0 && !puo.mutation.EpisodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.EpisodeTable,
+			Columns: []string{profile.EpisodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: episode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.EpisodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.EpisodeTable,
+			Columns: []string{profile.EpisodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: episode.FieldID,
 				},
 			},
 		}

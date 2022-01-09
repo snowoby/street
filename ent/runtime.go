@@ -4,6 +4,7 @@ package ent
 
 import (
 	"street/ent/account"
+	"street/ent/episode"
 	"street/ent/profile"
 	"street/ent/schema"
 	"street/ent/token"
@@ -55,6 +56,49 @@ func init() {
 	accountDescID := accountMixinFields0[0].Descriptor()
 	// account.DefaultID holds the default value on creation for the id field.
 	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
+	episodeMixin := schema.Episode{}.Mixin()
+	episodeMixinFields0 := episodeMixin[0].Fields()
+	_ = episodeMixinFields0
+	episodeMixinFields1 := episodeMixin[1].Fields()
+	_ = episodeMixinFields1
+	episodeFields := schema.Episode{}.Fields()
+	_ = episodeFields
+	// episodeDescCreateTime is the schema descriptor for create_time field.
+	episodeDescCreateTime := episodeMixinFields1[0].Descriptor()
+	// episode.DefaultCreateTime holds the default value on creation for the create_time field.
+	episode.DefaultCreateTime = episodeDescCreateTime.Default.(func() time.Time)
+	// episodeDescUpdateTime is the schema descriptor for update_time field.
+	episodeDescUpdateTime := episodeMixinFields1[1].Descriptor()
+	// episode.DefaultUpdateTime holds the default value on creation for the update_time field.
+	episode.DefaultUpdateTime = episodeDescUpdateTime.Default.(func() time.Time)
+	// episode.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	episode.UpdateDefaultUpdateTime = episodeDescUpdateTime.UpdateDefault.(func() time.Time)
+	// episodeDescTitle is the schema descriptor for title field.
+	episodeDescTitle := episodeFields[0].Descriptor()
+	// episode.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	episode.TitleValidator = func() func(string) error {
+		validators := episodeDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// episodeDescContent is the schema descriptor for content field.
+	episodeDescContent := episodeFields[1].Descriptor()
+	// episode.ContentValidator is a validator for the "content" field. It is called by the builders before save.
+	episode.ContentValidator = episodeDescContent.Validators[0].(func(string) error)
+	// episodeDescID is the schema descriptor for id field.
+	episodeDescID := episodeMixinFields0[0].Descriptor()
+	// episode.DefaultID holds the default value on creation for the id field.
+	episode.DefaultID = episodeDescID.Default.(func() uuid.UUID)
 	profileMixin := schema.Profile{}.Mixin()
 	profileMixinFields0 := profileMixin[0].Fields()
 	_ = profileMixinFields0

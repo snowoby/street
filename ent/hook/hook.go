@@ -21,6 +21,19 @@ func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The EpisodeFunc type is an adapter to allow the use of ordinary
+// function as Episode mutator.
+type EpisodeFunc func(context.Context, *ent.EpisodeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EpisodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.EpisodeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EpisodeMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ProfileFunc type is an adapter to allow the use of ordinary
 // function as Profile mutator.
 type ProfileFunc func(context.Context, *ent.ProfileMutation) (ent.Value, error)

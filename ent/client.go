@@ -10,6 +10,7 @@ import (
 	"street/ent/migrate"
 
 	"street/ent/account"
+	"street/ent/episode"
 	"street/ent/profile"
 	"street/ent/token"
 
@@ -26,6 +27,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// Episode is the client for interacting with the Episode builders.
+	Episode *EpisodeClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
 	// Token is the client for interacting with the Token builders.
@@ -44,6 +47,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
+	c.Episode = NewEpisodeClient(c.config)
 	c.Profile = NewProfileClient(c.config)
 	c.Token = NewTokenClient(c.config)
 }
@@ -80,6 +84,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:     ctx,
 		config:  cfg,
 		Account: NewAccountClient(cfg),
+		Episode: NewEpisodeClient(cfg),
 		Profile: NewProfileClient(cfg),
 		Token:   NewTokenClient(cfg),
 	}, nil
@@ -101,6 +106,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		config:  cfg,
 		Account: NewAccountClient(cfg),
+		Episode: NewEpisodeClient(cfg),
 		Profile: NewProfileClient(cfg),
 		Token:   NewTokenClient(cfg),
 	}, nil
@@ -133,6 +139,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
+	c.Episode.Use(hooks...)
 	c.Profile.Use(hooks...)
 	c.Token.Use(hooks...)
 }
@@ -259,6 +266,112 @@ func (c *AccountClient) Hooks() []Hook {
 	return c.hooks.Account
 }
 
+// EpisodeClient is a client for the Episode schema.
+type EpisodeClient struct {
+	config
+}
+
+// NewEpisodeClient returns a client for the Episode from the given config.
+func NewEpisodeClient(c config) *EpisodeClient {
+	return &EpisodeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `episode.Hooks(f(g(h())))`.
+func (c *EpisodeClient) Use(hooks ...Hook) {
+	c.hooks.Episode = append(c.hooks.Episode, hooks...)
+}
+
+// Create returns a create builder for Episode.
+func (c *EpisodeClient) Create() *EpisodeCreate {
+	mutation := newEpisodeMutation(c.config, OpCreate)
+	return &EpisodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Episode entities.
+func (c *EpisodeClient) CreateBulk(builders ...*EpisodeCreate) *EpisodeCreateBulk {
+	return &EpisodeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Episode.
+func (c *EpisodeClient) Update() *EpisodeUpdate {
+	mutation := newEpisodeMutation(c.config, OpUpdate)
+	return &EpisodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EpisodeClient) UpdateOne(e *Episode) *EpisodeUpdateOne {
+	mutation := newEpisodeMutation(c.config, OpUpdateOne, withEpisode(e))
+	return &EpisodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EpisodeClient) UpdateOneID(id uuid.UUID) *EpisodeUpdateOne {
+	mutation := newEpisodeMutation(c.config, OpUpdateOne, withEpisodeID(id))
+	return &EpisodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Episode.
+func (c *EpisodeClient) Delete() *EpisodeDelete {
+	mutation := newEpisodeMutation(c.config, OpDelete)
+	return &EpisodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *EpisodeClient) DeleteOne(e *Episode) *EpisodeDeleteOne {
+	return c.DeleteOneID(e.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *EpisodeClient) DeleteOneID(id uuid.UUID) *EpisodeDeleteOne {
+	builder := c.Delete().Where(episode.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EpisodeDeleteOne{builder}
+}
+
+// Query returns a query builder for Episode.
+func (c *EpisodeClient) Query() *EpisodeQuery {
+	return &EpisodeQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Episode entity by its id.
+func (c *EpisodeClient) Get(ctx context.Context, id uuid.UUID) (*Episode, error) {
+	return c.Query().Where(episode.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EpisodeClient) GetX(ctx context.Context, id uuid.UUID) *Episode {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProfile queries the profile edge of a Episode.
+func (c *EpisodeClient) QueryProfile(e *Episode) *ProfileQuery {
+	query := &ProfileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(episode.Table, episode.FieldID, id),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, episode.ProfileTable, episode.ProfileColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EpisodeClient) Hooks() []Hook {
+	return c.hooks.Episode
+}
+
 // ProfileClient is a client for the Profile schema.
 type ProfileClient struct {
 	config
@@ -353,6 +466,22 @@ func (c *ProfileClient) QueryAccount(pr *Profile) *AccountQuery {
 			sqlgraph.From(profile.Table, profile.FieldID, id),
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, profile.AccountTable, profile.AccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEpisode queries the episode edge of a Profile.
+func (c *ProfileClient) QueryEpisode(pr *Profile) *EpisodeQuery {
+	query := &EpisodeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, id),
+			sqlgraph.To(episode.Table, episode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.EpisodeTable, profile.EpisodeColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil

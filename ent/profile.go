@@ -38,9 +38,11 @@ type Profile struct {
 type ProfileEdges struct {
 	// Account holds the value of the account edge.
 	Account *Account `json:"account,omitempty"`
+	// Episode holds the value of the episode edge.
+	Episode []*Episode `json:"episode,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // AccountOrErr returns the Account value or an error if the edge
@@ -55,6 +57,15 @@ func (e ProfileEdges) AccountOrErr() (*Account, error) {
 		return e.Account, nil
 	}
 	return nil, &NotLoadedError{edge: "account"}
+}
+
+// EpisodeOrErr returns the Episode value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProfileEdges) EpisodeOrErr() ([]*Episode, error) {
+	if e.loadedTypes[1] {
+		return e.Episode, nil
+	}
+	return nil, &NotLoadedError{edge: "episode"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -136,6 +147,11 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 // QueryAccount queries the "account" edge of the Profile entity.
 func (pr *Profile) QueryAccount() *AccountQuery {
 	return (&ProfileClient{config: pr.config}).QueryAccount(pr)
+}
+
+// QueryEpisode queries the "episode" edge of the Profile entity.
+func (pr *Profile) QueryEpisode() *EpisodeQuery {
+	return (&ProfileClient{config: pr.config}).QueryEpisode(pr)
 }
 
 // Update returns a builder for updating this Profile.

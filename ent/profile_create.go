@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/episode"
 	"street/ent/profile"
 	"time"
 
@@ -83,6 +84,21 @@ func (pc *ProfileCreate) SetAccountID(id uuid.UUID) *ProfileCreate {
 // SetAccount sets the "account" edge to the Account entity.
 func (pc *ProfileCreate) SetAccount(a *Account) *ProfileCreate {
 	return pc.SetAccountID(a.ID)
+}
+
+// AddEpisodeIDs adds the "episode" edge to the Episode entity by IDs.
+func (pc *ProfileCreate) AddEpisodeIDs(ids ...uuid.UUID) *ProfileCreate {
+	pc.mutation.AddEpisodeIDs(ids...)
+	return pc
+}
+
+// AddEpisode adds the "episode" edges to the Episode entity.
+func (pc *ProfileCreate) AddEpisode(e ...*Episode) *ProfileCreate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
+	}
+	return pc.AddEpisodeIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -295,6 +311,25 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.account_profile = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.EpisodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.EpisodeTable,
+			Columns: []string{profile.EpisodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: episode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

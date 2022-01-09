@@ -16,7 +16,7 @@ type Store struct {
 }
 
 type db struct {
-	*ent.Client
+	client *ent.Client
 }
 
 func New(client *ent.Client) *Store {

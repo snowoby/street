@@ -8,6 +8,7 @@ import (
 	"street/db"
 	"street/ent"
 	"street/handler"
+	"street/middleware"
 	"street/profile"
 )
 
@@ -31,7 +32,7 @@ func setup() *gin.Engine {
 
 	g = r.Group("/profile")
 	profile.PublicRouters(g, h)
-	g.Use(h.P(account.AccessTokenMiddleware))
+	g.Use(h.P(middleware.AccessToken))
 	profile.Routers(g, h)
 	return r
 }
