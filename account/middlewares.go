@@ -3,21 +3,20 @@ package account
 import (
 	"github.com/gin-gonic/gin"
 	"street/db"
+	"street/db/value"
 	"street/ent"
 	"street/errors"
 	"time"
 )
 
-const StringAccount = "account"
-
 func AccessTokenMiddleware(ctx *gin.Context, s *db.Store) {
-	at, err := cookieTokenValidate(ctx, s, StringAccessToken)
+	at, err := cookieTokenValidate(ctx, s, value.StringAccessToken)
 	if err != nil {
 		return
 	}
 
-	ctx.Set(StringAccount, at.Edges.Account)
-	ctx.Set(StringAccessToken, at)
+	ctx.Set(value.StringAccount, at.Edges.Account)
+	ctx.Set(value.StringAccessToken, at)
 	ctx.Next()
 	return
 

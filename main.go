@@ -8,6 +8,7 @@ import (
 	"street/db"
 	"street/ent"
 	"street/handler"
+	"street/profile"
 )
 
 func storeSetup() handler.Handler {
@@ -22,14 +23,20 @@ func storeSetup() handler.Handler {
 	return h
 }
 
-func main() {
+func setup() *gin.Engine {
 	r := gin.Default()
 	h := storeSetup()
 	g := r.Group("/account")
-
 	account.Routers(g, h)
 
-	//r.Use(account.AccessTokenMiddleware(store))
+	g = r.Group("/profile")
+	profile.PublicRouters(g, h)
+	g.Use(h.P(account.AccessTokenMiddleware))
+	profile.Routers(g, h)
+	return r
+}
 
-	r.Run("127.0.0.1:8088")
+func main() {
+
+	setup().Run("127.0.0.1:8088")
 }

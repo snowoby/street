@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"street/db"
+	"street/db/value"
 	"street/ent"
 	"street/errors"
 	"time"
@@ -85,31 +86,31 @@ func login(ctx *gin.Context, store *db.Store) {
 	}
 
 	tokenBody := RandomString(128)
-	t, err := store.CreateToken(ctx, account.ID, tokenBody, StringRefreshToken, store.Config().RefreshTokenExpireTime)
+	t, err := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
 		return
 	}
-	ctx.SetCookie(StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
+	ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 	ctx.AbortWithStatus(http.StatusNoContent)
 }
 
 func refreshToken(ctx *gin.Context, s *db.Store) {
-	rt, err := cookieTokenValidate(ctx, s, StringRefreshToken)
+	rt, err := cookieTokenValidate(ctx, s, value.StringRefreshToken)
 	if err != nil {
 		return
 	}
 
 	tokenBody := RandomString(128)
-	t, err := s.CreateToken(ctx, rt.Edges.Account.ID, tokenBody, StringAccessToken, s.Config().AccessTokenExpireTime)
-	ctx.SetCookie(StringAccessToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
+	t, err := s.CreateToken(ctx, rt.Edges.Account.ID, tokenBody, value.StringAccessToken, s.Config().AccessTokenExpireTime)
+	ctx.SetCookie(value.StringAccessToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
 	ctx.AbortWithStatus(http.StatusCreated)
 	return
 
 }
 
 func info(ctx *gin.Context, s *db.Store) {
-	account := ctx.MustGet(StringAccount).(*ent.Account)
+	account := ctx.MustGet(value.StringAccount).(*ent.Account)
 	ctx.JSON(http.StatusOK, account)
 }
