@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"street/ent/account"
 	"street/ent/predicate"
+	"street/ent/profile"
 	"street/ent/token"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -26,12 +26,6 @@ type AccountUpdate struct {
 // Where appends a list predicates to the AccountUpdate builder.
 func (au *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
 	au.mutation.Where(ps...)
-	return au
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (au *AccountUpdate) SetUpdatedAt(t time.Time) *AccountUpdate {
-	au.mutation.SetUpdatedAt(t)
 	return au
 }
 
@@ -62,6 +56,21 @@ func (au *AccountUpdate) AddToken(t ...*Token) *AccountUpdate {
 	return au.AddTokenIDs(ids...)
 }
 
+// AddProfileIDs adds the "profile" edge to the Profile entity by IDs.
+func (au *AccountUpdate) AddProfileIDs(ids ...uuid.UUID) *AccountUpdate {
+	au.mutation.AddProfileIDs(ids...)
+	return au
+}
+
+// AddProfile adds the "profile" edges to the Profile entity.
+func (au *AccountUpdate) AddProfile(p ...*Profile) *AccountUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return au.AddProfileIDs(ids...)
+}
+
 // Mutation returns the AccountMutation object of the builder.
 func (au *AccountUpdate) Mutation() *AccountMutation {
 	return au.mutation
@@ -86,6 +95,27 @@ func (au *AccountUpdate) RemoveToken(t ...*Token) *AccountUpdate {
 		ids[i] = t[i].ID
 	}
 	return au.RemoveTokenIDs(ids...)
+}
+
+// ClearProfile clears all "profile" edges to the Profile entity.
+func (au *AccountUpdate) ClearProfile() *AccountUpdate {
+	au.mutation.ClearProfile()
+	return au
+}
+
+// RemoveProfileIDs removes the "profile" edge to Profile entities by IDs.
+func (au *AccountUpdate) RemoveProfileIDs(ids ...uuid.UUID) *AccountUpdate {
+	au.mutation.RemoveProfileIDs(ids...)
+	return au
+}
+
+// RemoveProfile removes "profile" edges to Profile entities.
+func (au *AccountUpdate) RemoveProfile(p ...*Profile) *AccountUpdate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return au.RemoveProfileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -151,9 +181,9 @@ func (au *AccountUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (au *AccountUpdate) defaults() {
-	if _, ok := au.mutation.UpdatedAt(); !ok {
-		v := account.UpdateDefaultUpdatedAt()
-		au.mutation.SetUpdatedAt(v)
+	if _, ok := au.mutation.UpdateTime(); !ok {
+		v := account.UpdateDefaultUpdateTime()
+		au.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -185,11 +215,11 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := au.mutation.UpdatedAt(); ok {
+	if value, ok := au.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: account.FieldUpdatedAt,
+			Column: account.FieldUpdateTime,
 		})
 	}
 	if value, ok := au.mutation.Email(); ok {
@@ -260,6 +290,60 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.ProfileTable,
+			Columns: []string{account.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: profile.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedProfileIDs(); len(nodes) > 0 && !au.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.ProfileTable,
+			Columns: []string{account.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.ProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.ProfileTable,
+			Columns: []string{account.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
@@ -277,12 +361,6 @@ type AccountUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AccountMutation
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (auo *AccountUpdateOne) SetUpdatedAt(t time.Time) *AccountUpdateOne {
-	auo.mutation.SetUpdatedAt(t)
-	return auo
 }
 
 // SetEmail sets the "email" field.
@@ -312,6 +390,21 @@ func (auo *AccountUpdateOne) AddToken(t ...*Token) *AccountUpdateOne {
 	return auo.AddTokenIDs(ids...)
 }
 
+// AddProfileIDs adds the "profile" edge to the Profile entity by IDs.
+func (auo *AccountUpdateOne) AddProfileIDs(ids ...uuid.UUID) *AccountUpdateOne {
+	auo.mutation.AddProfileIDs(ids...)
+	return auo
+}
+
+// AddProfile adds the "profile" edges to the Profile entity.
+func (auo *AccountUpdateOne) AddProfile(p ...*Profile) *AccountUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return auo.AddProfileIDs(ids...)
+}
+
 // Mutation returns the AccountMutation object of the builder.
 func (auo *AccountUpdateOne) Mutation() *AccountMutation {
 	return auo.mutation
@@ -336,6 +429,27 @@ func (auo *AccountUpdateOne) RemoveToken(t ...*Token) *AccountUpdateOne {
 		ids[i] = t[i].ID
 	}
 	return auo.RemoveTokenIDs(ids...)
+}
+
+// ClearProfile clears all "profile" edges to the Profile entity.
+func (auo *AccountUpdateOne) ClearProfile() *AccountUpdateOne {
+	auo.mutation.ClearProfile()
+	return auo
+}
+
+// RemoveProfileIDs removes the "profile" edge to Profile entities by IDs.
+func (auo *AccountUpdateOne) RemoveProfileIDs(ids ...uuid.UUID) *AccountUpdateOne {
+	auo.mutation.RemoveProfileIDs(ids...)
+	return auo
+}
+
+// RemoveProfile removes "profile" edges to Profile entities.
+func (auo *AccountUpdateOne) RemoveProfile(p ...*Profile) *AccountUpdateOne {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return auo.RemoveProfileIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -408,9 +522,9 @@ func (auo *AccountUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (auo *AccountUpdateOne) defaults() {
-	if _, ok := auo.mutation.UpdatedAt(); !ok {
-		v := account.UpdateDefaultUpdatedAt()
-		auo.mutation.SetUpdatedAt(v)
+	if _, ok := auo.mutation.UpdateTime(); !ok {
+		v := account.UpdateDefaultUpdateTime()
+		auo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -437,7 +551,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	id, ok := auo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing StringAccount.ID for update")}
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Account.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if fields := auo.fields; len(fields) > 0 {
@@ -459,11 +573,11 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			}
 		}
 	}
-	if value, ok := auo.mutation.UpdatedAt(); ok {
+	if value, ok := auo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: account.FieldUpdatedAt,
+			Column: account.FieldUpdateTime,
 		})
 	}
 	if value, ok := auo.mutation.Email(); ok {
@@ -526,6 +640,60 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: token.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.ProfileTable,
+			Columns: []string{account.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: profile.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedProfileIDs(); len(nodes) > 0 && !auo.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.ProfileTable,
+			Columns: []string{account.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.ProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.ProfileTable,
+			Columns: []string{account.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: profile.FieldID,
 				},
 			},
 		}

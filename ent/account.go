@@ -17,10 +17,10 @@ type Account struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Password holds the value of the "password" field.
@@ -34,9 +34,11 @@ type Account struct {
 type AccountEdges struct {
 	// Token holds the value of the token edge.
 	Token []*Token `json:"token,omitempty"`
+	// Profile holds the value of the profile edge.
+	Profile []*Profile `json:"profile,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // TokenOrErr returns the Token value or an error if the edge
@@ -48,6 +50,15 @@ func (e AccountEdges) TokenOrErr() ([]*Token, error) {
 	return nil, &NotLoadedError{edge: "token"}
 }
 
+// ProfileOrErr returns the Profile value or an error if the edge
+// was not loaded in eager-loading.
+func (e AccountEdges) ProfileOrErr() ([]*Profile, error) {
+	if e.loadedTypes[1] {
+		return e.Profile, nil
+	}
+	return nil, &NotLoadedError{edge: "profile"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Account) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -55,12 +66,12 @@ func (*Account) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case account.FieldEmail, account.FieldPassword:
 			values[i] = new(sql.NullString)
-		case account.FieldCreatedAt, account.FieldUpdatedAt:
+		case account.FieldCreateTime, account.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case account.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type StringAccount", columns[i])
+			return nil, fmt.Errorf("unexpected column %q for type Account", columns[i])
 		}
 	}
 	return values, nil
@@ -80,17 +91,17 @@ func (a *Account) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				a.ID = *value
 			}
-		case account.FieldCreatedAt:
+		case account.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				a.CreatedAt = value.Time
+				a.CreateTime = value.Time
 			}
-		case account.FieldUpdatedAt:
+		case account.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				a.UpdatedAt = value.Time
+				a.UpdateTime = value.Time
 			}
 		case account.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -114,6 +125,11 @@ func (a *Account) QueryToken() *TokenQuery {
 	return (&AccountClient{config: a.config}).QueryToken(a)
 }
 
+// QueryProfile queries the "profile" edge of the Account entity.
+func (a *Account) QueryProfile() *ProfileQuery {
+	return (&AccountClient{config: a.config}).QueryProfile(a)
+}
+
 // Update returns a builder for updating this Account.
 // Note that you need to call Account.Unwrap() before calling this method if this Account
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -126,7 +142,7 @@ func (a *Account) Update() *AccountUpdateOne {
 func (a *Account) Unwrap() *Account {
 	tx, ok := a.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: StringAccount is not a transactional entity")
+		panic("ent: Account is not a transactional entity")
 	}
 	a.config.driver = tx.drv
 	return a
@@ -135,12 +151,12 @@ func (a *Account) Unwrap() *Account {
 // String implements the fmt.Stringer.
 func (a *Account) String() string {
 	var builder strings.Builder
-	builder.WriteString("StringAccount(")
+	builder.WriteString("Account(")
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", create_time=")
+	builder.WriteString(a.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", update_time=")
+	builder.WriteString(a.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", email=")
 	builder.WriteString(a.Email)
 	builder.WriteString(", password=<sensitive>")

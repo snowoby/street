@@ -40,7 +40,7 @@ func cookieTokenValidate(ctx *gin.Context, store *store, tokenType string) (*ent
 		return nil, err
 	}
 
-	if t.ExpireAt.Before(time.Now()) {
+	if t.ExpireTime.Before(time.Now()) {
 		ctx.AbortWithStatusJSON(TokenExpiredError.Code, TokenExpiredError)
 		return nil, err
 	}

@@ -10,6 +10,7 @@ import (
 	"math"
 	"street/ent/account"
 	"street/ent/predicate"
+	"street/ent/profile"
 	"street/ent/token"
 
 	"entgo.io/ent/dialect/sql"
@@ -28,7 +29,8 @@ type AccountQuery struct {
 	fields     []string
 	predicates []predicate.Account
 	// eager-loading edges.
-	withToken *TokenQuery
+	withToken   *TokenQuery
+	withProfile *ProfileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,6 +82,28 @@ func (aq *AccountQuery) QueryToken() *TokenQuery {
 			sqlgraph.From(account.Table, account.FieldID, selector),
 			sqlgraph.To(token.Table, token.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, account.TokenTable, account.TokenColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryProfile chains the current query on the "profile" edge.
+func (aq *AccountQuery) QueryProfile() *ProfileQuery {
+	query := &ProfileQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, selector),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.ProfileTable, account.ProfileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -263,12 +287,13 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 		return nil
 	}
 	return &AccountQuery{
-		config:     aq.config,
-		limit:      aq.limit,
-		offset:     aq.offset,
-		order:      append([]OrderFunc{}, aq.order...),
-		predicates: append([]predicate.Account{}, aq.predicates...),
-		withToken:  aq.withToken.Clone(),
+		config:      aq.config,
+		limit:       aq.limit,
+		offset:      aq.offset,
+		order:       append([]OrderFunc{}, aq.order...),
+		predicates:  append([]predicate.Account{}, aq.predicates...),
+		withToken:   aq.withToken.Clone(),
+		withProfile: aq.withProfile.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -286,18 +311,29 @@ func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
 	return aq
 }
 
+// WithProfile tells the query-builder to eager-load the nodes that are connected to
+// the "profile" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AccountQuery) WithProfile(opts ...func(*ProfileQuery)) *AccountQuery {
+	query := &ProfileQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withProfile = query
+	return aq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.StringAccount.Query().
-//		GroupBy(account.FieldCreatedAt).
+//	client.Account.Query().
+//		GroupBy(account.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +355,11 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		CreateTime time.Time `json:"create_time,omitempty"`
 //	}
 //
-//	client.StringAccount.Query().
-//		Select(account.FieldCreatedAt).
+//	client.Account.Query().
+//		Select(account.FieldCreateTime).
 //		Scan(ctx, &v)
 //
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
@@ -351,8 +387,9 @@ func (aq *AccountQuery) sqlAll(ctx context.Context) ([]*Account, error) {
 	var (
 		nodes       = []*Account{}
 		_spec       = aq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			aq.withToken != nil,
+			aq.withProfile != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -401,6 +438,35 @@ func (aq *AccountQuery) sqlAll(ctx context.Context) ([]*Account, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "account_token" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Token = append(node.Edges.Token, n)
+		}
+	}
+
+	if query := aq.withProfile; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Account)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Profile = []*Profile{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Profile(func(s *sql.Selector) {
+			s.Where(sql.InValues(account.ProfileColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.account_profile
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "account_profile" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "account_profile" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Profile = append(node.Edges.Profile, n)
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"entgo.io/ent/schema/mixin"
 )
 
 // Account holds the schema definition for the Account entity.
@@ -23,7 +24,7 @@ func (Account) Fields() []ent.Field {
 func (Account) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		IDMixin{},
-		TimeMixin{},
+		mixin.Time{},
 	}
 }
 
@@ -31,11 +32,11 @@ func (Account) Mixin() []ent.Mixin {
 func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("token", Token.Type),
+		edge.To("profile", Profile.Type),
 	}
 }
 
 // Indexes of the Account.
-
 func (Account) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("email").

@@ -11,8 +11,8 @@ var (
 	// AccountsColumns holds the columns for the "accounts" table.
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 320},
 		{Name: "password", Type: field.TypeString},
 	}
@@ -29,14 +29,50 @@ var (
 			},
 		},
 	}
+	// ProfilesColumns holds the columns for the "profiles" table.
+	ProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "title", Type: field.TypeString, Size: 64},
+		{Name: "call_sign", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "category", Type: field.TypeString, Size: 16},
+		{Name: "account_profile", Type: field.TypeUUID, Nullable: true},
+	}
+	// ProfilesTable holds the schema information for the "profiles" table.
+	ProfilesTable = &schema.Table{
+		Name:       "profiles",
+		Columns:    ProfilesColumns,
+		PrimaryKey: []*schema.Column{ProfilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "profiles_accounts_profile",
+				Columns:    []*schema.Column{ProfilesColumns[6]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "profile_call_sign",
+				Unique:  true,
+				Columns: []*schema.Column{ProfilesColumns[4]},
+			},
+			{
+				Name:    "profile_category",
+				Unique:  false,
+				Columns: []*schema.Column{ProfilesColumns[5]},
+			},
+		},
+	}
 	// TokensColumns holds the columns for the "tokens" table.
 	TokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
 		{Name: "body", Type: field.TypeString, Unique: true, Size: 320},
 		{Name: "type", Type: field.TypeString, Size: 16},
-		{Name: "expire_at", Type: field.TypeTime},
+		{Name: "expire_time", Type: field.TypeTime},
 		{Name: "account_token", Type: field.TypeUUID, Nullable: true},
 	}
 	// TokensTable holds the schema information for the "tokens" table.
@@ -63,10 +99,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
+		ProfilesTable,
 		TokensTable,
 	}
 )
 
 func init() {
+	ProfilesTable.ForeignKeys[0].RefTable = AccountsTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable
 }

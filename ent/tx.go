@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// Profile is the client for interacting with the Profile builders.
+	Profile *ProfileClient
 	// Token is the client for interacting with the Token builders.
 	Token *TokenClient
 
@@ -152,6 +154,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
+	tx.Profile = NewProfileClient(tx.config)
 	tx.Token = NewTokenClient(tx.config)
 }
 

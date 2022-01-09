@@ -4,6 +4,7 @@ package ent
 
 import (
 	"street/ent/account"
+	"street/ent/profile"
 	"street/ent/schema"
 	"street/ent/token"
 	"time"
@@ -22,16 +23,16 @@ func init() {
 	_ = accountMixinFields1
 	accountFields := schema.Account{}.Fields()
 	_ = accountFields
-	// accountDescCreatedAt is the schema descriptor for created_at field.
-	accountDescCreatedAt := accountMixinFields1[0].Descriptor()
-	// account.DefaultCreatedAt holds the default value on creation for the created_at field.
-	account.DefaultCreatedAt = accountDescCreatedAt.Default.(func() time.Time)
-	// accountDescUpdatedAt is the schema descriptor for updated_at field.
-	accountDescUpdatedAt := accountMixinFields1[1].Descriptor()
-	// account.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
-	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// accountDescCreateTime is the schema descriptor for create_time field.
+	accountDescCreateTime := accountMixinFields1[0].Descriptor()
+	// account.DefaultCreateTime holds the default value on creation for the create_time field.
+	account.DefaultCreateTime = accountDescCreateTime.Default.(func() time.Time)
+	// accountDescUpdateTime is the schema descriptor for update_time field.
+	accountDescUpdateTime := accountMixinFields1[1].Descriptor()
+	// account.DefaultUpdateTime holds the default value on creation for the update_time field.
+	account.DefaultUpdateTime = accountDescUpdateTime.Default.(func() time.Time)
+	// account.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	account.UpdateDefaultUpdateTime = accountDescUpdateTime.UpdateDefault.(func() time.Time)
 	// accountDescEmail is the schema descriptor for email field.
 	accountDescEmail := accountFields[0].Descriptor()
 	// account.EmailValidator is a validator for the "email" field. It is called by the builders before save.
@@ -54,6 +55,81 @@ func init() {
 	accountDescID := accountMixinFields0[0].Descriptor()
 	// account.DefaultID holds the default value on creation for the id field.
 	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
+	profileMixin := schema.Profile{}.Mixin()
+	profileMixinFields0 := profileMixin[0].Fields()
+	_ = profileMixinFields0
+	profileMixinFields1 := profileMixin[1].Fields()
+	_ = profileMixinFields1
+	profileFields := schema.Profile{}.Fields()
+	_ = profileFields
+	// profileDescCreateTime is the schema descriptor for create_time field.
+	profileDescCreateTime := profileMixinFields1[0].Descriptor()
+	// profile.DefaultCreateTime holds the default value on creation for the create_time field.
+	profile.DefaultCreateTime = profileDescCreateTime.Default.(func() time.Time)
+	// profileDescUpdateTime is the schema descriptor for update_time field.
+	profileDescUpdateTime := profileMixinFields1[1].Descriptor()
+	// profile.DefaultUpdateTime holds the default value on creation for the update_time field.
+	profile.DefaultUpdateTime = profileDescUpdateTime.Default.(func() time.Time)
+	// profile.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	profile.UpdateDefaultUpdateTime = profileDescUpdateTime.UpdateDefault.(func() time.Time)
+	// profileDescTitle is the schema descriptor for title field.
+	profileDescTitle := profileFields[0].Descriptor()
+	// profile.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	profile.TitleValidator = func() func(string) error {
+		validators := profileDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// profileDescCallSign is the schema descriptor for callSign field.
+	profileDescCallSign := profileFields[1].Descriptor()
+	// profile.CallSignValidator is a validator for the "callSign" field. It is called by the builders before save.
+	profile.CallSignValidator = func() func(string) error {
+		validators := profileDescCallSign.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(callSign string) error {
+			for _, fn := range fns {
+				if err := fn(callSign); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// profileDescCategory is the schema descriptor for category field.
+	profileDescCategory := profileFields[2].Descriptor()
+	// profile.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	profile.CategoryValidator = func() func(string) error {
+		validators := profileDescCategory.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(category string) error {
+			for _, fn := range fns {
+				if err := fn(category); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// profileDescID is the schema descriptor for id field.
+	profileDescID := profileMixinFields0[0].Descriptor()
+	// profile.DefaultID holds the default value on creation for the id field.
+	profile.DefaultID = profileDescID.Default.(func() uuid.UUID)
 	tokenMixin := schema.Token{}.Mixin()
 	tokenMixinFields0 := tokenMixin[0].Fields()
 	_ = tokenMixinFields0
@@ -61,16 +137,16 @@ func init() {
 	_ = tokenMixinFields1
 	tokenFields := schema.Token{}.Fields()
 	_ = tokenFields
-	// tokenDescCreatedAt is the schema descriptor for created_at field.
-	tokenDescCreatedAt := tokenMixinFields1[0].Descriptor()
-	// token.DefaultCreatedAt holds the default value on creation for the created_at field.
-	token.DefaultCreatedAt = tokenDescCreatedAt.Default.(func() time.Time)
-	// tokenDescUpdatedAt is the schema descriptor for updated_at field.
-	tokenDescUpdatedAt := tokenMixinFields1[1].Descriptor()
-	// token.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	token.DefaultUpdatedAt = tokenDescUpdatedAt.Default.(func() time.Time)
-	// token.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	token.UpdateDefaultUpdatedAt = tokenDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// tokenDescCreateTime is the schema descriptor for create_time field.
+	tokenDescCreateTime := tokenMixinFields1[0].Descriptor()
+	// token.DefaultCreateTime holds the default value on creation for the create_time field.
+	token.DefaultCreateTime = tokenDescCreateTime.Default.(func() time.Time)
+	// tokenDescUpdateTime is the schema descriptor for update_time field.
+	tokenDescUpdateTime := tokenMixinFields1[1].Descriptor()
+	// token.DefaultUpdateTime holds the default value on creation for the update_time field.
+	token.DefaultUpdateTime = tokenDescUpdateTime.Default.(func() time.Time)
+	// token.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	token.UpdateDefaultUpdateTime = tokenDescUpdateTime.UpdateDefault.(func() time.Time)
 	// tokenDescBody is the schema descriptor for body field.
 	tokenDescBody := tokenFields[0].Descriptor()
 	// token.BodyValidator is a validator for the "body" field. It is called by the builders before save.

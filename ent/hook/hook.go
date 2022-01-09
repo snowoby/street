@@ -21,6 +21,19 @@ func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The ProfileFunc type is an adapter to allow the use of ordinary
+// function as Profile mutator.
+type ProfileFunc func(context.Context, *ent.ProfileMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ProfileMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProfileMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The TokenFunc type is an adapter to allow the use of ordinary
 // function as Token mutator.
 type TokenFunc func(context.Context, *ent.TokenMutation) (ent.Value, error)

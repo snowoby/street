@@ -30,12 +30,6 @@ func (tu *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
 	return tu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tu *TokenUpdate) SetUpdatedAt(t time.Time) *TokenUpdate {
-	tu.mutation.SetUpdatedAt(t)
-	return tu
-}
-
 // SetBody sets the "body" field.
 func (tu *TokenUpdate) SetBody(s string) *TokenUpdate {
 	tu.mutation.SetBody(s)
@@ -48,9 +42,9 @@ func (tu *TokenUpdate) SetType(s string) *TokenUpdate {
 	return tu
 }
 
-// SetExpireAt sets the "expire_at" field.
-func (tu *TokenUpdate) SetExpireAt(t time.Time) *TokenUpdate {
-	tu.mutation.SetExpireAt(t)
+// SetExpireTime sets the "expire_time" field.
+func (tu *TokenUpdate) SetExpireTime(t time.Time) *TokenUpdate {
+	tu.mutation.SetExpireTime(t)
 	return tu
 }
 
@@ -139,9 +133,9 @@ func (tu *TokenUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tu *TokenUpdate) defaults() {
-	if _, ok := tu.mutation.UpdatedAt(); !ok {
-		v := token.UpdateDefaultUpdatedAt()
-		tu.mutation.SetUpdatedAt(v)
+	if _, ok := tu.mutation.UpdateTime(); !ok {
+		v := token.UpdateDefaultUpdateTime()
+		tu.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -181,11 +175,11 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.UpdatedAt(); ok {
+	if value, ok := tu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldUpdatedAt,
+			Column: token.FieldUpdateTime,
 		})
 	}
 	if value, ok := tu.mutation.Body(); ok {
@@ -202,11 +196,11 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: token.FieldType,
 		})
 	}
-	if value, ok := tu.mutation.ExpireAt(); ok {
+	if value, ok := tu.mutation.ExpireTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldExpireAt,
+			Column: token.FieldExpireTime,
 		})
 	}
 	if tu.mutation.AccountCleared() {
@@ -263,12 +257,6 @@ type TokenUpdateOne struct {
 	mutation *TokenMutation
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tuo *TokenUpdateOne) SetUpdatedAt(t time.Time) *TokenUpdateOne {
-	tuo.mutation.SetUpdatedAt(t)
-	return tuo
-}
-
 // SetBody sets the "body" field.
 func (tuo *TokenUpdateOne) SetBody(s string) *TokenUpdateOne {
 	tuo.mutation.SetBody(s)
@@ -281,9 +269,9 @@ func (tuo *TokenUpdateOne) SetType(s string) *TokenUpdateOne {
 	return tuo
 }
 
-// SetExpireAt sets the "expire_at" field.
-func (tuo *TokenUpdateOne) SetExpireAt(t time.Time) *TokenUpdateOne {
-	tuo.mutation.SetExpireAt(t)
+// SetExpireTime sets the "expire_time" field.
+func (tuo *TokenUpdateOne) SetExpireTime(t time.Time) *TokenUpdateOne {
+	tuo.mutation.SetExpireTime(t)
 	return tuo
 }
 
@@ -379,9 +367,9 @@ func (tuo *TokenUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tuo *TokenUpdateOne) defaults() {
-	if _, ok := tuo.mutation.UpdatedAt(); !ok {
-		v := token.UpdateDefaultUpdatedAt()
-		tuo.mutation.SetUpdatedAt(v)
+	if _, ok := tuo.mutation.UpdateTime(); !ok {
+		v := token.UpdateDefaultUpdateTime()
+		tuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -438,11 +426,11 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 			}
 		}
 	}
-	if value, ok := tuo.mutation.UpdatedAt(); ok {
+	if value, ok := tuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldUpdatedAt,
+			Column: token.FieldUpdateTime,
 		})
 	}
 	if value, ok := tuo.mutation.Body(); ok {
@@ -459,11 +447,11 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 			Column: token.FieldType,
 		})
 	}
-	if value, ok := tuo.mutation.ExpireAt(); ok {
+	if value, ok := tuo.mutation.ExpireTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldExpireAt,
+			Column: token.FieldExpireTime,
 		})
 	}
 	if tuo.mutation.AccountCleared() {

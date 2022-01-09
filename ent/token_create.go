@@ -22,30 +22,30 @@ type TokenCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (tc *TokenCreate) SetCreatedAt(t time.Time) *TokenCreate {
-	tc.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (tc *TokenCreate) SetCreateTime(t time.Time) *TokenCreate {
+	tc.mutation.SetCreateTime(t)
 	return tc
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tc *TokenCreate) SetNillableCreatedAt(t *time.Time) *TokenCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (tc *TokenCreate) SetNillableCreateTime(t *time.Time) *TokenCreate {
 	if t != nil {
-		tc.SetCreatedAt(*t)
+		tc.SetCreateTime(*t)
 	}
 	return tc
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tc *TokenCreate) SetUpdatedAt(t time.Time) *TokenCreate {
-	tc.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (tc *TokenCreate) SetUpdateTime(t time.Time) *TokenCreate {
+	tc.mutation.SetUpdateTime(t)
 	return tc
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tc *TokenCreate) SetNillableUpdatedAt(t *time.Time) *TokenCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (tc *TokenCreate) SetNillableUpdateTime(t *time.Time) *TokenCreate {
 	if t != nil {
-		tc.SetUpdatedAt(*t)
+		tc.SetUpdateTime(*t)
 	}
 	return tc
 }
@@ -62,9 +62,9 @@ func (tc *TokenCreate) SetType(s string) *TokenCreate {
 	return tc
 }
 
-// SetExpireAt sets the "expire_at" field.
-func (tc *TokenCreate) SetExpireAt(t time.Time) *TokenCreate {
-	tc.mutation.SetExpireAt(t)
+// SetExpireTime sets the "expire_time" field.
+func (tc *TokenCreate) SetExpireTime(t time.Time) *TokenCreate {
+	tc.mutation.SetExpireTime(t)
 	return tc
 }
 
@@ -156,13 +156,13 @@ func (tc *TokenCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tc *TokenCreate) defaults() {
-	if _, ok := tc.mutation.CreatedAt(); !ok {
-		v := token.DefaultCreatedAt()
-		tc.mutation.SetCreatedAt(v)
+	if _, ok := tc.mutation.CreateTime(); !ok {
+		v := token.DefaultCreateTime()
+		tc.mutation.SetCreateTime(v)
 	}
-	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		v := token.DefaultUpdatedAt()
-		tc.mutation.SetUpdatedAt(v)
+	if _, ok := tc.mutation.UpdateTime(); !ok {
+		v := token.DefaultUpdateTime()
+		tc.mutation.SetUpdateTime(v)
 	}
 	if _, ok := tc.mutation.ID(); !ok {
 		v := token.DefaultID()
@@ -172,11 +172,11 @@ func (tc *TokenCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TokenCreate) check() error {
-	if _, ok := tc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+	if _, ok := tc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
-	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
+	if _, ok := tc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
 	}
 	if _, ok := tc.mutation.Body(); !ok {
 		return &ValidationError{Name: "body", err: errors.New(`ent: missing required field "body"`)}
@@ -194,8 +194,8 @@ func (tc *TokenCreate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "type": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.ExpireAt(); !ok {
-		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "expire_at"`)}
+	if _, ok := tc.mutation.ExpireTime(); !ok {
+		return &ValidationError{Name: "expire_time", err: errors.New(`ent: missing required field "expire_time"`)}
 	}
 	if _, ok := tc.mutation.AccountID(); !ok {
 		return &ValidationError{Name: "account", err: errors.New("ent: missing required edge \"account\"")}
@@ -232,21 +232,21 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := tc.mutation.CreatedAt(); ok {
+	if value, ok := tc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldCreatedAt,
+			Column: token.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := tc.mutation.UpdatedAt(); ok {
+	if value, ok := tc.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldUpdatedAt,
+			Column: token.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := tc.mutation.Body(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -264,13 +264,13 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 		})
 		_node.Type = value
 	}
-	if value, ok := tc.mutation.ExpireAt(); ok {
+	if value, ok := tc.mutation.ExpireTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldExpireAt,
+			Column: token.FieldExpireTime,
 		})
-		_node.ExpireAt = value
+		_node.ExpireTime = value
 	}
 	if nodes := tc.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

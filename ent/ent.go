@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/profile"
 	"street/ent/token"
 
 	"entgo.io/ent"
@@ -31,6 +32,7 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		account.Table: account.ValidColumn,
+		profile.Table: profile.ValidColumn,
 		token.Table:   token.ValidColumn,
 	}
 	check, ok := checks[table]

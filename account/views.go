@@ -90,7 +90,7 @@ func login(ctx *gin.Context, store *store) {
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
 		return
 	}
-	ctx.SetCookie(StringRefreshToken, t.Body, int(t.ExpireAt.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
+	ctx.SetCookie(StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 	ctx.AbortWithStatus(http.StatusNoContent)
 }
 
@@ -102,7 +102,7 @@ func refreshToken(ctx *gin.Context, s *store) {
 
 	tokenBody := RandomString(128)
 	t, err := s.createToken(ctx, rt.Edges.Account.ID, tokenBody, StringAccessToken, s.Config().AccessTokenExpireTime)
-	ctx.SetCookie(StringAccessToken, t.Body, int(t.ExpireAt.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
+	ctx.SetCookie(StringAccessToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
 	ctx.AbortWithStatus(http.StatusCreated)
 	return
 

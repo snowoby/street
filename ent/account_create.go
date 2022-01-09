@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/profile"
 	"street/ent/token"
 	"time"
 
@@ -22,30 +23,30 @@ type AccountCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (ac *AccountCreate) SetCreatedAt(t time.Time) *AccountCreate {
-	ac.mutation.SetCreatedAt(t)
+// SetCreateTime sets the "create_time" field.
+func (ac *AccountCreate) SetCreateTime(t time.Time) *AccountCreate {
+	ac.mutation.SetCreateTime(t)
 	return ac
 }
 
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableCreatedAt(t *time.Time) *AccountCreate {
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableCreateTime(t *time.Time) *AccountCreate {
 	if t != nil {
-		ac.SetCreatedAt(*t)
+		ac.SetCreateTime(*t)
 	}
 	return ac
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (ac *AccountCreate) SetUpdatedAt(t time.Time) *AccountCreate {
-	ac.mutation.SetUpdatedAt(t)
+// SetUpdateTime sets the "update_time" field.
+func (ac *AccountCreate) SetUpdateTime(t time.Time) *AccountCreate {
+	ac.mutation.SetUpdateTime(t)
 	return ac
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableUpdatedAt(t *time.Time) *AccountCreate {
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableUpdateTime(t *time.Time) *AccountCreate {
 	if t != nil {
-		ac.SetUpdatedAt(*t)
+		ac.SetUpdateTime(*t)
 	}
 	return ac
 }
@@ -81,6 +82,21 @@ func (ac *AccountCreate) AddToken(t ...*Token) *AccountCreate {
 		ids[i] = t[i].ID
 	}
 	return ac.AddTokenIDs(ids...)
+}
+
+// AddProfileIDs adds the "profile" edge to the Profile entity by IDs.
+func (ac *AccountCreate) AddProfileIDs(ids ...uuid.UUID) *AccountCreate {
+	ac.mutation.AddProfileIDs(ids...)
+	return ac
+}
+
+// AddProfile adds the "profile" edges to the Profile entity.
+func (ac *AccountCreate) AddProfile(p ...*Profile) *AccountCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ac.AddProfileIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
@@ -154,13 +170,13 @@ func (ac *AccountCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ac *AccountCreate) defaults() {
-	if _, ok := ac.mutation.CreatedAt(); !ok {
-		v := account.DefaultCreatedAt()
-		ac.mutation.SetCreatedAt(v)
+	if _, ok := ac.mutation.CreateTime(); !ok {
+		v := account.DefaultCreateTime()
+		ac.mutation.SetCreateTime(v)
 	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
-		v := account.DefaultUpdatedAt()
-		ac.mutation.SetUpdatedAt(v)
+	if _, ok := ac.mutation.UpdateTime(); !ok {
+		v := account.DefaultUpdateTime()
+		ac.mutation.SetUpdateTime(v)
 	}
 	if _, ok := ac.mutation.ID(); !ok {
 		v := account.DefaultID()
@@ -170,11 +186,11 @@ func (ac *AccountCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountCreate) check() error {
-	if _, ok := ac.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+	if _, ok := ac.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
+	if _, ok := ac.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
 	}
 	if _, ok := ac.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "email"`)}
@@ -219,21 +235,21 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := ac.mutation.CreatedAt(); ok {
+	if value, ok := ac.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: account.FieldCreatedAt,
+			Column: account.FieldCreateTime,
 		})
-		_node.CreatedAt = value
+		_node.CreateTime = value
 	}
-	if value, ok := ac.mutation.UpdatedAt(); ok {
+	if value, ok := ac.mutation.UpdateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: account.FieldUpdatedAt,
+			Column: account.FieldUpdateTime,
 		})
-		_node.UpdatedAt = value
+		_node.UpdateTime = value
 	}
 	if value, ok := ac.mutation.Email(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -262,6 +278,25 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: token.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.ProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.ProfileTable,
+			Columns: []string{account.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: profile.FieldID,
 				},
 			},
 		}
