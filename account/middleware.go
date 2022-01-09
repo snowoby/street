@@ -10,30 +10,27 @@ import (
 
 const StringAccount = "account"
 
-func AccessTokenMiddleware(dbStore db.Store) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		s := &store{dbStore}
-		at, err := cookieTokenValidate(ctx, s, StringAccessToken)
-		if err != nil {
-			return
-		}
-
-		ctx.Set(StringAccount, at.Edges.Account)
-		ctx.Set(StringAccessToken, at)
-		ctx.Next()
+func AccessTokenMiddleware(ctx *gin.Context, s *db.Store) {
+	at, err := cookieTokenValidate(ctx, s, StringAccessToken)
+	if err != nil {
 		return
 	}
 
+	ctx.Set(StringAccount, at.Edges.Account)
+	ctx.Set(StringAccessToken, at)
+	ctx.Next()
+	return
+
 }
 
-func cookieTokenValidate(ctx *gin.Context, store *store, tokenType string) (*ent.Token, error) {
+func cookieTokenValidate(ctx *gin.Context, store *db.Store, tokenType string) (*ent.Token, error) {
 	tokenBody, err := ctx.Cookie(tokenType)
 	if err != nil {
 		ctx.AbortWithStatusJSON(TokenNotExistsError.Code, TokenNotExistsError)
 		return nil, err
 	}
 
-	t, err := store.findToken(ctx, tokenBody, tokenType, true)
+	t, err := store.DB().FindToken(ctx, tokenBody, tokenType, true)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)

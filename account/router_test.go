@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"street/db"
 	"street/ent/enttest"
+	"street/handler"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -16,7 +17,8 @@ func setupRouter(t *testing.T) *gin.Engine {
 	r := gin.Default()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	g := r.Group("")
-	Routers(g, db.New(client))
+	h := handler.New(db.New(client))
+	Routers(g, h)
 	return r
 }
 

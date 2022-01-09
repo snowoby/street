@@ -2,21 +2,14 @@ package account
 
 import (
 	"github.com/gin-gonic/gin"
-	"street/db"
+	"street/handler"
 )
 
-type Flatten func(ctx *gin.Context, store *store)
+func Routers(group *gin.RouterGroup, h handler.Handler) {
 
-func Handle(s db.Store, handle Flatten) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		handle(ctx, &store{s})
-	}
-}
-
-func Routers(group *gin.RouterGroup, store db.Store) {
-	group.POST("/login", Handle(store, login))
-	group.POST("/register", Handle(store, register))
-	group.POST("/refresh", Handle(store, refreshToken))
-	group.GET("/", AccessTokenMiddleware(store), Handle(store, info))
+	group.POST("/login", h.P(login))
+	group.POST("/register", h.P(register))
+	group.POST("/refresh", h.P(refreshToken))
+	group.GET("/", h.P(AccessTokenMiddleware), h.P(info))
 
 }

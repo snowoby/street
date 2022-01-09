@@ -10,14 +10,18 @@ type config struct {
 	AccessTokenExpireTime  time.Duration `json:"access_token_expire_time"`
 	Domain                 string        `json:"domain"`
 }
-type store struct {
-	*ent.Client
+type Store struct {
+	*db
 	config
 }
 
-func New(client *ent.Client) *store {
-	return &store{
-		client,
+type db struct {
+	*ent.Client
+}
+
+func New(client *ent.Client) *Store {
+	return &Store{
+		&db{client},
 		config{
 			//TODO config
 			RefreshTokenExpireTime: time.Hour * 24 * 7 * 4,
@@ -26,15 +30,10 @@ func New(client *ent.Client) *store {
 	}
 }
 
-func (s *store) DB() *ent.Client {
-	return s.Client
+func (s *Store) DB() *db {
+	return s.db
 }
 
-func (s *store) Config() config {
+func (s *Store) Config() config {
 	return s.config
-}
-
-type Store interface {
-	DB() *ent.Client
-	Config() config
 }

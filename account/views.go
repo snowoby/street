@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"street/db"
 	"street/ent"
 	"street/errors"
 	"time"
@@ -24,7 +25,7 @@ type PublicResponse struct {
 	Password *struct{} `json:"password,omitempty"`
 }
 
-func register(ctx *gin.Context, store *store) {
+func register(ctx *gin.Context, store *db.Store) {
 	var register EmailPassword
 	err := ctx.ShouldBindJSON(&register)
 	if err != nil {
@@ -38,7 +39,7 @@ func register(ctx *gin.Context, store *store) {
 		return
 	}
 
-	exists := store.emailExists(ctx, register.Email)
+	exists := store.EmailExists(ctx, register.Email)
 	if exists {
 		ctx.AbortWithStatusJSON(DuplicateEmailError.Code, DuplicateEmailError)
 		return
@@ -49,7 +50,7 @@ func register(ctx *gin.Context, store *store) {
 		ctx.AbortWithStatusJSON(PasswordHashError.Code, PasswordHashError)
 	}
 
-	user, err := store.createAccount(ctx, register.Email, encryptedPassword)
+	user, err := store.CreateAccount(ctx, register.Email, encryptedPassword)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
@@ -62,7 +63,7 @@ func register(ctx *gin.Context, store *store) {
 
 }
 
-func login(ctx *gin.Context, store *store) {
+func login(ctx *gin.Context, store *db.Store) {
 	var login EmailPassword
 	err := ctx.ShouldBindJSON(&login)
 	if err != nil {
@@ -71,7 +72,7 @@ func login(ctx *gin.Context, store *store) {
 		return
 	}
 
-	account, err := store.findAccount(ctx, login.Email)
+	account, err := store.FindAccount(ctx, login.Email)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
@@ -84,7 +85,7 @@ func login(ctx *gin.Context, store *store) {
 	}
 
 	tokenBody := RandomString(128)
-	t, err := store.createToken(ctx, account.ID, tokenBody, StringRefreshToken, store.Config().RefreshTokenExpireTime)
+	t, err := store.CreateToken(ctx, account.ID, tokenBody, StringRefreshToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
 		databaseError := errors.DatabaseError(err)
 		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
@@ -94,21 +95,21 @@ func login(ctx *gin.Context, store *store) {
 	ctx.AbortWithStatus(http.StatusNoContent)
 }
 
-func refreshToken(ctx *gin.Context, s *store) {
+func refreshToken(ctx *gin.Context, s *db.Store) {
 	rt, err := cookieTokenValidate(ctx, s, StringRefreshToken)
 	if err != nil {
 		return
 	}
 
 	tokenBody := RandomString(128)
-	t, err := s.createToken(ctx, rt.Edges.Account.ID, tokenBody, StringAccessToken, s.Config().AccessTokenExpireTime)
+	t, err := s.CreateToken(ctx, rt.Edges.Account.ID, tokenBody, StringAccessToken, s.Config().AccessTokenExpireTime)
 	ctx.SetCookie(StringAccessToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/", s.Config().Domain, false, true)
 	ctx.AbortWithStatus(http.StatusCreated)
 	return
 
 }
 
-func info(ctx *gin.Context, s *store) {
+func info(ctx *gin.Context, s *db.Store) {
 	account := ctx.MustGet(StringAccount).(*ent.Account)
 	ctx.JSON(http.StatusOK, account)
 }
