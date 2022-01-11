@@ -13,6 +13,7 @@ type config struct {
 type Store struct {
 	*db
 	config
+	*series
 }
 
 type db struct {
@@ -27,6 +28,7 @@ func New(client *ent.Client) *Store {
 			RefreshTokenExpireTime: time.Hour * 24 * 7 * 4,
 			AccessTokenExpireTime:  time.Hour,
 		},
+		&series{client.Series},
 	}
 }
 
@@ -36,4 +38,8 @@ func (s *Store) DB() *db {
 
 func (s *Store) Config() config {
 	return s.config
+}
+
+func (s *Store) Series() *series {
+	return s.series
 }

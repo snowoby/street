@@ -28,7 +28,7 @@ func create(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	ep, err := store.CreateSeries(ctx, series.Title, series.Content, profile.ID)
+	ep, err := store.Series().Create(ctx, series.Title, series.Content, profile.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -58,7 +58,7 @@ func update(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	ep, err := store.UpdateSeries(ctx, id.ID, series.Title, series.Content)
+	ep, err := store.Series().Update(ctx, id.ID, series.Title, series.Content)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -75,7 +75,7 @@ func get(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	ep, err := store.FindSeriesByID(ctx, id.ID)
+	ep, err := store.Series().FindByID(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -97,7 +97,7 @@ func del(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	err := store.DeleteSeries(ctx, id.ID)
+	err := store.Series().Delete(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -109,7 +109,7 @@ func del(ctx *gin.Context, store *data.Store) {
 }
 
 func seriesMustBelong(ctx *gin.Context, store *data.Store, profileID, seriesID uuid.UUID) bool {
-	belongs, err := store.SeriesBelongs(ctx, profileID, seriesID)
+	belongs, err := store.Series().IsOwner(ctx, profileID, seriesID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
