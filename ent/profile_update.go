@@ -10,6 +10,7 @@ import (
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
+	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -74,6 +75,21 @@ func (pu *ProfileUpdate) AddEpisode(e ...*Episode) *ProfileUpdate {
 	return pu.AddEpisodeIDs(ids...)
 }
 
+// AddSeriesIDs adds the "series" edge to the Series entity by IDs.
+func (pu *ProfileUpdate) AddSeriesIDs(ids ...uuid.UUID) *ProfileUpdate {
+	pu.mutation.AddSeriesIDs(ids...)
+	return pu
+}
+
+// AddSeries adds the "series" edges to the Series entity.
+func (pu *ProfileUpdate) AddSeries(s ...*Series) *ProfileUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pu.AddSeriesIDs(ids...)
+}
+
 // Mutation returns the ProfileMutation object of the builder.
 func (pu *ProfileUpdate) Mutation() *ProfileMutation {
 	return pu.mutation
@@ -104,6 +120,27 @@ func (pu *ProfileUpdate) RemoveEpisode(e ...*Episode) *ProfileUpdate {
 		ids[i] = e[i].ID
 	}
 	return pu.RemoveEpisodeIDs(ids...)
+}
+
+// ClearSeries clears all "series" edges to the Series entity.
+func (pu *ProfileUpdate) ClearSeries() *ProfileUpdate {
+	pu.mutation.ClearSeries()
+	return pu
+}
+
+// RemoveSeriesIDs removes the "series" edge to Series entities by IDs.
+func (pu *ProfileUpdate) RemoveSeriesIDs(ids ...uuid.UUID) *ProfileUpdate {
+	pu.mutation.RemoveSeriesIDs(ids...)
+	return pu
+}
+
+// RemoveSeries removes "series" edges to Series entities.
+func (pu *ProfileUpdate) RemoveSeries(s ...*Series) *ProfileUpdate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pu.RemoveSeriesIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -333,6 +370,60 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pu.mutation.SeriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.SeriesTable,
+			Columns: []string{profile.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedSeriesIDs(); len(nodes) > 0 && !pu.mutation.SeriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.SeriesTable,
+			Columns: []string{profile.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.SeriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.SeriesTable,
+			Columns: []string{profile.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{profile.Label}
@@ -396,6 +487,21 @@ func (puo *ProfileUpdateOne) AddEpisode(e ...*Episode) *ProfileUpdateOne {
 	return puo.AddEpisodeIDs(ids...)
 }
 
+// AddSeriesIDs adds the "series" edge to the Series entity by IDs.
+func (puo *ProfileUpdateOne) AddSeriesIDs(ids ...uuid.UUID) *ProfileUpdateOne {
+	puo.mutation.AddSeriesIDs(ids...)
+	return puo
+}
+
+// AddSeries adds the "series" edges to the Series entity.
+func (puo *ProfileUpdateOne) AddSeries(s ...*Series) *ProfileUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return puo.AddSeriesIDs(ids...)
+}
+
 // Mutation returns the ProfileMutation object of the builder.
 func (puo *ProfileUpdateOne) Mutation() *ProfileMutation {
 	return puo.mutation
@@ -426,6 +532,27 @@ func (puo *ProfileUpdateOne) RemoveEpisode(e ...*Episode) *ProfileUpdateOne {
 		ids[i] = e[i].ID
 	}
 	return puo.RemoveEpisodeIDs(ids...)
+}
+
+// ClearSeries clears all "series" edges to the Series entity.
+func (puo *ProfileUpdateOne) ClearSeries() *ProfileUpdateOne {
+	puo.mutation.ClearSeries()
+	return puo
+}
+
+// RemoveSeriesIDs removes the "series" edge to Series entities by IDs.
+func (puo *ProfileUpdateOne) RemoveSeriesIDs(ids ...uuid.UUID) *ProfileUpdateOne {
+	puo.mutation.RemoveSeriesIDs(ids...)
+	return puo
+}
+
+// RemoveSeries removes "series" edges to Series entities.
+func (puo *ProfileUpdateOne) RemoveSeries(s ...*Series) *ProfileUpdateOne {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return puo.RemoveSeriesIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -671,6 +798,60 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: episode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.SeriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.SeriesTable,
+			Columns: []string{profile.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedSeriesIDs(); len(nodes) > 0 && !puo.mutation.SeriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.SeriesTable,
+			Columns: []string{profile.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.SeriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.SeriesTable,
+			Columns: []string{profile.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
 				},
 			},
 		}

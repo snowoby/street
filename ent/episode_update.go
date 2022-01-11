@@ -9,6 +9,7 @@ import (
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
+	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -52,6 +53,25 @@ func (eu *EpisodeUpdate) SetProfile(p *Profile) *EpisodeUpdate {
 	return eu.SetProfileID(p.ID)
 }
 
+// SetSeriesID sets the "series" edge to the Series entity by ID.
+func (eu *EpisodeUpdate) SetSeriesID(id uuid.UUID) *EpisodeUpdate {
+	eu.mutation.SetSeriesID(id)
+	return eu
+}
+
+// SetNillableSeriesID sets the "series" edge to the Series entity by ID if the given value is not nil.
+func (eu *EpisodeUpdate) SetNillableSeriesID(id *uuid.UUID) *EpisodeUpdate {
+	if id != nil {
+		eu = eu.SetSeriesID(*id)
+	}
+	return eu
+}
+
+// SetSeries sets the "series" edge to the Series entity.
+func (eu *EpisodeUpdate) SetSeries(s *Series) *EpisodeUpdate {
+	return eu.SetSeriesID(s.ID)
+}
+
 // Mutation returns the EpisodeMutation object of the builder.
 func (eu *EpisodeUpdate) Mutation() *EpisodeMutation {
 	return eu.mutation
@@ -60,6 +80,12 @@ func (eu *EpisodeUpdate) Mutation() *EpisodeMutation {
 // ClearProfile clears the "profile" edge to the Profile entity.
 func (eu *EpisodeUpdate) ClearProfile() *EpisodeUpdate {
 	eu.mutation.ClearProfile()
+	return eu
+}
+
+// ClearSeries clears the "series" edge to the Series entity.
+func (eu *EpisodeUpdate) ClearSeries() *EpisodeUpdate {
+	eu.mutation.ClearSeries()
 	return eu
 }
 
@@ -224,6 +250,41 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if eu.mutation.SeriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   episode.SeriesTable,
+			Columns: []string{episode.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := eu.mutation.SeriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   episode.SeriesTable,
+			Columns: []string{episode.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, eu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{episode.Label}
@@ -266,6 +327,25 @@ func (euo *EpisodeUpdateOne) SetProfile(p *Profile) *EpisodeUpdateOne {
 	return euo.SetProfileID(p.ID)
 }
 
+// SetSeriesID sets the "series" edge to the Series entity by ID.
+func (euo *EpisodeUpdateOne) SetSeriesID(id uuid.UUID) *EpisodeUpdateOne {
+	euo.mutation.SetSeriesID(id)
+	return euo
+}
+
+// SetNillableSeriesID sets the "series" edge to the Series entity by ID if the given value is not nil.
+func (euo *EpisodeUpdateOne) SetNillableSeriesID(id *uuid.UUID) *EpisodeUpdateOne {
+	if id != nil {
+		euo = euo.SetSeriesID(*id)
+	}
+	return euo
+}
+
+// SetSeries sets the "series" edge to the Series entity.
+func (euo *EpisodeUpdateOne) SetSeries(s *Series) *EpisodeUpdateOne {
+	return euo.SetSeriesID(s.ID)
+}
+
 // Mutation returns the EpisodeMutation object of the builder.
 func (euo *EpisodeUpdateOne) Mutation() *EpisodeMutation {
 	return euo.mutation
@@ -274,6 +354,12 @@ func (euo *EpisodeUpdateOne) Mutation() *EpisodeMutation {
 // ClearProfile clears the "profile" edge to the Profile entity.
 func (euo *EpisodeUpdateOne) ClearProfile() *EpisodeUpdateOne {
 	euo.mutation.ClearProfile()
+	return euo
+}
+
+// ClearSeries clears the "series" edge to the Series entity.
+func (euo *EpisodeUpdateOne) ClearSeries() *EpisodeUpdateOne {
+	euo.mutation.ClearSeries()
 	return euo
 }
 
@@ -454,6 +540,41 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if euo.mutation.SeriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   episode.SeriesTable,
+			Columns: []string{episode.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := euo.mutation.SeriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   episode.SeriesTable,
+			Columns: []string{episode.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
 				},
 			},
 		}

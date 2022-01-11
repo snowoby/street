@@ -10,6 +10,7 @@ import (
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
+	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,6 +29,7 @@ type EpisodeQuery struct {
 	predicates []predicate.Episode
 	// eager-loading edges.
 	withProfile *ProfileQuery
+	withSeries  *SeriesQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -80,6 +82,28 @@ func (eq *EpisodeQuery) QueryProfile() *ProfileQuery {
 			sqlgraph.From(episode.Table, episode.FieldID, selector),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, episode.ProfileTable, episode.ProfileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySeries chains the current query on the "series" edge.
+func (eq *EpisodeQuery) QuerySeries() *SeriesQuery {
+	query := &SeriesQuery{config: eq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := eq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := eq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(episode.Table, episode.FieldID, selector),
+			sqlgraph.To(series.Table, series.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, episode.SeriesTable, episode.SeriesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,6 +293,7 @@ func (eq *EpisodeQuery) Clone() *EpisodeQuery {
 		order:       append([]OrderFunc{}, eq.order...),
 		predicates:  append([]predicate.Episode{}, eq.predicates...),
 		withProfile: eq.withProfile.Clone(),
+		withSeries:  eq.withSeries.Clone(),
 		// clone intermediate query.
 		sql:  eq.sql.Clone(),
 		path: eq.path,
@@ -283,6 +308,17 @@ func (eq *EpisodeQuery) WithProfile(opts ...func(*ProfileQuery)) *EpisodeQuery {
 		opt(query)
 	}
 	eq.withProfile = query
+	return eq
+}
+
+// WithSeries tells the query-builder to eager-load the nodes that are connected to
+// the "series" edge. The optional arguments are used to configure the query builder of the edge.
+func (eq *EpisodeQuery) WithSeries(opts ...func(*SeriesQuery)) *EpisodeQuery {
+	query := &SeriesQuery{config: eq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	eq.withSeries = query
 	return eq
 }
 
@@ -352,11 +388,12 @@ func (eq *EpisodeQuery) sqlAll(ctx context.Context) ([]*Episode, error) {
 		nodes       = []*Episode{}
 		withFKs     = eq.withFKs
 		_spec       = eq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			eq.withProfile != nil,
+			eq.withSeries != nil,
 		}
 	)
-	if eq.withProfile != nil {
+	if eq.withProfile != nil || eq.withSeries != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -407,6 +444,35 @@ func (eq *EpisodeQuery) sqlAll(ctx context.Context) ([]*Episode, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Profile = n
+			}
+		}
+	}
+
+	if query := eq.withSeries; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Episode)
+		for i := range nodes {
+			if nodes[i].series_episode == nil {
+				continue
+			}
+			fk := *nodes[i].series_episode
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(series.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "series_episode" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Series = n
 			}
 		}
 	}

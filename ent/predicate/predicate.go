@@ -15,5 +15,8 @@ type Episode func(*sql.Selector)
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
 
+// Series is the predicate function for series builders.
+type Series func(*sql.Selector)
+
 // Token is the predicate function for token builders.
 type Token func(*sql.Selector)

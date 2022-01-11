@@ -9,6 +9,7 @@ import (
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
+	"street/ent/series"
 	"street/ent/token"
 	"sync"
 	"time"
@@ -30,6 +31,7 @@ const (
 	TypeAccount = "Account"
 	TypeEpisode = "Episode"
 	TypeProfile = "Profile"
+	TypeSeries  = "Series"
 	TypeToken   = "Token"
 )
 
@@ -682,6 +684,8 @@ type EpisodeMutation struct {
 	clearedFields  map[string]struct{}
 	profile        *uuid.UUID
 	clearedprofile bool
+	series         *uuid.UUID
+	clearedseries  bool
 	done           bool
 	oldValue       func(context.Context) (*Episode, error)
 	predicates     []predicate.Episode
@@ -955,6 +959,45 @@ func (m *EpisodeMutation) ResetProfile() {
 	m.clearedprofile = false
 }
 
+// SetSeriesID sets the "series" edge to the Series entity by id.
+func (m *EpisodeMutation) SetSeriesID(id uuid.UUID) {
+	m.series = &id
+}
+
+// ClearSeries clears the "series" edge to the Series entity.
+func (m *EpisodeMutation) ClearSeries() {
+	m.clearedseries = true
+}
+
+// SeriesCleared reports if the "series" edge to the Series entity was cleared.
+func (m *EpisodeMutation) SeriesCleared() bool {
+	return m.clearedseries
+}
+
+// SeriesID returns the "series" edge ID in the mutation.
+func (m *EpisodeMutation) SeriesID() (id uuid.UUID, exists bool) {
+	if m.series != nil {
+		return *m.series, true
+	}
+	return
+}
+
+// SeriesIDs returns the "series" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SeriesID instead. It exists only for internal usage by the builders.
+func (m *EpisodeMutation) SeriesIDs() (ids []uuid.UUID) {
+	if id := m.series; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSeries resets all changes to the "series" edge.
+func (m *EpisodeMutation) ResetSeries() {
+	m.series = nil
+	m.clearedseries = false
+}
+
 // Where appends a list predicates to the EpisodeMutation builder.
 func (m *EpisodeMutation) Where(ps ...predicate.Episode) {
 	m.predicates = append(m.predicates, ps...)
@@ -1124,9 +1167,12 @@ func (m *EpisodeMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *EpisodeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.profile != nil {
 		edges = append(edges, episode.EdgeProfile)
+	}
+	if m.series != nil {
+		edges = append(edges, episode.EdgeSeries)
 	}
 	return edges
 }
@@ -1139,13 +1185,17 @@ func (m *EpisodeMutation) AddedIDs(name string) []ent.Value {
 		if id := m.profile; id != nil {
 			return []ent.Value{*id}
 		}
+	case episode.EdgeSeries:
+		if id := m.series; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EpisodeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -1159,9 +1209,12 @@ func (m *EpisodeMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *EpisodeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedprofile {
 		edges = append(edges, episode.EdgeProfile)
+	}
+	if m.clearedseries {
+		edges = append(edges, episode.EdgeSeries)
 	}
 	return edges
 }
@@ -1172,6 +1225,8 @@ func (m *EpisodeMutation) EdgeCleared(name string) bool {
 	switch name {
 	case episode.EdgeProfile:
 		return m.clearedprofile
+	case episode.EdgeSeries:
+		return m.clearedseries
 	}
 	return false
 }
@@ -1183,6 +1238,9 @@ func (m *EpisodeMutation) ClearEdge(name string) error {
 	case episode.EdgeProfile:
 		m.ClearProfile()
 		return nil
+	case episode.EdgeSeries:
+		m.ClearSeries()
+		return nil
 	}
 	return fmt.Errorf("unknown Episode unique edge %s", name)
 }
@@ -1193,6 +1251,9 @@ func (m *EpisodeMutation) ResetEdge(name string) error {
 	switch name {
 	case episode.EdgeProfile:
 		m.ResetProfile()
+		return nil
+	case episode.EdgeSeries:
+		m.ResetSeries()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode edge %s", name)
@@ -1215,6 +1276,9 @@ type ProfileMutation struct {
 	episode        map[uuid.UUID]struct{}
 	removedepisode map[uuid.UUID]struct{}
 	clearedepisode bool
+	series         map[uuid.UUID]struct{}
+	removedseries  map[uuid.UUID]struct{}
+	clearedseries  bool
 	done           bool
 	oldValue       func(context.Context) (*Profile, error)
 	predicates     []predicate.Profile
@@ -1578,6 +1642,60 @@ func (m *ProfileMutation) ResetEpisode() {
 	m.removedepisode = nil
 }
 
+// AddSeriesIDs adds the "series" edge to the Series entity by ids.
+func (m *ProfileMutation) AddSeriesIDs(ids ...uuid.UUID) {
+	if m.series == nil {
+		m.series = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.series[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSeries clears the "series" edge to the Series entity.
+func (m *ProfileMutation) ClearSeries() {
+	m.clearedseries = true
+}
+
+// SeriesCleared reports if the "series" edge to the Series entity was cleared.
+func (m *ProfileMutation) SeriesCleared() bool {
+	return m.clearedseries
+}
+
+// RemoveSeriesIDs removes the "series" edge to the Series entity by IDs.
+func (m *ProfileMutation) RemoveSeriesIDs(ids ...uuid.UUID) {
+	if m.removedseries == nil {
+		m.removedseries = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.series, ids[i])
+		m.removedseries[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSeries returns the removed IDs of the "series" edge to the Series entity.
+func (m *ProfileMutation) RemovedSeriesIDs() (ids []uuid.UUID) {
+	for id := range m.removedseries {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SeriesIDs returns the "series" edge IDs in the mutation.
+func (m *ProfileMutation) SeriesIDs() (ids []uuid.UUID) {
+	for id := range m.series {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSeries resets all changes to the "series" edge.
+func (m *ProfileMutation) ResetSeries() {
+	m.series = nil
+	m.clearedseries = false
+	m.removedseries = nil
+}
+
 // Where appends a list predicates to the ProfileMutation builder.
 func (m *ProfileMutation) Where(ps ...predicate.Profile) {
 	m.predicates = append(m.predicates, ps...)
@@ -1764,12 +1882,15 @@ func (m *ProfileMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ProfileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.account != nil {
 		edges = append(edges, profile.EdgeAccount)
 	}
 	if m.episode != nil {
 		edges = append(edges, profile.EdgeEpisode)
+	}
+	if m.series != nil {
+		edges = append(edges, profile.EdgeSeries)
 	}
 	return edges
 }
@@ -1788,15 +1909,24 @@ func (m *ProfileMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case profile.EdgeSeries:
+		ids := make([]ent.Value, 0, len(m.series))
+		for id := range m.series {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ProfileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedepisode != nil {
 		edges = append(edges, profile.EdgeEpisode)
+	}
+	if m.removedseries != nil {
+		edges = append(edges, profile.EdgeSeries)
 	}
 	return edges
 }
@@ -1811,18 +1941,27 @@ func (m *ProfileMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case profile.EdgeSeries:
+		ids := make([]ent.Value, 0, len(m.removedseries))
+		for id := range m.removedseries {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ProfileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedaccount {
 		edges = append(edges, profile.EdgeAccount)
 	}
 	if m.clearedepisode {
 		edges = append(edges, profile.EdgeEpisode)
+	}
+	if m.clearedseries {
+		edges = append(edges, profile.EdgeSeries)
 	}
 	return edges
 }
@@ -1835,6 +1974,8 @@ func (m *ProfileMutation) EdgeCleared(name string) bool {
 		return m.clearedaccount
 	case profile.EdgeEpisode:
 		return m.clearedepisode
+	case profile.EdgeSeries:
+		return m.clearedseries
 	}
 	return false
 }
@@ -1860,8 +2001,699 @@ func (m *ProfileMutation) ResetEdge(name string) error {
 	case profile.EdgeEpisode:
 		m.ResetEpisode()
 		return nil
+	case profile.EdgeSeries:
+		m.ResetSeries()
+		return nil
 	}
 	return fmt.Errorf("unknown Profile edge %s", name)
+}
+
+// SeriesMutation represents an operation that mutates the Series nodes in the graph.
+type SeriesMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	create_time    *time.Time
+	update_time    *time.Time
+	title          *string
+	callSign       *string
+	content        *string
+	clearedFields  map[string]struct{}
+	profile        *uuid.UUID
+	clearedprofile bool
+	episode        map[uuid.UUID]struct{}
+	removedepisode map[uuid.UUID]struct{}
+	clearedepisode bool
+	done           bool
+	oldValue       func(context.Context) (*Series, error)
+	predicates     []predicate.Series
+}
+
+var _ ent.Mutation = (*SeriesMutation)(nil)
+
+// seriesOption allows management of the mutation configuration using functional options.
+type seriesOption func(*SeriesMutation)
+
+// newSeriesMutation creates new mutation for the Series entity.
+func newSeriesMutation(c config, op Op, opts ...seriesOption) *SeriesMutation {
+	m := &SeriesMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSeries,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSeriesID sets the ID field of the mutation.
+func withSeriesID(id uuid.UUID) seriesOption {
+	return func(m *SeriesMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Series
+		)
+		m.oldValue = func(ctx context.Context) (*Series, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Series.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSeries sets the old Series of the mutation.
+func withSeries(node *Series) seriesOption {
+	return func(m *SeriesMutation) {
+		m.oldValue = func(context.Context) (*Series, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SeriesMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SeriesMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Series entities.
+func (m *SeriesMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SeriesMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *SeriesMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *SeriesMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *SeriesMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *SeriesMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *SeriesMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *SeriesMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *SeriesMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *SeriesMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *SeriesMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetCallSign sets the "callSign" field.
+func (m *SeriesMutation) SetCallSign(s string) {
+	m.callSign = &s
+}
+
+// CallSign returns the value of the "callSign" field in the mutation.
+func (m *SeriesMutation) CallSign() (r string, exists bool) {
+	v := m.callSign
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCallSign returns the old "callSign" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldCallSign(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCallSign is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCallSign requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCallSign: %w", err)
+	}
+	return oldValue.CallSign, nil
+}
+
+// ClearCallSign clears the value of the "callSign" field.
+func (m *SeriesMutation) ClearCallSign() {
+	m.callSign = nil
+	m.clearedFields[series.FieldCallSign] = struct{}{}
+}
+
+// CallSignCleared returns if the "callSign" field was cleared in this mutation.
+func (m *SeriesMutation) CallSignCleared() bool {
+	_, ok := m.clearedFields[series.FieldCallSign]
+	return ok
+}
+
+// ResetCallSign resets all changes to the "callSign" field.
+func (m *SeriesMutation) ResetCallSign() {
+	m.callSign = nil
+	delete(m.clearedFields, series.FieldCallSign)
+}
+
+// SetContent sets the "content" field.
+func (m *SeriesMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *SeriesMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Series entity.
+// If the Series object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeriesMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *SeriesMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetProfileID sets the "profile" edge to the Profile entity by id.
+func (m *SeriesMutation) SetProfileID(id uuid.UUID) {
+	m.profile = &id
+}
+
+// ClearProfile clears the "profile" edge to the Profile entity.
+func (m *SeriesMutation) ClearProfile() {
+	m.clearedprofile = true
+}
+
+// ProfileCleared reports if the "profile" edge to the Profile entity was cleared.
+func (m *SeriesMutation) ProfileCleared() bool {
+	return m.clearedprofile
+}
+
+// ProfileID returns the "profile" edge ID in the mutation.
+func (m *SeriesMutation) ProfileID() (id uuid.UUID, exists bool) {
+	if m.profile != nil {
+		return *m.profile, true
+	}
+	return
+}
+
+// ProfileIDs returns the "profile" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ProfileID instead. It exists only for internal usage by the builders.
+func (m *SeriesMutation) ProfileIDs() (ids []uuid.UUID) {
+	if id := m.profile; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetProfile resets all changes to the "profile" edge.
+func (m *SeriesMutation) ResetProfile() {
+	m.profile = nil
+	m.clearedprofile = false
+}
+
+// AddEpisodeIDs adds the "episode" edge to the Episode entity by ids.
+func (m *SeriesMutation) AddEpisodeIDs(ids ...uuid.UUID) {
+	if m.episode == nil {
+		m.episode = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.episode[ids[i]] = struct{}{}
+	}
+}
+
+// ClearEpisode clears the "episode" edge to the Episode entity.
+func (m *SeriesMutation) ClearEpisode() {
+	m.clearedepisode = true
+}
+
+// EpisodeCleared reports if the "episode" edge to the Episode entity was cleared.
+func (m *SeriesMutation) EpisodeCleared() bool {
+	return m.clearedepisode
+}
+
+// RemoveEpisodeIDs removes the "episode" edge to the Episode entity by IDs.
+func (m *SeriesMutation) RemoveEpisodeIDs(ids ...uuid.UUID) {
+	if m.removedepisode == nil {
+		m.removedepisode = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.episode, ids[i])
+		m.removedepisode[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedEpisode returns the removed IDs of the "episode" edge to the Episode entity.
+func (m *SeriesMutation) RemovedEpisodeIDs() (ids []uuid.UUID) {
+	for id := range m.removedepisode {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// EpisodeIDs returns the "episode" edge IDs in the mutation.
+func (m *SeriesMutation) EpisodeIDs() (ids []uuid.UUID) {
+	for id := range m.episode {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetEpisode resets all changes to the "episode" edge.
+func (m *SeriesMutation) ResetEpisode() {
+	m.episode = nil
+	m.clearedepisode = false
+	m.removedepisode = nil
+}
+
+// Where appends a list predicates to the SeriesMutation builder.
+func (m *SeriesMutation) Where(ps ...predicate.Series) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *SeriesMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Series).
+func (m *SeriesMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SeriesMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.create_time != nil {
+		fields = append(fields, series.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, series.FieldUpdateTime)
+	}
+	if m.title != nil {
+		fields = append(fields, series.FieldTitle)
+	}
+	if m.callSign != nil {
+		fields = append(fields, series.FieldCallSign)
+	}
+	if m.content != nil {
+		fields = append(fields, series.FieldContent)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SeriesMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case series.FieldCreateTime:
+		return m.CreateTime()
+	case series.FieldUpdateTime:
+		return m.UpdateTime()
+	case series.FieldTitle:
+		return m.Title()
+	case series.FieldCallSign:
+		return m.CallSign()
+	case series.FieldContent:
+		return m.Content()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SeriesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case series.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case series.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case series.FieldTitle:
+		return m.OldTitle(ctx)
+	case series.FieldCallSign:
+		return m.OldCallSign(ctx)
+	case series.FieldContent:
+		return m.OldContent(ctx)
+	}
+	return nil, fmt.Errorf("unknown Series field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SeriesMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case series.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case series.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case series.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case series.FieldCallSign:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCallSign(v)
+		return nil
+	case series.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Series field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SeriesMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SeriesMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SeriesMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Series numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SeriesMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(series.FieldCallSign) {
+		fields = append(fields, series.FieldCallSign)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SeriesMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SeriesMutation) ClearField(name string) error {
+	switch name {
+	case series.FieldCallSign:
+		m.ClearCallSign()
+		return nil
+	}
+	return fmt.Errorf("unknown Series nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SeriesMutation) ResetField(name string) error {
+	switch name {
+	case series.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case series.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case series.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case series.FieldCallSign:
+		m.ResetCallSign()
+		return nil
+	case series.FieldContent:
+		m.ResetContent()
+		return nil
+	}
+	return fmt.Errorf("unknown Series field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SeriesMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.profile != nil {
+		edges = append(edges, series.EdgeProfile)
+	}
+	if m.episode != nil {
+		edges = append(edges, series.EdgeEpisode)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SeriesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case series.EdgeProfile:
+		if id := m.profile; id != nil {
+			return []ent.Value{*id}
+		}
+	case series.EdgeEpisode:
+		ids := make([]ent.Value, 0, len(m.episode))
+		for id := range m.episode {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SeriesMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedepisode != nil {
+		edges = append(edges, series.EdgeEpisode)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SeriesMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case series.EdgeEpisode:
+		ids := make([]ent.Value, 0, len(m.removedepisode))
+		for id := range m.removedepisode {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SeriesMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedprofile {
+		edges = append(edges, series.EdgeProfile)
+	}
+	if m.clearedepisode {
+		edges = append(edges, series.EdgeEpisode)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SeriesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case series.EdgeProfile:
+		return m.clearedprofile
+	case series.EdgeEpisode:
+		return m.clearedepisode
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SeriesMutation) ClearEdge(name string) error {
+	switch name {
+	case series.EdgeProfile:
+		m.ClearProfile()
+		return nil
+	}
+	return fmt.Errorf("unknown Series unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SeriesMutation) ResetEdge(name string) error {
+	switch name {
+	case series.EdgeProfile:
+		m.ResetProfile()
+		return nil
+	case series.EdgeEpisode:
+		m.ResetEpisode()
+		return nil
+	}
+	return fmt.Errorf("unknown Series edge %s", name)
 }
 
 // TokenMutation represents an operation that mutates the Token nodes in the graph.

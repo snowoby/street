@@ -27,6 +27,7 @@ type hooks struct {
 	Account []ent.Hook
 	Episode []ent.Hook
 	Profile []ent.Hook
+	Series  []ent.Hook
 	Token   []ent.Hook
 }
 

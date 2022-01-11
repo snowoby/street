@@ -524,6 +524,34 @@ func HasProfileWith(preds ...predicate.Profile) predicate.Episode {
 	})
 }
 
+// HasSeries applies the HasEdge predicate on the "series" edge.
+func HasSeries() predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SeriesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, SeriesTable, SeriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSeriesWith applies the HasEdge predicate on the "series" edge with a given conditions (other predicates).
+func HasSeriesWith(preds ...predicate.Series) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SeriesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, SeriesTable, SeriesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Episode) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {

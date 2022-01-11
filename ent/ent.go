@@ -8,6 +8,7 @@ import (
 	"street/ent/account"
 	"street/ent/episode"
 	"street/ent/profile"
+	"street/ent/series"
 	"street/ent/token"
 
 	"entgo.io/ent"
@@ -35,6 +36,7 @@ func columnChecker(table string) func(string) error {
 		account.Table: account.ValidColumn,
 		episode.Table: episode.ValidColumn,
 		profile.Table: profile.ValidColumn,
+		series.Table:  series.ValidColumn,
 		token.Table:   token.ValidColumn,
 	}
 	check, ok := checks[table]
@@ -158,7 +160,7 @@ func (e *ValidationError) Error() string {
 	return e.err.Error()
 }
 
-// Unwrap implements the errs.Wrapper interface.
+// Unwrap implements the errors.Wrapper interface.
 func (e *ValidationError) Unwrap() error {
 	return e.err
 }
@@ -250,7 +252,7 @@ func (e ConstraintError) Error() string {
 	return "ent: constraint failed: " + e.msg
 }
 
-// Unwrap implements the errs.Wrapper interface.
+// Unwrap implements the errors.Wrapper interface.
 func (e *ConstraintError) Unwrap() error {
 	return e.wrap
 }

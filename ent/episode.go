@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"street/ent/episode"
 	"street/ent/profile"
+	"street/ent/series"
 	"strings"
 	"time"
 
@@ -30,15 +31,18 @@ type Episode struct {
 	// The values are being populated by the EpisodeQuery when eager-loading is set.
 	Edges           EpisodeEdges `json:"edges"`
 	profile_episode *uuid.UUID
+	series_episode  *uuid.UUID
 }
 
 // EpisodeEdges holds the relations/edges for other nodes in the graph.
 type EpisodeEdges struct {
 	// Profile holds the value of the profile edge.
 	Profile *Profile `json:"profile,omitempty"`
+	// Series holds the value of the series edge.
+	Series *Series `json:"series,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // ProfileOrErr returns the Profile value or an error if the edge
@@ -55,6 +59,20 @@ func (e EpisodeEdges) ProfileOrErr() (*Profile, error) {
 	return nil, &NotLoadedError{edge: "profile"}
 }
 
+// SeriesOrErr returns the Series value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e EpisodeEdges) SeriesOrErr() (*Series, error) {
+	if e.loadedTypes[1] {
+		if e.Series == nil {
+			// The edge series was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: series.Label}
+		}
+		return e.Series, nil
+	}
+	return nil, &NotLoadedError{edge: "series"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Episode) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -67,6 +85,8 @@ func (*Episode) scanValues(columns []string) ([]interface{}, error) {
 		case episode.FieldID:
 			values[i] = new(uuid.UUID)
 		case episode.ForeignKeys[0]: // profile_episode
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case episode.ForeignKeys[1]: // series_episode
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Episode", columns[i])
@@ -120,6 +140,13 @@ func (e *Episode) assignValues(columns []string, values []interface{}) error {
 				e.profile_episode = new(uuid.UUID)
 				*e.profile_episode = *value.S.(*uuid.UUID)
 			}
+		case episode.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field series_episode", values[i])
+			} else if value.Valid {
+				e.series_episode = new(uuid.UUID)
+				*e.series_episode = *value.S.(*uuid.UUID)
+			}
 		}
 	}
 	return nil
@@ -128,6 +155,11 @@ func (e *Episode) assignValues(columns []string, values []interface{}) error {
 // QueryProfile queries the "profile" edge of the Episode entity.
 func (e *Episode) QueryProfile() *ProfileQuery {
 	return (&EpisodeClient{config: e.config}).QueryProfile(e)
+}
+
+// QuerySeries queries the "series" edge of the Episode entity.
+func (e *Episode) QuerySeries() *SeriesQuery {
+	return (&EpisodeClient{config: e.config}).QuerySeries(e)
 }
 
 // Update returns a builder for updating this Episode.

@@ -31,5 +31,6 @@ func (Episode) Mixin() []ent.Mixin {
 func (Episode) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("profile", Profile.Type).Ref("episode").Required().Unique(),
+		edge.From("series", Series.Type).Ref("episode").Unique(),
 	}
 }

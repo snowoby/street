@@ -47,6 +47,19 @@ func (f ProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The SeriesFunc type is an adapter to allow the use of ordinary
+// function as Series mutator.
+type SeriesFunc func(context.Context, *ent.SeriesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SeriesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SeriesMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SeriesMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The TokenFunc type is an adapter to allow the use of ordinary
 // function as Token mutator.
 type TokenFunc func(context.Context, *ent.TokenMutation) (ent.Value, error)

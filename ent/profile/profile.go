@@ -27,6 +27,8 @@ const (
 	EdgeAccount = "account"
 	// EdgeEpisode holds the string denoting the episode edge name in mutations.
 	EdgeEpisode = "episode"
+	// EdgeSeries holds the string denoting the series edge name in mutations.
+	EdgeSeries = "series"
 	// Table holds the table name of the profile in the database.
 	Table = "profiles"
 	// AccountTable is the table that holds the account relation/edge.
@@ -43,6 +45,13 @@ const (
 	EpisodeInverseTable = "episodes"
 	// EpisodeColumn is the table column denoting the episode relation/edge.
 	EpisodeColumn = "profile_episode"
+	// SeriesTable is the table that holds the series relation/edge.
+	SeriesTable = "series"
+	// SeriesInverseTable is the table name for the Series entity.
+	// It exists in this package in order to avoid circular dependency with the "series" package.
+	SeriesInverseTable = "series"
+	// SeriesColumn is the table column denoting the series relation/edge.
+	SeriesColumn = "profile_series"
 )
 
 // Columns holds all SQL columns for profile fields.
