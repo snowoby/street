@@ -3,8 +3,8 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"street/db"
-	"street/db/value"
+	"street/data"
+	"street/data/value"
 	"street/ent"
 	"street/errs"
 	"street/utils"
@@ -15,7 +15,7 @@ type Token struct {
 	Token string `header:"Authorization" binding:"required"`
 }
 
-func RefreshToken(ctx *gin.Context, s *db.Store) {
+func RefreshToken(ctx *gin.Context, s *data.Store) {
 	rt, err := cookieTokenValidate(ctx, s, value.StringRefreshToken)
 	if err != nil {
 		return
@@ -29,7 +29,7 @@ func RefreshToken(ctx *gin.Context, s *db.Store) {
 
 }
 
-func cookieTokenValidate(ctx *gin.Context, store *db.Store, tokenType string) (*ent.Token, error) {
+func cookieTokenValidate(ctx *gin.Context, store *data.Store, tokenType string) (*ent.Token, error) {
 	tokenBody, err := ctx.Cookie(tokenType)
 	if err != nil {
 		ctx.JSON(errs.TokenNotExistsError.Code, errs.TokenNotExistsError)

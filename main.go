@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"street/account"
-	"street/db"
+	"street/data"
 	"street/ent"
 	"street/handler"
 	"street/middleware"
@@ -19,7 +19,7 @@ func storeSetup() handler.Handler {
 	}
 
 	client.Schema.Create(context.Background())
-	store := db.New(client)
+	store := data.New(client)
 	h := handler.New(store)
 	return h
 }

@@ -4,14 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/db"
-	"street/db/value"
+	"street/data"
+	"street/data/value"
 	"street/ent"
 	"street/errs"
 	"street/utils"
 )
 
-func MustRefresh(ctx *gin.Context, store *db.Store) {
+func MustRefresh(ctx *gin.Context, store *data.Store) {
 	tokenType := value.StringRefreshToken
 	t := tryToken(ctx, store, tokenType)
 	if t == nil {
@@ -31,7 +31,7 @@ func MustRefresh(ctx *gin.Context, store *db.Store) {
 	ctx.JSON(http.StatusCreated, t)
 }
 
-func TryAccessToken(ctx *gin.Context, store *db.Store) {
+func TryAccessToken(ctx *gin.Context, store *data.Store) {
 	t := tryToken(ctx, store, value.StringAccessToken)
 	if t != nil {
 		ctx.Set(value.StringAccount, t.Edges.Account)
@@ -41,7 +41,7 @@ func TryAccessToken(ctx *gin.Context, store *db.Store) {
 	ctx.Next()
 }
 
-func tryToken(ctx *gin.Context, store *db.Store, tokenType string) *ent.Token {
+func tryToken(ctx *gin.Context, store *data.Store, tokenType string) *ent.Token {
 	var token Token
 	err := ctx.ShouldBindHeader(&token)
 	if err == nil {
@@ -62,7 +62,7 @@ type ID struct {
 	ID uuid.UUID `binding:"uuid" header:"Profile"`
 }
 
-func TryProfile(ctx *gin.Context, store *db.Store) {
+func TryProfile(ctx *gin.Context, store *data.Store) {
 	var id ID
 	err := ctx.ShouldBindHeader(&id)
 	if err == nil {
@@ -80,7 +80,7 @@ func TryProfile(ctx *gin.Context, store *db.Store) {
 	ctx.Next()
 }
 
-func MustLogin(ctx *gin.Context, store *db.Store) {
+func MustLogin(ctx *gin.Context, store *data.Store) {
 	_, ok := ctx.Get(value.StringAccount)
 	if !ok {
 		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, errs.UnauthorizedError)
@@ -91,7 +91,7 @@ func MustLogin(ctx *gin.Context, store *db.Store) {
 
 }
 
-func MustProfile(ctx *gin.Context, store *db.Store) {
+func MustProfile(ctx *gin.Context, store *data.Store) {
 	_, ok := ctx.Get(value.StringProfile)
 	if !ok {
 		ctx.AbortWithStatusJSON(errs.ProfileIdentityError.Code, errs.ProfileIdentityError)

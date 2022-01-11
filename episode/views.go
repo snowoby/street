@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/db"
-	"street/db/value"
+	"street/data"
+	"street/data/value"
 	"street/ent"
 	"street/errs"
 	"street/utils"
@@ -20,7 +20,7 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func createEpisode(ctx *gin.Context, store *db.Store) {
+func createEpisode(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 
 	var episode Episode
@@ -39,7 +39,7 @@ func createEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func updateEpisode(ctx *gin.Context, store *db.Store) {
+func updateEpisode(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
@@ -69,7 +69,7 @@ func updateEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func getEpisode(ctx *gin.Context, store *db.Store) {
+func getEpisode(ctx *gin.Context, store *data.Store) {
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
 		return
@@ -86,7 +86,7 @@ func getEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func deleteEpisode(ctx *gin.Context, store *db.Store) {
+func deleteEpisode(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
@@ -108,7 +108,7 @@ func deleteEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func episodeMustBelong(ctx *gin.Context, store *db.Store, profileID, episodeID uuid.UUID) bool {
+func episodeMustBelong(ctx *gin.Context, store *data.Store, profileID, episodeID uuid.UUID) bool {
 	belongs, err := store.EpisodeBelongs(ctx, profileID, episodeID)
 	if err != nil {
 		e := errs.DatabaseError(err)

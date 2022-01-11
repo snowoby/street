@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/db"
-	"street/db/value"
+	"street/data"
+	"street/data/value"
 	"street/ent"
 	"street/errs"
 	"street/utils"
@@ -26,7 +26,7 @@ type PublicResponse struct {
 	Password *struct{} `json:"password,omitempty"`
 }
 
-func register(ctx *gin.Context, store *db.Store) {
+func register(ctx *gin.Context, store *data.Store) {
 	var register EmailPassword
 	if !utils.MustBindJSON(ctx, &register) {
 		return
@@ -68,7 +68,7 @@ func register(ctx *gin.Context, store *db.Store) {
 
 }
 
-func login(ctx *gin.Context, store *db.Store) {
+func login(ctx *gin.Context, store *data.Store) {
 	var login EmailPassword
 	if !utils.MustBindJSON(ctx, &login) {
 		return
@@ -97,7 +97,7 @@ func login(ctx *gin.Context, store *db.Store) {
 	//ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 }
 
-func info(ctx *gin.Context, s *db.Store) {
+func info(ctx *gin.Context, s *data.Store) {
 	account := ctx.MustGet(value.StringAccount).(*ent.Account)
 	ctx.JSON(http.StatusOK, account)
 }

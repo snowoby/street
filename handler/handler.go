@@ -2,13 +2,13 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"street/db"
+	"street/data"
 )
 
-type F func(ctx *gin.Context, store *db.Store)
+type F func(ctx *gin.Context, store *data.Store)
 
 type handler struct {
-	store *db.Store
+	store *data.Store
 }
 
 type Handler interface {
@@ -16,7 +16,7 @@ type Handler interface {
 	P(f F) gin.HandlerFunc
 }
 
-func New(store *db.Store) *handler {
+func New(store *data.Store) *handler {
 	return &handler{store: store}
 }
 

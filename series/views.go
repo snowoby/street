@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/db"
-	"street/db/value"
+	"street/data"
+	"street/data/value"
 	"street/ent"
 	"street/errs"
 	"street/utils"
@@ -20,7 +20,7 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func create(ctx *gin.Context, store *db.Store) {
+func create(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 
 	var series TitleContent
@@ -39,7 +39,7 @@ func create(ctx *gin.Context, store *db.Store) {
 
 }
 
-func update(ctx *gin.Context, store *db.Store) {
+func update(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
@@ -69,7 +69,7 @@ func update(ctx *gin.Context, store *db.Store) {
 
 }
 
-func get(ctx *gin.Context, store *db.Store) {
+func get(ctx *gin.Context, store *data.Store) {
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
 		return
@@ -86,7 +86,7 @@ func get(ctx *gin.Context, store *db.Store) {
 
 }
 
-func del(ctx *gin.Context, store *db.Store) {
+func del(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
@@ -108,7 +108,7 @@ func del(ctx *gin.Context, store *db.Store) {
 
 }
 
-func seriesMustBelong(ctx *gin.Context, store *db.Store, profileID, seriesID uuid.UUID) bool {
+func seriesMustBelong(ctx *gin.Context, store *data.Store, profileID, seriesID uuid.UUID) bool {
 	belongs, err := store.SeriesBelongs(ctx, profileID, seriesID)
 	if err != nil {
 		e := errs.DatabaseError(err)

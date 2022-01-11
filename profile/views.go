@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/db"
-	"street/db/value"
+	"street/data"
+	"street/data/value"
 	"street/ent"
 	"street/errs"
 	"street/utils"
@@ -25,7 +25,7 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func createProfile(ctx *gin.Context, store *db.Store) {
+func createProfile(ctx *gin.Context, store *data.Store) {
 	account := ctx.MustGet(value.StringAccount).(*ent.Account)
 	var profile Profile
 	if !utils.MustBindJSON(ctx, &profile) {
@@ -52,7 +52,7 @@ func createProfile(ctx *gin.Context, store *db.Store) {
 	ctx.JSON(http.StatusCreated, p)
 }
 
-func updateProfile(ctx *gin.Context, store *db.Store) {
+func updateProfile(ctx *gin.Context, store *data.Store) {
 	var id ID
 	if !utils.MustBindUri(ctx, &id) {
 		return
@@ -73,7 +73,7 @@ func updateProfile(ctx *gin.Context, store *db.Store) {
 
 }
 
-func getProfile(ctx *gin.Context, store *db.Store) {
+func getProfile(ctx *gin.Context, store *data.Store) {
 	var id ID
 	if !utils.MustBindUri(ctx, &id) {
 		return
@@ -87,7 +87,7 @@ func getProfile(ctx *gin.Context, store *db.Store) {
 	ctx.JSON(http.StatusOK, ps)
 }
 
-func accountProfiles(ctx *gin.Context, store *db.Store) {
+func accountProfiles(ctx *gin.Context, store *data.Store) {
 	account := ctx.MustGet(value.StringAccount).(*ent.Account)
 
 	ps, err := store.FindProfilesByAccountID(ctx, account.ID)
