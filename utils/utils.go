@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"github.com/alexedwards/argon2id"
 	"math/big"
+	"street/ent"
+	"time"
 )
 
 func HashPassword(password string) (string, error) {
@@ -47,4 +49,14 @@ func Encrypt(rawPassword string) (string, error) {
 
 func Validate(rawPassword string, recordPassword string) bool {
 	return CheckPassword(rawPassword, recordPassword)
+}
+
+func TokenIsValid(token *ent.Token) bool {
+	if token == nil {
+		return false
+	}
+	if token.ExpireTime.Before(time.Now()) {
+		return false
+	}
+	return true
 }

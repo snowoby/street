@@ -7,7 +7,7 @@ import (
 	"street/db"
 	"street/db/value"
 	"street/ent"
-	"street/errors"
+	"street/errs"
 	"street/utils"
 )
 
@@ -30,7 +30,7 @@ func createEpisode(ctx *gin.Context, store *db.Store) {
 
 	ep, err := store.CreateEpisode(ctx, episode.Title, episode.Content, profile.ID)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
@@ -49,7 +49,7 @@ func updateEpisode(ctx *gin.Context, store *db.Store) {
 	var episode Episode
 	err := ctx.ShouldBindJSON(&episode)
 	if err != nil {
-		e := errors.BindingError(err)
+		e := errs.BindingError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
@@ -60,7 +60,7 @@ func updateEpisode(ctx *gin.Context, store *db.Store) {
 
 	ep, err := store.UpdateEpisode(ctx, id.ID, episode.Title, episode.Content)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
@@ -77,7 +77,7 @@ func getEpisode(ctx *gin.Context, store *db.Store) {
 
 	ep, err := store.FindEpisode(ctx, id.ID)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
@@ -99,7 +99,7 @@ func deleteEpisode(ctx *gin.Context, store *db.Store) {
 
 	err := store.DeleteEpisode(ctx, id.ID)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
@@ -111,13 +111,13 @@ func deleteEpisode(ctx *gin.Context, store *db.Store) {
 func episodeBelongs(ctx *gin.Context, store *db.Store, profileID, episodeID uuid.UUID) bool {
 	belongs, err := store.EpisodeBelongs(ctx, profileID, episodeID)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 		return false
 	}
 
 	if !belongs {
-		ctx.JSON(errors.NotBelongsToOperator.Code, errors.NotBelongsToOperator)
+		ctx.JSON(errs.NotBelongsToOperator.Code, errs.NotBelongsToOperator)
 		return false
 	}
 	return true

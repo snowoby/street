@@ -6,22 +6,13 @@ import (
 	"street/db"
 	"street/db/value"
 	"street/ent"
-	"street/errors"
+	"street/errs"
 	"street/utils"
 	"time"
 )
 
-func AccessToken(ctx *gin.Context, s *db.Store) {
-	at, err := cookieTokenValidate(ctx, s, value.StringAccessToken)
-	if err != nil {
-		return
-	}
-
-	ctx.Set(value.StringAccount, at.Edges.Account)
-	ctx.Set(value.StringAccessToken, at)
-	ctx.Next()
-	return
-
+type Token struct {
+	Token string `header:"Authorization" binding:"required"`
 }
 
 func RefreshToken(ctx *gin.Context, s *db.Store) {
@@ -41,19 +32,19 @@ func RefreshToken(ctx *gin.Context, s *db.Store) {
 func cookieTokenValidate(ctx *gin.Context, store *db.Store, tokenType string) (*ent.Token, error) {
 	tokenBody, err := ctx.Cookie(tokenType)
 	if err != nil {
-		ctx.JSON(errors.TokenNotExistsError.Code, errors.TokenNotExistsError)
+		ctx.JSON(errs.TokenNotExistsError.Code, errs.TokenNotExistsError)
 		return nil, err
 	}
 
 	t, err := store.FindToken(ctx, tokenBody, tokenType, true)
 	if err != nil {
-		databaseError := errors.DatabaseError(err)
+		databaseError := errs.DatabaseError(err)
 		ctx.JSON(databaseError.Code, databaseError)
 		return nil, err
 	}
 
 	if t.ExpireTime.Before(time.Now()) {
-		ctx.JSON(errors.TokenExpiredError.Code, errors.TokenExpiredError)
+		ctx.JSON(errs.TokenExpiredError.Code, errs.TokenExpiredError)
 		return nil, err
 	}
 

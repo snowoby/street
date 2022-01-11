@@ -27,13 +27,15 @@ func storeSetup() handler.Handler {
 func setup() *gin.Engine {
 	r := gin.Default()
 	h := storeSetup()
+	r.POST("/refresh", h.P(middleware.MustRefresh))
+	r.Use(h.P(middleware.TryAccessToken), h.P(middleware.TryProfile))
+
 	g := r.Group("/account")
 	account.Routers(g, h)
 
 	g = r.Group("/profile")
-	profile.PublicRouters(g, h)
-	g.Use(h.P(middleware.AccessToken))
 	profile.Routers(g, h)
+
 	return r
 }
 

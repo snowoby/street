@@ -7,9 +7,8 @@ import (
 	"street/db"
 	"street/db/value"
 	"street/ent"
-	"street/errors"
+	"street/errs"
 	"street/utils"
-	"time"
 )
 
 type ID struct {
@@ -34,30 +33,30 @@ func register(ctx *gin.Context, store *db.Store) {
 	}
 
 	if err := utils.StrongPassword(register.Password); err != nil {
-		ctx.JSON(errors.WeakPasswordError.Code, errors.WeakPasswordError)
+		ctx.JSON(errs.WeakPasswordError.Code, errs.WeakPasswordError)
 		return
 	}
 
 	exists, err := store.EmailExists(ctx, register.Email)
 	if err != nil {
-		databaseError := errors.DatabaseError(err)
+		databaseError := errs.DatabaseError(err)
 		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
 
 	if exists {
-		ctx.JSON(errors.DuplicateEmailError.Code, errors.DuplicateEmailError)
+		ctx.JSON(errs.DuplicateEmailError.Code, errs.DuplicateEmailError)
 		return
 	}
 
 	encryptedPassword, err := utils.Encrypt(register.Password)
 	if err != nil {
-		ctx.JSON(errors.PasswordHashError.Code, errors.PasswordHashError)
+		ctx.JSON(errs.PasswordHashError.Code, errs.PasswordHashError)
 	}
 
 	user, err := store.CreateAccount(ctx, register.Email, encryptedPassword)
 	if err != nil {
-		databaseError := errors.DatabaseError(err)
+		databaseError := errs.DatabaseError(err)
 		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
@@ -77,25 +76,25 @@ func login(ctx *gin.Context, store *db.Store) {
 
 	account, err := store.FindAccount(ctx, login.Email)
 	if err != nil {
-		databaseError := errors.DatabaseError(err)
+		databaseError := errs.DatabaseError(err)
 		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
 
 	if !utils.Validate(login.Password, account.Password) {
-		ctx.JSON(errors.RecordNotMatchError.Code, errors.RecordNotMatchError)
+		ctx.JSON(errs.RecordNotMatchError.Code, errs.RecordNotMatchError)
 		return
 	}
 
 	tokenBody := utils.RandomString(128)
 	t, err := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
-		databaseError := errors.DatabaseError(err)
+		databaseError := errs.DatabaseError(err)
 		ctx.JSON(databaseError.Code, databaseError)
 		return
 	}
-	ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusCreated, t)
+	//ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 }
 
 func info(ctx *gin.Context, s *db.Store) {

@@ -7,7 +7,7 @@ import (
 	"street/db"
 	"street/db/value"
 	"street/ent"
-	"street/errors"
+	"street/errs"
 	"street/utils"
 )
 
@@ -34,19 +34,19 @@ func createProfile(ctx *gin.Context, store *db.Store) {
 
 	exists, err := store.CallSignExists(ctx, profile.CallSign.CallSign)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
 
 	if exists {
-		ctx.JSON(errors.CallSignDuplicateError.Code, errors.CallSignDuplicateError)
+		ctx.JSON(errs.CallSignDuplicateError.Code, errs.CallSignDuplicateError)
 		return
 	}
 
 	p, err := store.CreateProfile(ctx, profile.CallSign.CallSign, profile.Title, profile.Category, account.ID)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 	}
 	ctx.JSON(http.StatusCreated, p)
@@ -65,7 +65,7 @@ func updateProfile(ctx *gin.Context, store *db.Store) {
 
 	p, err := store.UpdateProfile(ctx, id.ID, profile.Title, profile.CallSign.CallSign, profile.Category)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 	}
 
@@ -81,7 +81,7 @@ func getProfile(ctx *gin.Context, store *db.Store) {
 
 	ps, err := store.FindProfileByID(ctx, id.ID)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 	}
 	ctx.JSON(http.StatusOK, ps)
@@ -92,7 +92,7 @@ func accountProfiles(ctx *gin.Context, store *db.Store) {
 
 	ps, err := store.FindProfilesByAccountID(ctx, account.ID)
 	if err != nil {
-		e := errors.DatabaseError(err)
+		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
 	}
 	ctx.JSON(http.StatusOK, ps)

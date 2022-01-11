@@ -25,11 +25,11 @@ func (s *db) EmailExists(ctx context.Context, email string) (bool, error) {
 }
 
 func (s *db) FindToken(ctx context.Context, tokenBody, t string, validOnly bool) (*ent.Token, error) {
-	query := s.client.Token.Query().Where(token.Body(tokenBody)).Where(token.Type(t)).WithAccount()
+	query := s.client.Token.Query().Where(token.Body(tokenBody)).Where(token.Type(t))
 	if validOnly {
 		query = query.Where(token.ExpireTimeGT(time.Now()))
 	}
-	return s.client.Token.Query().Where(token.Body(tokenBody)).WithAccount().Only(ctx)
+	return query.WithAccount().Only(ctx)
 }
 
 func (s *db) CreateToken(ctx context.Context, accountID uuid.UUID, tokenBody, tokenType string, lifelong time.Duration) (*ent.Token, error) {
