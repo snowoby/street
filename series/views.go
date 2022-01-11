@@ -11,7 +11,7 @@ import (
 	"street/utils"
 )
 
-type Episode struct {
+type TitleContent struct {
 	Title   string `json:"title" binding:"required"`
 	Content string `json:"content"`
 }
@@ -20,15 +20,15 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func createEpisode(ctx *gin.Context, store *db.Store) {
+func create(ctx *gin.Context, store *db.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 
-	var episode Episode
-	if !utils.MustBindJSON(ctx, episode) {
+	var series TitleContent
+	if !utils.MustBindJSON(ctx, series) {
 		return
 	}
 
-	ep, err := store.CreateEpisode(ctx, episode.Title, episode.Content, profile.ID)
+	ep, err := store.CreateSeries(ctx, series.Title, series.Content, profile.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -39,26 +39,26 @@ func createEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func updateEpisode(ctx *gin.Context, store *db.Store) {
+func update(ctx *gin.Context, store *db.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
 		return
 	}
 
-	var episode Episode
-	err := ctx.ShouldBindJSON(&episode)
+	var series TitleContent
+	err := ctx.ShouldBindJSON(&series)
 	if err != nil {
 		e := errs.BindingError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
 
-	if !episodeMustBelong(ctx, store, profile.ID, id.ID) {
+	if !seriesMustBelong(ctx, store, profile.ID, id.ID) {
 		return
 	}
 
-	ep, err := store.UpdateEpisode(ctx, id.ID, episode.Title, episode.Content)
+	ep, err := store.UpdateSeries(ctx, id.ID, series.Title, series.Content)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -69,13 +69,13 @@ func updateEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func getEpisode(ctx *gin.Context, store *db.Store) {
+func get(ctx *gin.Context, store *db.Store) {
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
 		return
 	}
 
-	ep, err := store.FindEpisode(ctx, id.ID)
+	ep, err := store.FindSeriesByID(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -86,18 +86,18 @@ func getEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func deleteEpisode(ctx *gin.Context, store *db.Store) {
+func del(ctx *gin.Context, store *db.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
 		return
 	}
 
-	if !episodeMustBelong(ctx, store, profile.ID, id.ID) {
+	if !seriesMustBelong(ctx, store, profile.ID, id.ID) {
 		return
 	}
 
-	err := store.DeleteEpisode(ctx, id.ID)
+	err := store.DeleteSeries(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -108,8 +108,8 @@ func deleteEpisode(ctx *gin.Context, store *db.Store) {
 
 }
 
-func episodeMustBelong(ctx *gin.Context, store *db.Store, profileID, episodeID uuid.UUID) bool {
-	belongs, err := store.EpisodeBelongs(ctx, profileID, episodeID)
+func seriesMustBelong(ctx *gin.Context, store *db.Store, profileID, seriesID uuid.UUID) bool {
+	belongs, err := store.SeriesBelongs(ctx, profileID, seriesID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)

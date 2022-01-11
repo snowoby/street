@@ -16,6 +16,9 @@ func (s *db) CreateSeries(ctx context.Context, title, cleanContent string, profi
 func (s *db) FindSeries(ctx context.Context, callSign string) (*ent.Series, error) {
 	return s.client.Series.Query().Where(series.CallSign(callSign)).WithProfile().Only(ctx)
 }
+func (s *db) FindSeriesByID(ctx context.Context, id uuid.UUID) (*ent.Series, error) {
+	return s.client.Series.Query().Where(series.ID(id)).WithProfile().Only(ctx)
+}
 
 func (s *db) UpdateSeries(ctx context.Context, seriesID uuid.UUID, title, cleanContent string) (*ent.Series, error) {
 	return s.client.Series.UpdateOneID(seriesID).SetTitle(title).SetContent(cleanContent).Save(ctx)
