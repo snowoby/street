@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
 	"street/data"
 	"street/data/value"
@@ -56,10 +55,6 @@ func tryToken(ctx *gin.Context, store *data.Store, tokenType string) *ent.Token 
 		}
 	}
 	return nil
-}
-
-type ID struct {
-	ID uuid.UUID `binding:"uuid" header:"Profile"`
 }
 
 func TryProfile(ctx *gin.Context, store *data.Store) {

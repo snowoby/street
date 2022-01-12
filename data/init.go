@@ -12,8 +12,9 @@ type config struct {
 }
 type Store struct {
 	*db
-	config
+	*config
 	*series
+	*episode
 }
 
 type db struct {
@@ -23,12 +24,13 @@ type db struct {
 func New(client *ent.Client) *Store {
 	return &Store{
 		&db{client},
-		config{
+		&config{
 			//TODO config
 			RefreshTokenExpireTime: time.Hour * 24 * 7 * 4,
 			AccessTokenExpireTime:  time.Hour,
 		},
 		&series{client.Series},
+		&episode{client.Episode},
 	}
 }
 
@@ -36,10 +38,14 @@ func (s *Store) DB() *db {
 	return s.db
 }
 
-func (s *Store) Config() config {
+func (s *Store) Config() *config {
 	return s.config
 }
 
 func (s *Store) Series() *series {
 	return s.series
+}
+
+func (s *Store) Episode() *episode {
+	return s.episode
 }

@@ -10,6 +10,12 @@ type HTTPError struct {
 	Message string `json:"message"`
 }
 
+type ResponseError interface {
+	Code() int
+	Error() string
+	Message() string
+}
+
 func (e HTTPError) Error() string {
 	return e.Message
 }
@@ -42,3 +48,7 @@ func DatabaseError(err error) HTTPError {
 		Message: err.Error(),
 	}
 }
+
+var (
+	NotFoundError = HTTPError{Code: http.StatusNotFound, Message: "not found"}
+)

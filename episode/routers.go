@@ -7,9 +7,9 @@ import (
 )
 
 func Routers(group *gin.RouterGroup, h handler.Handler) {
-	group.GET("/:id", h.P(getEpisode))
+	group.GET("/:id", h.P(get))
 	group.Use(h.P(middleware.MustProfile))
-	group.POST("/", h.P(createEpisode))
-	group.PUT("/:id", h.P(updateEpisode))
-	group.DELETE("/:id", h.P(deleteEpisode))
+	group.POST("/", h.P(create))
+	group.PUT("/:id", h.P(update))
+	group.DELETE("/:id", h.P(del))
 }

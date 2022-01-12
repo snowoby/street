@@ -20,7 +20,7 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func createEpisode(ctx *gin.Context, store *data.Store) {
+func create(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 
 	var episode Episode
@@ -28,7 +28,7 @@ func createEpisode(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	ep, err := store.CreateEpisode(ctx, episode.Title, episode.Content, profile.ID)
+	ep, err := store.Episode().Create(ctx, episode.Title, episode.Content, profile.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -39,7 +39,7 @@ func createEpisode(ctx *gin.Context, store *data.Store) {
 
 }
 
-func updateEpisode(ctx *gin.Context, store *data.Store) {
+func update(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
@@ -58,7 +58,7 @@ func updateEpisode(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	ep, err := store.UpdateEpisode(ctx, id.ID, episode.Title, episode.Content)
+	ep, err := store.Episode().Update(ctx, id.ID, episode.Title, episode.Content)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -69,13 +69,13 @@ func updateEpisode(ctx *gin.Context, store *data.Store) {
 
 }
 
-func getEpisode(ctx *gin.Context, store *data.Store) {
+func get(ctx *gin.Context, store *data.Store) {
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
 		return
 	}
 
-	ep, err := store.FindEpisode(ctx, id.ID)
+	ep, err := store.Episode().FindByID(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -86,7 +86,7 @@ func getEpisode(ctx *gin.Context, store *data.Store) {
 
 }
 
-func deleteEpisode(ctx *gin.Context, store *data.Store) {
+func del(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 	var id ID
 	if !utils.MustBindUri(ctx, id) {
@@ -97,7 +97,7 @@ func deleteEpisode(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	err := store.DeleteEpisode(ctx, id.ID)
+	err := store.Episode().Delete(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -109,7 +109,7 @@ func deleteEpisode(ctx *gin.Context, store *data.Store) {
 }
 
 func episodeMustBelong(ctx *gin.Context, store *data.Store, profileID, episodeID uuid.UUID) bool {
-	belongs, err := store.EpisodeBelongs(ctx, profileID, episodeID)
+	belongs, err := store.Episode().IsOwner(ctx, profileID, episodeID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
