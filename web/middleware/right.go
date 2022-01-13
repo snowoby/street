@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"street/data"
-	"street/data/value"
 	"street/ent"
 	"street/errs"
-	"street/utils"
+	"street/pkg/data"
+	"street/pkg/data/value"
+	"street/pkg/utils"
 )
 
 func MustBeOwner(ctx *gin.Context, owner data.Owner) {

@@ -6,8 +6,8 @@ import (
 )
 
 type HTTPError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	code    int    `json:"code"`
+	message string `json:"message"`
 }
 
 type ResponseError interface {
@@ -16,21 +16,29 @@ type ResponseError interface {
 	Message() string
 }
 
+func (e HTTPError) Code() int {
+	return e.code
+}
+
+func (e HTTPError) Message() string {
+	return e.message
+}
+
 func (e HTTPError) Error() string {
-	return e.Message
+	return e.message
 }
 
 func BindingError(err error) HTTPError {
 	return HTTPError{
-		Code:    http.StatusBadRequest,
-		Message: err.Error(),
+		code:    http.StatusBadRequest,
+		message: err.Error(),
 	}
 }
 
 func WTF(info string) HTTPError {
 	return HTTPError{
-		Code:    http.StatusBadRequest,
-		Message: info,
+		code:    http.StatusBadRequest,
+		message: info,
 	}
 }
 
@@ -44,11 +52,16 @@ func DatabaseError(err error) HTTPError {
 	}
 
 	return HTTPError{
-		Code:    code,
-		Message: err.Error(),
+		code:    code,
+		message: err.Error(),
 	}
 }
 
+func Detect(err error) HTTPError {
+	// TODO
+	return HTTPError{}
+}
+
 var (
-	NotFoundError = HTTPError{Code: http.StatusNotFound, Message: "not found"}
+	NotFoundError = HTTPError{code: http.StatusNotFound, message: "not found"}
 )

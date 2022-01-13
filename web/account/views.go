@@ -4,11 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/data"
-	"street/data/value"
-	"street/ent"
 	"street/errs"
-	"street/utils"
+	"street/pkg/controller"
+	"street/pkg/data"
+	"street/pkg/data/value"
+	"street/pkg/utils"
 )
 
 type ID struct {
@@ -26,18 +26,18 @@ type PublicResponse struct {
 	Password *struct{} `json:"password,omitempty"`
 }
 
-func register(ctx *gin.Context, store *data.Store) {
+func register(ctx *gin.Context, store *data.Store) (code int, responseData interface{}, err errs.ResponseError) {
 	var register EmailPassword
-	if !utils.MustBindJSON(ctx, &register) {
-		return
+	e := ctx.ShouldBindJSON(&register)
+	if err != nil {
+		return code, responseData, errs.BindingError(e)
 	}
 
 	if err := utils.StrongPassword(register.Password); err != nil {
-		ctx.JSON(errs.WeakPasswordError.Code, errs.WeakPasswordError)
-		return
+		return code, responseData, errs.WeakPasswordError
 	}
 
-	exists, err := store.EmailExists(ctx, register.Email)
+	exists, e := store.EmailExists(ctx, register.Email)
 	if err != nil {
 		databaseError := errs.DatabaseError(err)
 		ctx.JSON(databaseError.Code, databaseError)
@@ -49,7 +49,7 @@ func register(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	encryptedPassword, err := utils.Encrypt(register.Password)
+	encryptedPassword, err := utils2.Encrypt(register.Password)
 	if err != nil {
 		ctx.JSON(errs.PasswordHashError.Code, errs.PasswordHashError)
 	}
@@ -68,36 +68,32 @@ func register(ctx *gin.Context, store *data.Store) {
 
 }
 
-func login(ctx *gin.Context, store *data.Store) {
+func login(ctx *gin.Context, store *data.Store) (code int, responseData interface{}, err errs.ResponseError) {
 	var login EmailPassword
-	if !utils.MustBindJSON(ctx, &login) {
-		return
+	e := ctx.ShouldBindJSON(&login)
+	if err != nil {
+		return code, responseData, errs.BindingError(e)
 	}
 
-	account, err := store.FindAccount(ctx, login.Email)
+	account, e := store.FindAccount(ctx, login.Email)
 	if err != nil {
-		databaseError := errs.DatabaseError(err)
-		ctx.JSON(databaseError.Code, databaseError)
-		return
+		return code, responseData, errs.DatabaseError(e)
 	}
 
 	if !utils.Validate(login.Password, account.Password) {
-		ctx.JSON(errs.RecordNotMatchError.Code, errs.RecordNotMatchError)
-		return
+		return code, responseData, errs.RecordNotMatchError
 	}
 
 	tokenBody := utils.RandomString(128)
-	t, err := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
+	t, e := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
-		databaseError := errs.DatabaseError(err)
-		ctx.JSON(databaseError.Code, databaseError)
-		return
+		return code, responseData, errs.DatabaseError(e)
 	}
-	ctx.JSON(http.StatusCreated, t)
+
+	return http.StatusCreated, t, nil
 	//ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 }
 
-func info(ctx *gin.Context, s *data.Store) {
-	account := ctx.MustGet(value.StringAccount).(*ent.Account)
-	ctx.JSON(http.StatusOK, account)
+func info(ctx *gin.Context, s *data.Store, operator controller.Identity) {
+	return
 }

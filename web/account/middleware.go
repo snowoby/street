@@ -1,29 +1,33 @@
-package middleware
+package account
 
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"street/data"
-	"street/data/value"
 	"street/ent"
 	"street/errs"
-	"street/utils"
+	"street/pkg/data"
+	"street/pkg/data/value"
+	"street/pkg/utils"
 )
+
+type Token struct {
+	Token string `header:"Authorization" binding:"required"`
+}
 
 func MustRefresh(ctx *gin.Context, store *data.Store) {
 	tokenType := value.StringRefreshToken
 	t := tryToken(ctx, store, tokenType)
 	if t == nil {
-		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, errs.UnauthorizedError)
+		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code(), errs.UnauthorizedError)
 		return
 	}
 
 	tokenBody := utils.RandomString(128)
-	// Create an access token
+	// Create access token
 	t, err := store.CreateToken(ctx, t.Edges.Account.ID, tokenBody, value.StringAccessToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
 		databaseError := errs.DatabaseError(err)
-		ctx.AbortWithStatusJSON(databaseError.Code, databaseError)
+		ctx.AbortWithStatusJSON(databaseError.Code(), databaseError)
 		return
 	}
 
@@ -56,40 +60,10 @@ func tryToken(ctx *gin.Context, store *data.Store, tokenType string) *ent.Token 
 	}
 	return nil
 }
-
-func TryProfile(ctx *gin.Context, store *data.Store) {
-	var id ID
-	err := ctx.ShouldBindHeader(&id)
-	if err == nil {
-		p, err := store.FindProfileByID(ctx, id.ID)
-		if err == nil {
-			a, ok := ctx.Get(value.StringAccount)
-			if ok {
-				account := a.(*ent.Account)
-				if p.Edges.Account.ID == account.ID {
-					ctx.Set(value.StringProfile, p)
-				}
-			}
-		}
-	}
-	ctx.Next()
-}
-
-func MustLogin(ctx *gin.Context, store *data.Store) {
+func MustLogin(ctx *gin.Context) {
 	_, ok := ctx.Get(value.StringAccount)
 	if !ok {
-		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, errs.UnauthorizedError)
-		return
-	}
-	ctx.Next()
-	return
-
-}
-
-func MustProfile(ctx *gin.Context, store *data.Store) {
-	_, ok := ctx.Get(value.StringProfile)
-	if !ok {
-		ctx.AbortWithStatusJSON(errs.ProfileIdentityError.Code, errs.ProfileIdentityError)
+		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code(), errs.UnauthorizedError)
 		return
 	}
 	ctx.Next()

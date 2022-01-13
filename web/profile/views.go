@@ -4,11 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/data"
-	"street/data/value"
 	"street/ent"
 	"street/errs"
-	"street/utils"
+	"street/pkg/data"
+	"street/pkg/data/value"
+	"street/pkg/utils"
 )
 
 type CallSign struct {

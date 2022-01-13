@@ -2,8 +2,8 @@ package profile
 
 import (
 	"github.com/gin-gonic/gin"
-	"street/handler"
-	"street/middleware"
+	"street/pkg/handler"
+	"street/web/middleware"
 )
 
 func Routers(group *gin.RouterGroup, h handler.Handler) {

@@ -4,14 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/data"
-	"street/data/value"
 	"street/ent"
 	"street/errs"
-	"street/utils"
+	"street/pkg/data"
+	"street/pkg/data/value"
+	"street/pkg/utils"
 )
 
-type TitleContent struct {
+type Episode struct {
 	Title   string `json:"title" binding:"required"`
 	Content string `json:"content"`
 }
@@ -23,12 +23,12 @@ type ID struct {
 func create(ctx *gin.Context, store *data.Store) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
 
-	var series TitleContent
-	if !utils.MustBindJSON(ctx, series) {
+	var episode Episode
+	if !utils.MustBindJSON(ctx, episode) {
 		return
 	}
 
-	ep, err := store.Series().Create(ctx, series.Title, series.Content, profile.ID)
+	ep, err := store.Episode().Create(ctx, episode.Title, episode.Content, profile.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -46,19 +46,19 @@ func update(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	var series TitleContent
-	err := ctx.ShouldBindJSON(&series)
+	var episode Episode
+	err := ctx.ShouldBindJSON(&episode)
 	if err != nil {
 		e := errs.BindingError(err)
 		ctx.JSON(e.Code, e)
 		return
 	}
 
-	if !seriesMustBelong(ctx, store, profile.ID, id.ID) {
+	if !episodeMustBelong(ctx, store, profile.ID, id.ID) {
 		return
 	}
 
-	ep, err := store.Series().Update(ctx, id.ID, series.Title, series.Content)
+	ep, err := store.Episode().Update(ctx, id.ID, episode.Title, episode.Content)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -75,7 +75,7 @@ func get(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	ep, err := store.Series().FindByID(ctx, id.ID)
+	ep, err := store.Episode().FindByID(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -93,11 +93,11 @@ func del(ctx *gin.Context, store *data.Store) {
 		return
 	}
 
-	if !seriesMustBelong(ctx, store, profile.ID, id.ID) {
+	if !episodeMustBelong(ctx, store, profile.ID, id.ID) {
 		return
 	}
 
-	err := store.Series().Delete(ctx, id.ID)
+	err := store.Episode().Delete(ctx, id.ID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)
@@ -108,8 +108,8 @@ func del(ctx *gin.Context, store *data.Store) {
 
 }
 
-func seriesMustBelong(ctx *gin.Context, store *data.Store, profileID, seriesID uuid.UUID) bool {
-	belongs, err := store.Series().IsOwner(ctx, profileID, seriesID)
+func episodeMustBelong(ctx *gin.Context, store *data.Store, profileID, episodeID uuid.UUID) bool {
+	belongs, err := store.Episode().IsOwner(ctx, profileID, episodeID)
 	if err != nil {
 		e := errs.DatabaseError(err)
 		ctx.JSON(e.Code, e)

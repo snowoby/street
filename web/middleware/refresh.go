@@ -3,11 +3,11 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"street/data"
-	"street/data/value"
 	"street/ent"
 	"street/errs"
-	"street/utils"
+	"street/pkg/data"
+	"street/pkg/data/value"
+	"street/pkg/utils"
 	"time"
 )
 
