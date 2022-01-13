@@ -2,15 +2,15 @@ package profile
 
 import (
 	"github.com/gin-gonic/gin"
-	"street/pkg/handler"
+	"street/pkg/controller"
 	"street/web/account"
 )
 
-func Routers(group *gin.RouterGroup, h handler.Handler) {
-	group.GET("/:id", h.P(getProfile))
-	group.Use(h.P(account.MustLogin))
-	group.GET("/", h.P(accountProfiles))
-	group.POST("/", h.P(createProfile))
-	group.PUT("/:id", h.P(MustProfile), h.P(updateProfile))
+func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
+	group.GET("/:id", ctrl.Bare(get))
+	group.Use(account.MustLogin)
+	group.GET("/", ctrl.General(accountProfiles))
+	group.POST("/", ctrl.General(create))
+	group.PUT("/:id", MustProfile, ctrl.General(update))
 
 }

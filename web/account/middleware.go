@@ -14,24 +14,21 @@ type Token struct {
 	Token string `header:"Authorization" binding:"required"`
 }
 
-func MustRefresh(ctx *gin.Context, store *data.Store) {
+func MustRefresh(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	tokenType := value.StringRefreshToken
 	t := tryToken(ctx, store, tokenType)
 	if t == nil {
-		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code(), errs.UnauthorizedError)
-		return
+		return 0, nil, errs.UnauthorizedError
 	}
 
 	tokenBody := utils.RandomString(128)
 	// Create access token
 	t, err := store.CreateToken(ctx, t.Edges.Account.ID, tokenBody, value.StringAccessToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
-		databaseError := errs.DatabaseError(err)
-		ctx.AbortWithStatusJSON(databaseError.Code(), databaseError)
-		return
+		return 0, nil, err
 	}
 
-	ctx.JSON(http.StatusCreated, t)
+	return http.StatusCreated, t, nil
 }
 
 func TryAccessToken(ctx *gin.Context, store *data.Store) {

@@ -26,74 +26,69 @@ type PublicResponse struct {
 	Password *struct{} `json:"password,omitempty"`
 }
 
-func register(ctx *gin.Context, store *data.Store) (code int, responseData interface{}, err errs.ResponseError) {
+func register(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	var register EmailPassword
-	e := ctx.ShouldBindJSON(&register)
+	err := ctx.ShouldBindJSON(&register)
 	if err != nil {
-		return code, responseData, errs.BindingError(e)
+		return 0, nil, errs.BindingError(err)
 	}
 
 	if err := utils.StrongPassword(register.Password); err != nil {
-		return code, responseData, errs.WeakPasswordError
+		return 0, nil, errs.WeakPasswordError
 	}
 
-	exists, e := store.EmailExists(ctx, register.Email)
+	exists, err := store.EmailExists(ctx, register.Email)
 	if err != nil {
-		databaseError := errs.DatabaseError(err)
-		ctx.JSON(databaseError.Code, databaseError)
-		return
+		return 0, nil, err
 	}
 
 	if exists {
-		ctx.JSON(errs.DuplicateEmailError.Code, errs.DuplicateEmailError)
-		return
+		return 0, nil, errs.DuplicateEmailError
 	}
 
-	encryptedPassword, err := utils2.Encrypt(register.Password)
+	encryptedPassword, err := utils.Encrypt(register.Password)
 	if err != nil {
-		ctx.JSON(errs.PasswordHashError.Code, errs.PasswordHashError)
+		return 0, nil, errs.PasswordHashError
 	}
 
 	user, err := store.CreateAccount(ctx, register.Email, encryptedPassword)
 	if err != nil {
-		databaseError := errs.DatabaseError(err)
-		ctx.JSON(databaseError.Code, databaseError)
-		return
+		return 0, nil, err
 	}
 
 	var responseData = &PublicResponse{}
 	responseData.Email = user.Email
 	responseData.ID.ID = user.ID
-	ctx.JSON(http.StatusCreated, responseData)
 
+	return http.StatusCreated, responseData, nil
 }
 
-func login(ctx *gin.Context, store *data.Store) (code int, responseData interface{}, err errs.ResponseError) {
+func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	var login EmailPassword
-	e := ctx.ShouldBindJSON(&login)
+	err := ctx.ShouldBindJSON(&login)
 	if err != nil {
-		return code, responseData, errs.BindingError(e)
+		return 0, nil, errs.BindingError(err)
 	}
 
-	account, e := store.FindAccount(ctx, login.Email)
+	account, err := store.FindAccount(ctx, login.Email)
 	if err != nil {
-		return code, responseData, errs.DatabaseError(e)
+		return 0, nil, err
 	}
 
 	if !utils.Validate(login.Password, account.Password) {
-		return code, responseData, errs.RecordNotMatchError
+		return 0, nil, errs.RecordNotMatchError
 	}
 
 	tokenBody := utils.RandomString(128)
-	t, e := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
+	t, err := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
 	if err != nil {
-		return code, responseData, errs.DatabaseError(e)
+		return 0, nil, err
 	}
 
 	return http.StatusCreated, t, nil
 	//ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 }
 
-func info(ctx *gin.Context, s *data.Store, operator controller.Identity) {
-	return
+func info(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
+	return http.StatusOK, identity.Account(), nil
 }

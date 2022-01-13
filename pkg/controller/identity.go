@@ -3,12 +3,16 @@ package controller
 import "street/ent"
 
 type Identity struct {
-	account *ent.Account
-	profile *ent.Profile
+	account    *ent.Account
+	profile    *ent.Profile
+	allProfile []*ent.Profile
 }
 
 func (i *Identity) Profile() *ent.Profile {
 	return i.profile
+}
+func (i *Identity) AllProfiles() []*ent.Profile {
+	return i.allProfile
 }
 
 func (i *Identity) Account() *ent.Account {

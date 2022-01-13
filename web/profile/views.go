@@ -4,11 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/ent"
 	"street/errs"
+	"street/pkg/controller"
 	"street/pkg/data"
 	"street/pkg/data/value"
-	"street/pkg/utils"
 )
 
 type CallSign struct {
@@ -25,75 +24,58 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func createProfile(ctx *gin.Context, store *data.Store) {
-	account := ctx.MustGet(value.StringAccount).(*ent.Account)
+func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	var profile Profile
-	if !utils.MustBindJSON(ctx, &profile) {
-		return
+	err := ctx.ShouldBindUri(&profile)
+	if err != nil {
+		return 0, nil, errs.BindingError(err)
 	}
 
 	exists, err := store.CallSignExists(ctx, profile.CallSign.CallSign)
 	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-		return
+		return 0, nil, err
 	}
 
 	if exists {
-		ctx.JSON(errs.CallSignDuplicateError.Code, errs.CallSignDuplicateError)
-		return
+		return 0, nil, errs.CallSignDuplicateError
 	}
 
-	p, err := store.CreateProfile(ctx, profile.CallSign.CallSign, profile.Title, profile.Category, account.ID)
+	p, err := store.CreateProfile(ctx, profile.CallSign.CallSign, profile.Title, profile.Category, identity.Profile().ID)
 	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
+		return 0, nil, err
 	}
-	ctx.JSON(http.StatusCreated, p)
+
+	return http.StatusCreated, p, nil
 }
 
-func updateProfile(ctx *gin.Context, store *data.Store) {
-	var id ID
-	if !utils.MustBindUri(ctx, &id) {
-		return
-	}
+func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, interface{}, error) {
+	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
 
 	var profile Profile
-	if !utils.MustBindJSON(ctx, &profile) {
-		return
-	}
-
-	p, err := store.UpdateProfile(ctx, id.ID, profile.Title, profile.CallSign.CallSign, profile.Category)
+	err := ctx.ShouldBindJSON(&profile)
 	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
+		return 0, nil, errs.BindingError(err)
 	}
 
-	ctx.JSON(http.StatusOK, p)
+	p, err := store.UpdateProfile(ctx, *objectID, profile.Title, profile.CallSign.CallSign, profile.Category)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return http.StatusOK, p, nil
 
 }
 
-func getProfile(ctx *gin.Context, store *data.Store) {
-	var id ID
-	if !utils.MustBindUri(ctx, &id) {
-		return
+func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	ps, err := store.FindProfileByID(ctx, *objectID)
+	if err != nil {
+		return 0, nil, err
 	}
 
-	ps, err := store.FindProfileByID(ctx, id.ID)
-	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-	}
-	ctx.JSON(http.StatusOK, ps)
+	return http.StatusOK, ps, nil
 }
 
-func accountProfiles(ctx *gin.Context, store *data.Store) {
-	account := ctx.MustGet(value.StringAccount).(*ent.Account)
-
-	ps, err := store.FindProfilesByAccountID(ctx, account.ID)
-	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-	}
-	ctx.JSON(http.StatusOK, ps)
+func accountProfiles(_ *gin.Context, _ *data.Store, identity *controller.Identity) (int, interface{}, error) {
+	return http.StatusOK, identity.AllProfiles(), nil
 }

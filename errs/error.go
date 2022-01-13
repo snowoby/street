@@ -35,10 +35,10 @@ func BindingError(err error) HTTPError {
 	}
 }
 
-func WTF(info string) HTTPError {
+func WTF(err error) HTTPError {
 	return HTTPError{
 		code:    http.StatusBadRequest,
-		message: info,
+		message: err.Error(),
 	}
 }
 
@@ -47,6 +47,12 @@ func DatabaseError(err error) HTTPError {
 	switch err.(type) {
 	case *ent.NotFoundError:
 		code = http.StatusNotFound
+	case *ent.NotLoadedError:
+		code = http.StatusBadGateway
+	case *ent.NotSingularError:
+		code = http.StatusBadGateway
+	case *ent.ValidationError:
+		code = http.StatusBadRequest
 	case *ent.ConstraintError:
 		code = http.StatusBadRequest
 	}
@@ -59,6 +65,19 @@ func DatabaseError(err error) HTTPError {
 
 func Detect(err error) HTTPError {
 	// TODO
+	switch err.(type) {
+	case HTTPError:
+		e := err.(HTTPError)
+		return e
+	case *ent.NotFoundError:
+	case *ent.NotLoadedError:
+	case *ent.NotSingularError:
+	case *ent.ValidationError:
+	case *ent.ConstraintError:
+		return DatabaseError(err)
+	default:
+		return WTF(err)
+	}
 	return HTTPError{}
 }
 
