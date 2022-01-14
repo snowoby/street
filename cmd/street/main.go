@@ -25,7 +25,7 @@ func storeSetup() controller.Controller {
 func setup() *gin.Engine {
 	r := gin.Default()
 	ctrl := storeSetup()
-	r.Use(ctrl.Bare(account.TryAccessToken), ctrl.Bare(profile.TryProfile))
+	r.Use(ctrl.Original(account.TryAccessToken), ctrl.Original(profile.TryProfile))
 
 	g := r.Group("/account")
 	account.Routers(g, ctrl)

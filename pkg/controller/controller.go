@@ -8,6 +8,7 @@ import (
 	"street/pkg/data/value"
 )
 
+type OriginalF func(ctx *gin.Context, store *data.Store)
 type F func(ctx *gin.Context, store *data.Store) (int, interface{}, error)
 type Func func(ctx *gin.Context, store *data.Store, visitor *Identity) (int, interface{}, error)
 
@@ -19,6 +20,7 @@ type controller struct {
 }
 
 type Controller interface {
+	Original(f OriginalF) gin.HandlerFunc
 	Bare(f F) gin.HandlerFunc
 	// General will try to bind visitor identity as param.
 	General(f Func) gin.HandlerFunc
@@ -54,6 +56,11 @@ func extractOperator(ctx *gin.Context) *Identity {
 	}
 }
 
+func (controller *controller) Original(f OriginalF) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		f(ctx, controller.store)
+	}
+}
 func (controller *controller) Bare(f F) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		code, responseValue, err := f(ctx, controller.store)

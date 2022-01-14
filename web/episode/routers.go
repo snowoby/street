@@ -2,14 +2,14 @@ package profile
 
 import (
 	"github.com/gin-gonic/gin"
-	"street/pkg/handler"
-	"street/web/middleware"
+	"street/pkg/controller"
+	"street/web/profile"
 )
 
-func Routers(group *gin.RouterGroup, h handler.Handler) {
-	group.GET("/:id", h.P(get))
-	group.Use(h.P(middleware.MustProfile))
-	group.POST("/", h.P(create))
-	group.PUT("/:id", h.P(update))
-	group.DELETE("/:id", h.P(del))
+func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
+	group.GET("/:id", ctrl.Bare(get))
+	group.Use(profile.MustProfile)
+	group.POST("/", ctrl.General(create))
+	group.PUT("/:id", ctrl.Bare(update))
+	group.DELETE("/:id", ctrl.Bare(del))
 }

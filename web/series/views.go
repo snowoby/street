@@ -1,14 +1,12 @@
-package profile
+package series
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
 	"street/ent"
-	"street/errs"
 	"street/pkg/data"
 	"street/pkg/data/value"
-	"street/pkg/utils"
 )
 
 type TitleContent struct {
@@ -20,105 +18,76 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func create(ctx *gin.Context, store *data.Store) {
+func create(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
-
-	var series TitleContent
-	if !utils.MustBindJSON(ctx, series) {
-		return
-	}
-
-	ep, err := store.Series().Create(ctx, series.Title, series.Content, profile.ID)
-	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, ep)
-
-}
-
-func update(ctx *gin.Context, store *data.Store) {
-	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
-	var id ID
-	if !utils.MustBindUri(ctx, id) {
-		return
-	}
 
 	var series TitleContent
 	err := ctx.ShouldBindJSON(&series)
 	if err != nil {
-		e := errs.BindingError(err)
-		ctx.JSON(e.Code, e)
-		return
+		return 0, nil, err
 	}
 
-	if !seriesMustBelong(ctx, store, profile.ID, id.ID) {
-		return
-	}
-
-	ep, err := store.Series().Update(ctx, id.ID, series.Title, series.Content)
+	ep, err := store.Series().Create(ctx, series.Title, series.Content, profile.ID)
 	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-		return
+		return 0, nil, err
 	}
 
-	ctx.JSON(http.StatusOK, ep)
+	return http.StatusCreated, ep, nil
+}
+
+func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+	id := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+
+	var series TitleContent
+	err := ctx.ShouldBindJSON(&series)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	ep, err := store.Series().Update(ctx, *id, series.Title, series.Content)
+	if err != nil {
+		return 0, nil, err
+	}
+	return http.StatusOK, ep, nil
 
 }
 
-func get(ctx *gin.Context, store *data.Store) {
-	var id ID
-	if !utils.MustBindUri(ctx, id) {
-		return
-	}
+func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+	id := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
 
-	ep, err := store.Series().FindByID(ctx, id.ID)
+	ep, err := store.Series().FindByID(ctx, *id)
 	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-		return
+		return 0, nil, err
 	}
 
-	ctx.JSON(http.StatusOK, ep)
+	return http.StatusOK, ep, nil
 
 }
 
-func del(ctx *gin.Context, store *data.Store) {
-	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
-	var id ID
-	if !utils.MustBindUri(ctx, id) {
-		return
-	}
+func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+	id := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
 
-	if !seriesMustBelong(ctx, store, profile.ID, id.ID) {
-		return
-	}
-
-	err := store.Series().Delete(ctx, id.ID)
+	err := store.Series().Delete(ctx, *id)
 	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-		return
+		return 0, nil, err
 	}
 
-	ctx.Status(http.StatusNoContent)
+	return http.StatusNoContent, nil, nil
 
 }
 
-func seriesMustBelong(ctx *gin.Context, store *data.Store, profileID, seriesID uuid.UUID) bool {
-	belongs, err := store.Series().IsOwner(ctx, profileID, seriesID)
-	if err != nil {
-		e := errs.DatabaseError(err)
-		ctx.JSON(e.Code, e)
-		return false
-	}
-
-	if !belongs {
-		ctx.JSON(errs.NotBelongsToOperator.Code, errs.NotBelongsToOperator)
-		return false
-	}
-	return true
-}
+//
+//func seriesMustBelong(ctx *gin.Context, store *data.Store, profileID, seriesID uuid.UUID) bool {
+//	belongs, err := store.Series().IsOwner(ctx, profileID, seriesID)
+//	if err != nil {
+//		e := errs.DatabaseError(err)
+//		ctx.JSON(e.Code, e)
+//		return false
+//	}
+//
+//	if !belongs {
+//		ctx.JSON(errs.NotBelongsToOperator.Code, errs.NotBelongsToOperator)
+//		return false
+//	}
+//	return true
+//}

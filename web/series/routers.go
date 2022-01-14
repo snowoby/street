@@ -1,16 +1,15 @@
-package profile
+package series
 
 import (
 	"github.com/gin-gonic/gin"
-	"street/pkg/handler"
-	middleware2 "street/web/middleware"
+	"street/pkg/controller"
+	"street/web/profile"
 )
 
-func Routers(group *gin.RouterGroup, h handler.Handler) {
-	group.GET("/:id", h.P(get))
-	group.Use(h.P(middleware2.MustProfile))
-	group.POST("/", h.P(create))
-	group.Use(h.OwnerFunc(middleware2.MustBeOwner, h.Store().Series()))
-	group.PUT("/:id", h.P(update))
-	group.DELETE("/:id", h.P(del))
+func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
+	group.GET("/:id", ctrl.Bare(get))
+	group.Use(profile.MustProfile)
+	group.POST("/", ctrl.Bare(create))
+	group.PUT("/:id", ctrl.Bare(update))
+	group.DELETE("/:id", ctrl.Bare(del))
 }
