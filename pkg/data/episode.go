@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	"street/ent"
 	ee "street/ent/episode"
-	"street/ent/profile"
+	ep "street/ent/profile"
 )
 
 type episode struct {
@@ -33,6 +33,6 @@ func (e *episode) IsOwner(ctx context.Context, profileID uuid.UUID, episodeID uu
 		Where(
 			ee.And(
 				ee.ID(episodeID),
-				ee.HasProfileWith(profile.ID(profileID))),
+				ee.HasProfileWith(ep.ID(profileID))),
 		).Exist(ctx)
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	"street/ent"
 	ee "street/ent/episode"
-	"street/ent/profile"
+	ep "street/ent/profile"
 	es "street/ent/series"
 )
 
@@ -33,7 +33,7 @@ func (s *series) IsOwner(ctx context.Context, profileID uuid.UUID, seriesID uuid
 		Where(
 			es.And(
 				es.ID(seriesID),
-				es.HasProfileWith(profile.ID(profileID))),
+				es.HasProfileWith(ep.ID(profileID))),
 		).Exist(ctx)
 
 }

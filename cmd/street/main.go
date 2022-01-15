@@ -8,7 +8,10 @@ import (
 	"street/pkg/controller"
 	"street/pkg/data"
 	"street/web/account"
+	"street/web/episode"
+	"street/web/middleware"
 	"street/web/profile"
+	"street/web/series"
 )
 
 func storeSetup() controller.Controller {
@@ -25,13 +28,19 @@ func storeSetup() controller.Controller {
 func setup() *gin.Engine {
 	r := gin.Default()
 	ctrl := storeSetup()
-	r.Use(ctrl.Original(account.TryAccessToken), ctrl.Original(profile.TryProfile))
+	r.Use(ctrl.Original(account.TryAccessToken), ctrl.Original(profile.TryProfile), middleware.TryUriUUID)
 
 	g := r.Group("/account")
 	account.Routers(g, ctrl)
 
 	g = r.Group("/profile")
 	profile.Routers(g, ctrl)
+
+	g = r.Group("/series")
+	series.Routers(g, ctrl)
+
+	g = r.Group("/episode")
+	episode.Routers(g, ctrl)
 
 	return r
 }

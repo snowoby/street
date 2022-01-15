@@ -15,8 +15,8 @@ type CallSign struct {
 }
 
 type Profile struct {
-	Title string `json:"title" binding:"required"`
-	CallSign
+	Title    string `json:"title" binding:"required"`
+	CallSign string `json:"call_sign" binding:"required"`
 	Category string `json:"category" binding:"required"`
 }
 
@@ -26,12 +26,13 @@ type ID struct {
 
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	var profile Profile
-	err := ctx.ShouldBindUri(&profile)
+	//fmt.Println(ioutil.ReadAll(ctx.Request.Body))
+	err := ctx.ShouldBindJSON(&profile)
 	if err != nil {
 		return 0, nil, errs.BindingError(err)
 	}
 
-	exists, err := store.CallSignExists(ctx, profile.CallSign.CallSign)
+	exists, err := store.CallSignExists(ctx, profile.CallSign)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -40,7 +41,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, errs.CallSignDuplicateError
 	}
 
-	p, err := store.CreateProfile(ctx, profile.CallSign.CallSign, profile.Title, profile.Category, identity.Profile().ID)
+	p, err := store.CreateProfile(ctx, profile.CallSign, profile.Title, profile.Category, identity.Account().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -57,7 +58,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 		return 0, nil, errs.BindingError(err)
 	}
 
-	p, err := store.UpdateProfile(ctx, *objectID, profile.Title, profile.CallSign.CallSign, profile.Category)
+	p, err := store.UpdateProfile(ctx, *objectID, profile.Title, profile.CallSign, profile.Category)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -78,4 +79,16 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func accountProfiles(_ *gin.Context, _ *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	return http.StatusOK, identity.AllProfiles(), nil
+}
+
+func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
+	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	ok, err := store.Profile().IsOwner(ctx, operator.Profile().ID, *objectID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errs.NotBelongsToOperator
+	}
+	return nil
 }

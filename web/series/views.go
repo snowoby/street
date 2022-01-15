@@ -5,6 +5,8 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"street/ent"
+	"street/errs"
+	"street/pkg/controller"
 	"street/pkg/data"
 	"street/pkg/data/value"
 )
@@ -74,6 +76,18 @@ func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 	return http.StatusNoContent, nil, nil
 
+}
+
+func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
+	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	ok, err := store.Series().IsOwner(ctx, operator.Profile().ID, *objectID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errs.NotBelongsToOperator
+	}
+	return nil
 }
 
 //

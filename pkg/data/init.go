@@ -15,6 +15,7 @@ type Store struct {
 	*config
 	*series
 	*episode
+	*profile
 }
 
 type db struct {
@@ -31,6 +32,7 @@ func New(client *ent.Client) *Store {
 		},
 		&series{client.Series},
 		&episode{client.Episode},
+		&profile{client.Profile},
 	}
 }
 
@@ -48,4 +50,8 @@ func (s *Store) Series() *series {
 
 func (s *Store) Episode() *episode {
 	return s.episode
+}
+
+func (s *Store) Profile() *profile {
+	return s.profile
 }

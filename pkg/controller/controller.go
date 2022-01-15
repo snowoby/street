@@ -13,7 +13,8 @@ type F func(ctx *gin.Context, store *data.Store) (int, interface{}, error)
 type Func func(ctx *gin.Context, store *data.Store, visitor *Identity) (int, interface{}, error)
 
 //type UUIDFunc func(ctx *gin.Context, store *data.Store, visitor *Identity, uuid *uuid.UUID) (int, interface{}, error)
-type OwnerFunc func(ctx *gin.Context, store data.Owner)
+
+type OwnerFunc func(ctx *gin.Context, store *data.Store, visitor *Identity) error
 
 type controller struct {
 	store *data.Store
@@ -26,7 +27,7 @@ type Controller interface {
 	General(f Func) gin.HandlerFunc
 	//GeneralUUID(f UUIDFunc) gin.HandlerFunc
 	Store() *data.Store
-	Owned(f OwnerFunc, store data.Owner) gin.HandlerFunc
+	Owned(f OwnerFunc) gin.HandlerFunc
 }
 
 func New(store *data.Store) *controller {
@@ -50,9 +51,18 @@ func (controller *controller) Store() *data.Store {
 func extractOperator(ctx *gin.Context) *Identity {
 	a, _ := ctx.Get(value.StringAccount)
 	p, _ := ctx.Get(value.StringProfile)
+	var account *ent.Account
+	if a != nil {
+		account = a.(*ent.Account)
+	}
+	var profile *ent.Profile
+	if p != nil {
+		profile = p.(*ent.Profile)
+	}
+
 	return &Identity{
-		account: a.(*ent.Account),
-		profile: p.(*ent.Profile),
+		account: account,
+		profile: profile,
 	}
 }
 
@@ -96,8 +106,15 @@ func (controller *controller) General(nf Func) gin.HandlerFunc {
 //
 //}
 
-func (controller *controller) Owned(f OwnerFunc, store data.Owner) gin.HandlerFunc {
-	return func(context *gin.Context) {
-		f(context, store)
+func (controller *controller) Owned(f OwnerFunc) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id := extractOperator(ctx)
+		err := f(ctx, controller.store, id)
+		if err != nil {
+			responseError := errs.Detect(err)
+			ctx.AbortWithStatusJSON(responseError.Code(), responseError.Message())
+			return
+		}
+		ctx.Next()
 	}
 }

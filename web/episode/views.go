@@ -1,4 +1,4 @@
-package profile
+package episode
 
 import (
 	"github.com/gin-gonic/gin"
@@ -76,17 +76,14 @@ func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	return http.StatusNoContent, nil, nil
 }
 
-//func episodeMustBelong(ctx *gin.Context, store *data.Store, profileID, episodeID uuid.UUID) bool {
-//	belongs, err := store.Episode().IsOwner(ctx, profileID, episodeID)
-//	if err != nil {
-//		e := errs.DatabaseError(err)
-//		ctx.JSON(e.Code, e)
-//		return false
-//	}
-//
-//	if !belongs {
-//		ctx.JSON(errs.NotBelongsToOperator.Code, errs.NotBelongsToOperator)
-//		return false
-//	}
-//	return true
-//}
+func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
+	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	ok, err := store.Episode().IsOwner(ctx, operator.Profile().ID, *objectID)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errs.NotBelongsToOperator
+	}
+	return nil
+}
