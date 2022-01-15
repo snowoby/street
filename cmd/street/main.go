@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"os"
 	"street/ent"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -14,11 +17,21 @@ import (
 	"street/web/series"
 )
 
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
 func storeSetup() controller.Controller {
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+
+	client, err := ent.Open("postgres", os.Getenv("database"))
 	if err != nil {
 		panic(err)
 	}
+	defer client.Close()
 
 	client.Schema.Create(context.Background())
 	store := data.New(client)
@@ -47,5 +60,5 @@ func setup() *gin.Engine {
 
 func main() {
 
-	setup().Run("127.0.0.1:8088")
+	setup().Run("0.0.0.0:8088")
 }

@@ -7,7 +7,8 @@ require (
 	github.com/alexedwards/argon2id v0.0.0-20211130144151-3585854a6387
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/uuid v1.3.0
-	github.com/mattn/go-sqlite3 v1.14.8
+	github.com/joho/godotenv v1.4.0
+	github.com/lib/pq v1.10.2
 	github.com/stretchr/testify v1.7.0
 )
 

@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  database:
+    image: "postgres:13-alpine3.15"
+    restart: always
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    volumes:
+      - ./.develop/db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+
+  street:
+    build: .
+    env_file:
+      - ./.env
+    restart: always
+    ports:
+      - "127.0.0.1:8088:8088"
+    depends_on:
+      - database
