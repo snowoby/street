@@ -3,10 +3,10 @@ services:
   database:
     image: "postgres:13-alpine3.15"
     restart: always
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
     volumes:
       - ./.develop/db:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:2345:5432"
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
 
@@ -14,8 +14,12 @@ services:
     build: .
     env_file:
       - ./.env
+    environment:
+      - "database=host=database port=5432 user=postgres dbname=postgres"
     restart: always
+
     ports:
       - "127.0.0.1:8088:8088"
     depends_on:
       - database
+

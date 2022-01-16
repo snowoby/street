@@ -31,7 +31,6 @@ func storeSetup() controller.Controller {
 	if err != nil {
 		panic(err)
 	}
-	defer client.Close()
 
 	client.Schema.Create(context.Background())
 	store := data.New(client)
@@ -60,5 +59,5 @@ func setup() *gin.Engine {
 
 func main() {
 
-	setup().Run("0.0.0.0:8088")
+	setup().Run(os.Getenv("address"))
 }
