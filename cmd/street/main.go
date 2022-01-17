@@ -59,5 +59,5 @@ func setup() *gin.Engine {
 
 func main() {
 
-	setup().Run(os.Getenv("address"))
+	setup().Run(fmt.Sprintf("%s:%s", os.Getenv("address"), os.Getenv("port")))
 }
