@@ -27,7 +27,7 @@ func init() {
 
 func storeSetup() controller.Controller {
 
-	client, err := ent.Open("postgres", os.Getenv("database"))
+	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
