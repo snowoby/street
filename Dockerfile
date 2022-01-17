@@ -5,7 +5,7 @@ WORKDIR /app
 COPY go.mod ./
 COPY go.sum ./
 ENV GO111MODULE=on \
-        GOPROXY=https://goproxy.cn,direct
+        GOPROXY=https://goproxy.io,direct
 RUN go mod download
 COPY . .
 RUN go build -o /street ./cmd/street
