@@ -32,7 +32,10 @@ func storeSetup() controller.Controller {
 		panic(err)
 	}
 
-	client.Schema.Create(context.Background())
+	err = client.Schema.Create(context.Background())
+	if err != nil {
+		panic(err)
+	}
 	store := data.New(client)
 	return controller.New(store)
 }
