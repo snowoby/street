@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -43,6 +44,11 @@ func storeSetup() controller.Controller {
 func setup() *gin.Engine {
 	r := gin.Default()
 	ctrl := storeSetup()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{os.Getenv("site")}
+	r.Use(cors.New(config))
+
 	r.Use(ctrl.Original(account.TryAccessToken), ctrl.Original(profile.TryProfile), middleware.TryUriUUID)
 
 	g := r.Group("/account")
