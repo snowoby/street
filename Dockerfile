@@ -4,8 +4,7 @@ FROM golang:1.17.6-alpine3.15
 WORKDIR /app
 COPY go.mod ./
 COPY go.sum ./
-ENV GO111MODULE=on \
-        GOPROXY=https://goproxy.io,direct
+ENV GO111MODULE=on
 RUN go mod download
 COPY . .
 RUN go build -o /street ./cmd/street
