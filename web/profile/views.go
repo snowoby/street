@@ -11,12 +11,12 @@ import (
 )
 
 type CallSign struct {
-	CallSign string `json:"call_sign" binding:"required"`
+	CallSign string `json:"callSign" binding:"required"`
 }
 
 type Profile struct {
 	Title    string `json:"title" binding:"required"`
-	CallSign string `json:"call_sign" binding:"required"`
+	CallSign string `json:"callSign" binding:"required"`
 	Category string `json:"category" binding:"required"`
 }
 
