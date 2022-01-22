@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"street/ent"
 	"street/errs"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -90,5 +91,11 @@ func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 }
 
 func info(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
-	return http.StatusOK, identity.Account(), nil
+	return http.StatusOK, struct {
+		Account  *ent.Account   `json:"account"`
+		Profiles []*ent.Profile `json:"profiles"`
+	}{
+		Account:  identity.Account(),
+		Profiles: identity.AllProfiles(),
+	}, nil
 }

@@ -21,17 +21,23 @@ func TryProfile(ctx *gin.Context, store *data.Store) {
 		ID uuid.UUID `binding:"uuid" header:"Profile" uri:"id"`
 	}
 
+	ps, err := store.FindProfilesByAccountID(ctx, account.ID)
+	if err != nil {
+		ctx.Next()
+		return
+	}
+	ctx.Set(value.StringAllProfiles, ps)
+
 	var id ID
-	err := ctx.ShouldBindHeader(&id)
-	if err == nil {
-		p, err := store.FindProfilesByAccountID(ctx, account.ID)
-		if err == nil {
-			for _, profile := range p {
-				if profile.ID == id.ID {
-					ctx.Set(value.StringProfile, profile)
-				}
-			}
-			ctx.Set(value.StringAllProfiles, p)
+	err = ctx.ShouldBindHeader(&id)
+	if err != nil {
+		ctx.Next()
+		return
+	}
+
+	for _, profile := range ps {
+		if profile.ID == id.ID {
+			ctx.Set(value.StringProfile, profile)
 		}
 	}
 	ctx.Next()

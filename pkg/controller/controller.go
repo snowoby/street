@@ -25,7 +25,6 @@ type Controller interface {
 	Bare(f F) gin.HandlerFunc
 	// General will try to bind visitor identity as param.
 	General(f Func) gin.HandlerFunc
-	//GeneralUUID(f UUIDFunc) gin.HandlerFunc
 	Store() *data.Store
 	Owned(f OwnerFunc) gin.HandlerFunc
 }
@@ -53,6 +52,7 @@ func (controller *controller) Store() *data.Store {
 func extractOperator(ctx *gin.Context) *Identity {
 	a, _ := ctx.Get(value.StringAccount)
 	p, _ := ctx.Get(value.StringProfile)
+	ps, _ := ctx.Get(value.StringAllProfiles)
 	var account *ent.Account
 	if a != nil {
 		account = a.(*ent.Account)
@@ -61,10 +61,15 @@ func extractOperator(ctx *gin.Context) *Identity {
 	if p != nil {
 		profile = p.(*ent.Profile)
 	}
+	var allProfile []*ent.Profile
+	if ps != nil {
+		allProfile = ps.([]*ent.Profile)
+	}
 
 	return &Identity{
-		account: account,
-		profile: profile,
+		account:    account,
+		profile:    profile,
+		allProfile: allProfile,
 	}
 }
 
