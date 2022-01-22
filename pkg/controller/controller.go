@@ -37,7 +37,9 @@ func New(store *data.Store) *controller {
 func resultProcess(ctx *gin.Context, code int, responseValue interface{}, err error) {
 	if err != nil {
 		responseError := errs.Detect(err)
-		ctx.AbortWithStatusJSON(responseError.Code(), responseError.Message())
+		ctx.AbortWithStatusJSON(responseError.Code(), struct {
+			Message string `json:"message"`
+		}{responseError.Message()})
 		return
 	}
 
