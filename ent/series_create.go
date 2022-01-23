@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"street/ent/episode"
 	"street/ent/profile"
+	"street/ent/schema"
 	"street/ent/series"
 	"time"
 
@@ -21,6 +22,20 @@ type SeriesCreate struct {
 	config
 	mutation *SeriesMutation
 	hooks    []Hook
+}
+
+// SetSID sets the "SID" field.
+func (sc *SeriesCreate) SetSID(s schema.ID) *SeriesCreate {
+	sc.mutation.SetSID(s)
+	return sc
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (sc *SeriesCreate) SetNillableSID(s *schema.ID) *SeriesCreate {
+	if s != nil {
+		sc.SetSID(*s)
+	}
+	return sc
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -188,6 +203,10 @@ func (sc *SeriesCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (sc *SeriesCreate) defaults() {
+	if _, ok := sc.mutation.SID(); !ok {
+		v := series.DefaultSID()
+		sc.mutation.SetSID(v)
+	}
 	if _, ok := sc.mutation.CreateTime(); !ok {
 		v := series.DefaultCreateTime()
 		sc.mutation.SetCreateTime(v)
@@ -208,6 +227,11 @@ func (sc *SeriesCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SeriesCreate) check() error {
+	if v, ok := sc.mutation.SID(); ok {
+		if err := series.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf(`ent: validator failed for field "SID": %w`, err)}
+		}
+	}
 	if _, ok := sc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
@@ -264,6 +288,14 @@ func (sc *SeriesCreate) createSpec() (*Series, *sqlgraph.CreateSpec) {
 	if id, ok := sc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := sc.mutation.SID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: series.FieldSID,
+		})
+		_node.SID = &value
 	}
 	if value, ok := sc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

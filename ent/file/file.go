@@ -3,6 +3,7 @@
 package file
 
 import (
+	"street/ent/schema"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,6 +14,8 @@ const (
 	Label = "file"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSID holds the string denoting the sid field in the database.
+	FieldSID = "sid"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
@@ -45,6 +48,7 @@ const (
 // Columns holds all SQL columns for file fields.
 var Columns = []string{
 	FieldID,
+	FieldSID,
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldFilename,
@@ -77,6 +81,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultSID holds the default value on creation for the "SID" field.
+	DefaultSID func() schema.ID
+	// SIDValidator is a validator for the "SID" field. It is called by the builders before save.
+	SIDValidator func(string) error
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.

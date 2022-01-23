@@ -49,7 +49,7 @@ func tryToken(ctx *gin.Context, store *data.Store, tokenType string) *ent.Token 
 			tokenBody := token.Token[7:]
 			t, err := store.FindToken(ctx, tokenBody, tokenType, true)
 			if err == nil {
-				if utils.TokenIsValid(t) {
+				if TokenIsValid(t) {
 					return t
 				}
 			}

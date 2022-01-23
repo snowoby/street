@@ -11,6 +11,7 @@ var (
 	// AccountsColumns holds the columns for the "accounts" table.
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 320},
@@ -25,13 +26,14 @@ var (
 			{
 				Name:    "account_email",
 				Unique:  true,
-				Columns: []*schema.Column{AccountsColumns[3]},
+				Columns: []*schema.Column{AccountsColumns[4]},
 			},
 		},
 	}
 	// EpisodesColumns holds the columns for the "episodes" table.
 	EpisodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
@@ -47,13 +49,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "episodes_profiles_episode",
-				Columns:    []*schema.Column{EpisodesColumns[5]},
+				Columns:    []*schema.Column{EpisodesColumns[6]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "episodes_series_episode",
-				Columns:    []*schema.Column{EpisodesColumns[6]},
+				Columns:    []*schema.Column{EpisodesColumns[7]},
 				RefColumns: []*schema.Column{SeriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -62,6 +64,7 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "filename", Type: field.TypeString, Size: 320, Default: "file"},
@@ -80,7 +83,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "files_profiles_file",
-				Columns:    []*schema.Column{FilesColumns[9]},
+				Columns:    []*schema.Column{FilesColumns[10]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -89,6 +92,7 @@ var (
 	// ProfilesColumns holds the columns for the "profiles" table.
 	ProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
@@ -104,7 +108,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "profiles_accounts_profile",
-				Columns:    []*schema.Column{ProfilesColumns[6]},
+				Columns:    []*schema.Column{ProfilesColumns[7]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -113,18 +117,19 @@ var (
 			{
 				Name:    "profile_call_sign",
 				Unique:  true,
-				Columns: []*schema.Column{ProfilesColumns[4]},
+				Columns: []*schema.Column{ProfilesColumns[5]},
 			},
 			{
 				Name:    "profile_category",
 				Unique:  false,
-				Columns: []*schema.Column{ProfilesColumns[5]},
+				Columns: []*schema.Column{ProfilesColumns[6]},
 			},
 		},
 	}
 	// SeriesColumns holds the columns for the "series" table.
 	SeriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
@@ -140,7 +145,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "series_profiles_series",
-				Columns:    []*schema.Column{SeriesColumns[6]},
+				Columns:    []*schema.Column{SeriesColumns[7]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -149,13 +154,14 @@ var (
 			{
 				Name:    "series_call_sign",
 				Unique:  true,
-				Columns: []*schema.Column{SeriesColumns[4]},
+				Columns: []*schema.Column{SeriesColumns[5]},
 			},
 		},
 	}
 	// TokensColumns holds the columns for the "tokens" table.
 	TokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "body", Type: field.TypeString, Unique: true, Size: 320},
@@ -171,7 +177,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tokens_accounts_token",
-				Columns:    []*schema.Column{TokensColumns[6]},
+				Columns:    []*schema.Column{TokensColumns[7]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -180,7 +186,7 @@ var (
 			{
 				Name:    "token_body",
 				Unique:  true,
-				Columns: []*schema.Column{TokensColumns[3]},
+				Columns: []*schema.Column{TokensColumns[4]},
 			},
 		},
 	}

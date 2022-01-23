@@ -26,6 +26,12 @@ func init() {
 	_ = accountMixinFields1
 	accountFields := schema.Account{}.Fields()
 	_ = accountFields
+	// accountDescSID is the schema descriptor for SID field.
+	accountDescSID := accountMixinFields0[0].Descriptor()
+	// account.DefaultSID holds the default value on creation for the SID field.
+	account.DefaultSID = accountDescSID.Default.(func() schema.ID)
+	// account.SIDValidator is a validator for the "SID" field. It is called by the builders before save.
+	account.SIDValidator = accountDescSID.Validators[0].(func(string) error)
 	// accountDescCreateTime is the schema descriptor for create_time field.
 	accountDescCreateTime := accountMixinFields1[0].Descriptor()
 	// account.DefaultCreateTime holds the default value on creation for the create_time field.
@@ -55,7 +61,7 @@ func init() {
 		}
 	}()
 	// accountDescID is the schema descriptor for id field.
-	accountDescID := accountMixinFields0[0].Descriptor()
+	accountDescID := accountMixinFields0[1].Descriptor()
 	// account.DefaultID holds the default value on creation for the id field.
 	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
 	episodeMixin := schema.Episode{}.Mixin()
@@ -65,6 +71,12 @@ func init() {
 	_ = episodeMixinFields1
 	episodeFields := schema.Episode{}.Fields()
 	_ = episodeFields
+	// episodeDescSID is the schema descriptor for SID field.
+	episodeDescSID := episodeMixinFields0[0].Descriptor()
+	// episode.DefaultSID holds the default value on creation for the SID field.
+	episode.DefaultSID = episodeDescSID.Default.(func() schema.ID)
+	// episode.SIDValidator is a validator for the "SID" field. It is called by the builders before save.
+	episode.SIDValidator = episodeDescSID.Validators[0].(func(string) error)
 	// episodeDescCreateTime is the schema descriptor for create_time field.
 	episodeDescCreateTime := episodeMixinFields1[0].Descriptor()
 	// episode.DefaultCreateTime holds the default value on creation for the create_time field.
@@ -98,7 +110,7 @@ func init() {
 	// episode.ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	episode.ContentValidator = episodeDescContent.Validators[0].(func(string) error)
 	// episodeDescID is the schema descriptor for id field.
-	episodeDescID := episodeMixinFields0[0].Descriptor()
+	episodeDescID := episodeMixinFields0[1].Descriptor()
 	// episode.DefaultID holds the default value on creation for the id field.
 	episode.DefaultID = episodeDescID.Default.(func() uuid.UUID)
 	fileMixin := schema.File{}.Mixin()
@@ -108,6 +120,12 @@ func init() {
 	_ = fileMixinFields1
 	fileFields := schema.File{}.Fields()
 	_ = fileFields
+	// fileDescSID is the schema descriptor for SID field.
+	fileDescSID := fileMixinFields0[0].Descriptor()
+	// file.DefaultSID holds the default value on creation for the SID field.
+	file.DefaultSID = fileDescSID.Default.(func() schema.ID)
+	// file.SIDValidator is a validator for the "SID" field. It is called by the builders before save.
+	file.SIDValidator = fileDescSID.Validators[0].(func(string) error)
 	// fileDescCreateTime is the schema descriptor for create_time field.
 	fileDescCreateTime := fileMixinFields1[0].Descriptor()
 	// file.DefaultCreateTime holds the default value on creation for the create_time field.
@@ -189,7 +207,7 @@ func init() {
 	// file.NoteValidator is a validator for the "note" field. It is called by the builders before save.
 	file.NoteValidator = fileDescNote.Validators[0].(func(string) error)
 	// fileDescID is the schema descriptor for id field.
-	fileDescID := fileMixinFields0[0].Descriptor()
+	fileDescID := fileMixinFields0[1].Descriptor()
 	// file.DefaultID holds the default value on creation for the id field.
 	file.DefaultID = fileDescID.Default.(func() uuid.UUID)
 	profileMixin := schema.Profile{}.Mixin()
@@ -199,6 +217,12 @@ func init() {
 	_ = profileMixinFields1
 	profileFields := schema.Profile{}.Fields()
 	_ = profileFields
+	// profileDescSID is the schema descriptor for SID field.
+	profileDescSID := profileMixinFields0[0].Descriptor()
+	// profile.DefaultSID holds the default value on creation for the SID field.
+	profile.DefaultSID = profileDescSID.Default.(func() schema.ID)
+	// profile.SIDValidator is a validator for the "SID" field. It is called by the builders before save.
+	profile.SIDValidator = profileDescSID.Validators[0].(func(string) error)
 	// profileDescCreateTime is the schema descriptor for create_time field.
 	profileDescCreateTime := profileMixinFields1[0].Descriptor()
 	// profile.DefaultCreateTime holds the default value on creation for the create_time field.
@@ -264,7 +288,7 @@ func init() {
 		}
 	}()
 	// profileDescID is the schema descriptor for id field.
-	profileDescID := profileMixinFields0[0].Descriptor()
+	profileDescID := profileMixinFields0[1].Descriptor()
 	// profile.DefaultID holds the default value on creation for the id field.
 	profile.DefaultID = profileDescID.Default.(func() uuid.UUID)
 	seriesMixin := schema.Series{}.Mixin()
@@ -274,6 +298,12 @@ func init() {
 	_ = seriesMixinFields1
 	seriesFields := schema.Series{}.Fields()
 	_ = seriesFields
+	// seriesDescSID is the schema descriptor for SID field.
+	seriesDescSID := seriesMixinFields0[0].Descriptor()
+	// series.DefaultSID holds the default value on creation for the SID field.
+	series.DefaultSID = seriesDescSID.Default.(func() schema.ID)
+	// series.SIDValidator is a validator for the "SID" field. It is called by the builders before save.
+	series.SIDValidator = seriesDescSID.Validators[0].(func(string) error)
 	// seriesDescCreateTime is the schema descriptor for create_time field.
 	seriesDescCreateTime := seriesMixinFields1[0].Descriptor()
 	// series.DefaultCreateTime holds the default value on creation for the create_time field.
@@ -311,7 +341,7 @@ func init() {
 	// series.DefaultContent holds the default value on creation for the content field.
 	series.DefaultContent = seriesDescContent.Default.(string)
 	// seriesDescID is the schema descriptor for id field.
-	seriesDescID := seriesMixinFields0[0].Descriptor()
+	seriesDescID := seriesMixinFields0[1].Descriptor()
 	// series.DefaultID holds the default value on creation for the id field.
 	series.DefaultID = seriesDescID.Default.(func() uuid.UUID)
 	tokenMixin := schema.Token{}.Mixin()
@@ -321,6 +351,12 @@ func init() {
 	_ = tokenMixinFields1
 	tokenFields := schema.Token{}.Fields()
 	_ = tokenFields
+	// tokenDescSID is the schema descriptor for SID field.
+	tokenDescSID := tokenMixinFields0[0].Descriptor()
+	// token.DefaultSID holds the default value on creation for the SID field.
+	token.DefaultSID = tokenDescSID.Default.(func() schema.ID)
+	// token.SIDValidator is a validator for the "SID" field. It is called by the builders before save.
+	token.SIDValidator = tokenDescSID.Validators[0].(func(string) error)
 	// tokenDescCreateTime is the schema descriptor for create_time field.
 	tokenDescCreateTime := tokenMixinFields1[0].Descriptor()
 	// token.DefaultCreateTime holds the default value on creation for the create_time field.
@@ -368,7 +404,7 @@ func init() {
 		}
 	}()
 	// tokenDescID is the schema descriptor for id field.
-	tokenDescID := tokenMixinFields0[0].Descriptor()
+	tokenDescID := tokenMixinFields0[1].Descriptor()
 	// token.DefaultID holds the default value on creation for the id field.
 	token.DefaultID = tokenDescID.Default.(func() uuid.UUID)
 }

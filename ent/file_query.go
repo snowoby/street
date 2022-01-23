@@ -292,12 +292,12 @@ func (fq *FileQuery) WithProfile(opts ...func(*ProfileQuery)) *FileQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		SID schema.ID `json:"SID,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.File.Query().
-//		GroupBy(file.FieldCreateTime).
+//		GroupBy(file.FieldSID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +319,11 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		SID schema.ID `json:"SID,omitempty"`
 //	}
 //
 //	client.File.Query().
-//		Select(file.FieldCreateTime).
+//		Select(file.FieldSID).
 //		Scan(ctx, &v)
 //
 func (fq *FileQuery) Select(fields ...string) *FileSelect {

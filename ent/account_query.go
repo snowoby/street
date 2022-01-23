@@ -328,12 +328,12 @@ func (aq *AccountQuery) WithProfile(opts ...func(*ProfileQuery)) *AccountQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		SID schema.ID `json:"SID,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Account.Query().
-//		GroupBy(account.FieldCreateTime).
+//		GroupBy(account.FieldSID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -355,11 +355,11 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		SID schema.ID `json:"SID,omitempty"`
 //	}
 //
 //	client.Account.Query().
-//		Select(account.FieldCreateTime).
+//		Select(account.FieldSID).
 //		Scan(ctx, &v)
 //
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {

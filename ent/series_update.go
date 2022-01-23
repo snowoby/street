@@ -9,6 +9,7 @@ import (
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
+	"street/ent/schema"
 	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
@@ -27,6 +28,26 @@ type SeriesUpdate struct {
 // Where appends a list predicates to the SeriesUpdate builder.
 func (su *SeriesUpdate) Where(ps ...predicate.Series) *SeriesUpdate {
 	su.mutation.Where(ps...)
+	return su
+}
+
+// SetSID sets the "SID" field.
+func (su *SeriesUpdate) SetSID(s schema.ID) *SeriesUpdate {
+	su.mutation.SetSID(s)
+	return su
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (su *SeriesUpdate) SetNillableSID(s *schema.ID) *SeriesUpdate {
+	if s != nil {
+		su.SetSID(*s)
+	}
+	return su
+}
+
+// ClearSID clears the value of the "SID" field.
+func (su *SeriesUpdate) ClearSID() *SeriesUpdate {
+	su.mutation.ClearSID()
 	return su
 }
 
@@ -199,6 +220,11 @@ func (su *SeriesUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (su *SeriesUpdate) check() error {
+	if v, ok := su.mutation.SID(); ok {
+		if err := series.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
+		}
+	}
 	if v, ok := su.mutation.Title(); ok {
 		if err := series.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
@@ -232,6 +258,19 @@ func (su *SeriesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := su.mutation.SID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: series.FieldSID,
+		})
+	}
+	if su.mutation.SIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: series.FieldSID,
+		})
 	}
 	if value, ok := su.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -373,6 +412,26 @@ type SeriesUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *SeriesMutation
+}
+
+// SetSID sets the "SID" field.
+func (suo *SeriesUpdateOne) SetSID(s schema.ID) *SeriesUpdateOne {
+	suo.mutation.SetSID(s)
+	return suo
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (suo *SeriesUpdateOne) SetNillableSID(s *schema.ID) *SeriesUpdateOne {
+	if s != nil {
+		suo.SetSID(*s)
+	}
+	return suo
+}
+
+// ClearSID clears the value of the "SID" field.
+func (suo *SeriesUpdateOne) ClearSID() *SeriesUpdateOne {
+	suo.mutation.ClearSID()
+	return suo
 }
 
 // SetTitle sets the "title" field.
@@ -551,6 +610,11 @@ func (suo *SeriesUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (suo *SeriesUpdateOne) check() error {
+	if v, ok := suo.mutation.SID(); ok {
+		if err := series.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
+		}
+	}
 	if v, ok := suo.mutation.Title(); ok {
 		if err := series.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
@@ -601,6 +665,19 @@ func (suo *SeriesUpdateOne) sqlSave(ctx context.Context) (_node *Series, err err
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := suo.mutation.SID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: series.FieldSID,
+		})
+	}
+	if suo.mutation.SIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: series.FieldSID,
+		})
 	}
 	if value, ok := suo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

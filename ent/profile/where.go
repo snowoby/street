@@ -4,6 +4,7 @@ package profile
 
 import (
 	"street/ent/predicate"
+	"street/ent/schema"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -94,6 +95,13 @@ func IDLTE(id uuid.UUID) predicate.Profile {
 	})
 }
 
+// SID applies equality check predicate on the "SID" field. It's identical to SIDEQ.
+func SID(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSID), v))
+	})
+}
+
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
@@ -126,6 +134,136 @@ func CallSign(v string) predicate.Profile {
 func Category(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCategory), v))
+	})
+}
+
+// SIDEQ applies the EQ predicate on the "SID" field.
+func SIDEQ(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSID), v))
+	})
+}
+
+// SIDNEQ applies the NEQ predicate on the "SID" field.
+func SIDNEQ(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSID), v))
+	})
+}
+
+// SIDIn applies the In predicate on the "SID" field.
+func SIDIn(vs ...schema.ID) predicate.Profile {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Profile(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSID), v...))
+	})
+}
+
+// SIDNotIn applies the NotIn predicate on the "SID" field.
+func SIDNotIn(vs ...schema.ID) predicate.Profile {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Profile(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSID), v...))
+	})
+}
+
+// SIDGT applies the GT predicate on the "SID" field.
+func SIDGT(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSID), v))
+	})
+}
+
+// SIDGTE applies the GTE predicate on the "SID" field.
+func SIDGTE(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSID), v))
+	})
+}
+
+// SIDLT applies the LT predicate on the "SID" field.
+func SIDLT(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSID), v))
+	})
+}
+
+// SIDLTE applies the LTE predicate on the "SID" field.
+func SIDLTE(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSID), v))
+	})
+}
+
+// SIDContains applies the Contains predicate on the "SID" field.
+func SIDContains(v schema.ID) predicate.Profile {
+	vc := string(v)
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldSID), vc))
+	})
+}
+
+// SIDHasPrefix applies the HasPrefix predicate on the "SID" field.
+func SIDHasPrefix(v schema.ID) predicate.Profile {
+	vc := string(v)
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldSID), vc))
+	})
+}
+
+// SIDHasSuffix applies the HasSuffix predicate on the "SID" field.
+func SIDHasSuffix(v schema.ID) predicate.Profile {
+	vc := string(v)
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldSID), vc))
+	})
+}
+
+// SIDIsNil applies the IsNil predicate on the "SID" field.
+func SIDIsNil() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSID)))
+	})
+}
+
+// SIDNotNil applies the NotNil predicate on the "SID" field.
+func SIDNotNil() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSID)))
+	})
+}
+
+// SIDEqualFold applies the EqualFold predicate on the "SID" field.
+func SIDEqualFold(v schema.ID) predicate.Profile {
+	vc := string(v)
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldSID), vc))
+	})
+}
+
+// SIDContainsFold applies the ContainsFold predicate on the "SID" field.
+func SIDContainsFold(v schema.ID) predicate.Profile {
+	vc := string(v)
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldSID), vc))
 	})
 }
 

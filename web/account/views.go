@@ -10,6 +10,7 @@ import (
 	"street/pkg/data"
 	"street/pkg/data/value"
 	"street/pkg/utils"
+	"time"
 )
 
 type ID struct {
@@ -98,4 +99,14 @@ func info(ctx *gin.Context, store *data.Store, identity *controller.Identity) (i
 		Account:  identity.Account(),
 		Profiles: identity.AllProfiles(),
 	}, nil
+}
+
+func TokenIsValid(token *ent.Token) bool {
+	if token == nil {
+		return false
+	}
+	if token.ExpireTime.Before(time.Now()) {
+		return false
+	}
+	return true
 }

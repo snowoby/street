@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"street/ent/account"
 	"street/ent/profile"
+	"street/ent/schema"
 	"street/ent/token"
 	"time"
 
@@ -21,6 +22,20 @@ type AccountCreate struct {
 	config
 	mutation *AccountMutation
 	hooks    []Hook
+}
+
+// SetSID sets the "SID" field.
+func (ac *AccountCreate) SetSID(s schema.ID) *AccountCreate {
+	ac.mutation.SetSID(s)
+	return ac
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableSID(s *schema.ID) *AccountCreate {
+	if s != nil {
+		ac.SetSID(*s)
+	}
+	return ac
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -170,6 +185,10 @@ func (ac *AccountCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ac *AccountCreate) defaults() {
+	if _, ok := ac.mutation.SID(); !ok {
+		v := account.DefaultSID()
+		ac.mutation.SetSID(v)
+	}
 	if _, ok := ac.mutation.CreateTime(); !ok {
 		v := account.DefaultCreateTime()
 		ac.mutation.SetCreateTime(v)
@@ -186,6 +205,11 @@ func (ac *AccountCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountCreate) check() error {
+	if v, ok := ac.mutation.SID(); ok {
+		if err := account.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf(`ent: validator failed for field "SID": %w`, err)}
+		}
+	}
 	if _, ok := ac.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
@@ -234,6 +258,14 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if id, ok := ac.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := ac.mutation.SID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: account.FieldSID,
+		})
+		_node.SID = &value
 	}
 	if value, ok := ac.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

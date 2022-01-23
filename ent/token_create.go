@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/schema"
 	"street/ent/token"
 	"time"
 
@@ -20,6 +21,20 @@ type TokenCreate struct {
 	config
 	mutation *TokenMutation
 	hooks    []Hook
+}
+
+// SetSID sets the "SID" field.
+func (tc *TokenCreate) SetSID(s schema.ID) *TokenCreate {
+	tc.mutation.SetSID(s)
+	return tc
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (tc *TokenCreate) SetNillableSID(s *schema.ID) *TokenCreate {
+	if s != nil {
+		tc.SetSID(*s)
+	}
+	return tc
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -156,6 +171,10 @@ func (tc *TokenCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tc *TokenCreate) defaults() {
+	if _, ok := tc.mutation.SID(); !ok {
+		v := token.DefaultSID()
+		tc.mutation.SetSID(v)
+	}
 	if _, ok := tc.mutation.CreateTime(); !ok {
 		v := token.DefaultCreateTime()
 		tc.mutation.SetCreateTime(v)
@@ -172,6 +191,11 @@ func (tc *TokenCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TokenCreate) check() error {
+	if v, ok := tc.mutation.SID(); ok {
+		if err := token.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf(`ent: validator failed for field "SID": %w`, err)}
+		}
+	}
 	if _, ok := tc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
@@ -231,6 +255,14 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := tc.mutation.SID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldSID,
+		})
+		_node.SID = &value
 	}
 	if value, ok := tc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"street/ent/file"
 	"street/ent/profile"
+	"street/ent/schema"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -20,6 +21,20 @@ type FileCreate struct {
 	config
 	mutation *FileMutation
 	hooks    []Hook
+}
+
+// SetSID sets the "SID" field.
+func (fc *FileCreate) SetSID(s schema.ID) *FileCreate {
+	fc.mutation.SetSID(s)
+	return fc
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (fc *FileCreate) SetNillableSID(s *schema.ID) *FileCreate {
+	if s != nil {
+		fc.SetSID(*s)
+	}
+	return fc
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -214,6 +229,10 @@ func (fc *FileCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (fc *FileCreate) defaults() {
+	if _, ok := fc.mutation.SID(); !ok {
+		v := file.DefaultSID()
+		fc.mutation.SetSID(v)
+	}
 	if _, ok := fc.mutation.CreateTime(); !ok {
 		v := file.DefaultCreateTime()
 		fc.mutation.SetCreateTime(v)
@@ -246,6 +265,11 @@ func (fc *FileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
+	if v, ok := fc.mutation.SID(); ok {
+		if err := file.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf(`ent: validator failed for field "SID": %w`, err)}
+		}
+	}
 	if _, ok := fc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
@@ -326,6 +350,14 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	if id, ok := fc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := fc.mutation.SID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: file.FieldSID,
+		})
+		_node.SID = &value
 	}
 	if value, ok := fc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"street/ent/episode"
 	"street/ent/profile"
+	"street/ent/schema"
 	"street/ent/series"
 	"time"
 
@@ -21,6 +22,20 @@ type EpisodeCreate struct {
 	config
 	mutation *EpisodeMutation
 	hooks    []Hook
+}
+
+// SetSID sets the "SID" field.
+func (ec *EpisodeCreate) SetSID(s schema.ID) *EpisodeCreate {
+	ec.mutation.SetSID(s)
+	return ec
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (ec *EpisodeCreate) SetNillableSID(s *schema.ID) *EpisodeCreate {
+	if s != nil {
+		ec.SetSID(*s)
+	}
+	return ec
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -170,6 +185,10 @@ func (ec *EpisodeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ec *EpisodeCreate) defaults() {
+	if _, ok := ec.mutation.SID(); !ok {
+		v := episode.DefaultSID()
+		ec.mutation.SetSID(v)
+	}
 	if _, ok := ec.mutation.CreateTime(); !ok {
 		v := episode.DefaultCreateTime()
 		ec.mutation.SetCreateTime(v)
@@ -186,6 +205,11 @@ func (ec *EpisodeCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ec *EpisodeCreate) check() error {
+	if v, ok := ec.mutation.SID(); ok {
+		if err := episode.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf(`ent: validator failed for field "SID": %w`, err)}
+		}
+	}
 	if _, ok := ec.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
@@ -242,6 +266,14 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 	if id, ok := ec.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := ec.mutation.SID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: episode.FieldSID,
+		})
+		_node.SID = &value
 	}
 	if value, ok := ec.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

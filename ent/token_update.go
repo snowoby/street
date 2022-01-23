@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"street/ent/account"
 	"street/ent/predicate"
+	"street/ent/schema"
 	"street/ent/token"
 	"time"
 
@@ -27,6 +28,26 @@ type TokenUpdate struct {
 // Where appends a list predicates to the TokenUpdate builder.
 func (tu *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
 	tu.mutation.Where(ps...)
+	return tu
+}
+
+// SetSID sets the "SID" field.
+func (tu *TokenUpdate) SetSID(s schema.ID) *TokenUpdate {
+	tu.mutation.SetSID(s)
+	return tu
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (tu *TokenUpdate) SetNillableSID(s *schema.ID) *TokenUpdate {
+	if s != nil {
+		tu.SetSID(*s)
+	}
+	return tu
+}
+
+// ClearSID clears the value of the "SID" field.
+func (tu *TokenUpdate) ClearSID() *TokenUpdate {
+	tu.mutation.ClearSID()
 	return tu
 }
 
@@ -141,6 +162,11 @@ func (tu *TokenUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tu *TokenUpdate) check() error {
+	if v, ok := tu.mutation.SID(); ok {
+		if err := token.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
+		}
+	}
 	if v, ok := tu.mutation.Body(); ok {
 		if err := token.BodyValidator(v); err != nil {
 			return &ValidationError{Name: "body", err: fmt.Errorf("ent: validator failed for field \"body\": %w", err)}
@@ -174,6 +200,19 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tu.mutation.SID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldSID,
+		})
+	}
+	if tu.mutation.SIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: token.FieldSID,
+		})
 	}
 	if value, ok := tu.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -255,6 +294,26 @@ type TokenUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *TokenMutation
+}
+
+// SetSID sets the "SID" field.
+func (tuo *TokenUpdateOne) SetSID(s schema.ID) *TokenUpdateOne {
+	tuo.mutation.SetSID(s)
+	return tuo
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (tuo *TokenUpdateOne) SetNillableSID(s *schema.ID) *TokenUpdateOne {
+	if s != nil {
+		tuo.SetSID(*s)
+	}
+	return tuo
+}
+
+// ClearSID clears the value of the "SID" field.
+func (tuo *TokenUpdateOne) ClearSID() *TokenUpdateOne {
+	tuo.mutation.ClearSID()
+	return tuo
 }
 
 // SetBody sets the "body" field.
@@ -375,6 +434,11 @@ func (tuo *TokenUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tuo *TokenUpdateOne) check() error {
+	if v, ok := tuo.mutation.SID(); ok {
+		if err := token.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
+		}
+	}
 	if v, ok := tuo.mutation.Body(); ok {
 		if err := token.BodyValidator(v); err != nil {
 			return &ValidationError{Name: "body", err: fmt.Errorf("ent: validator failed for field \"body\": %w", err)}
@@ -425,6 +489,19 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tuo.mutation.SID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldSID,
+		})
+	}
+	if tuo.mutation.SIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: token.FieldSID,
+		})
 	}
 	if value, ok := tuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

@@ -10,6 +10,7 @@ import (
 	"street/ent/episode"
 	"street/ent/file"
 	"street/ent/profile"
+	"street/ent/schema"
 	"street/ent/series"
 	"time"
 
@@ -23,6 +24,20 @@ type ProfileCreate struct {
 	config
 	mutation *ProfileMutation
 	hooks    []Hook
+}
+
+// SetSID sets the "SID" field.
+func (pc *ProfileCreate) SetSID(s schema.ID) *ProfileCreate {
+	pc.mutation.SetSID(s)
+	return pc
+}
+
+// SetNillableSID sets the "SID" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableSID(s *schema.ID) *ProfileCreate {
+	if s != nil {
+		pc.SetSID(*s)
+	}
+	return pc
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -204,6 +219,10 @@ func (pc *ProfileCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pc *ProfileCreate) defaults() {
+	if _, ok := pc.mutation.SID(); !ok {
+		v := profile.DefaultSID()
+		pc.mutation.SetSID(v)
+	}
 	if _, ok := pc.mutation.CreateTime(); !ok {
 		v := profile.DefaultCreateTime()
 		pc.mutation.SetCreateTime(v)
@@ -220,6 +239,11 @@ func (pc *ProfileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProfileCreate) check() error {
+	if v, ok := pc.mutation.SID(); ok {
+		if err := profile.SIDValidator(string(v)); err != nil {
+			return &ValidationError{Name: "SID", err: fmt.Errorf(`ent: validator failed for field "SID": %w`, err)}
+		}
+	}
 	if _, ok := pc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
@@ -284,6 +308,14 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := pc.mutation.SID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldSID,
+		})
+		_node.SID = &value
 	}
 	if value, ok := pc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
