@@ -5,6 +5,7 @@ package ent
 import (
 	"street/ent/account"
 	"street/ent/episode"
+	"street/ent/file"
 	"street/ent/profile"
 	"street/ent/schema"
 	"street/ent/series"
@@ -100,6 +101,97 @@ func init() {
 	episodeDescID := episodeMixinFields0[0].Descriptor()
 	// episode.DefaultID holds the default value on creation for the id field.
 	episode.DefaultID = episodeDescID.Default.(func() uuid.UUID)
+	fileMixin := schema.File{}.Mixin()
+	fileMixinFields0 := fileMixin[0].Fields()
+	_ = fileMixinFields0
+	fileMixinFields1 := fileMixin[1].Fields()
+	_ = fileMixinFields1
+	fileFields := schema.File{}.Fields()
+	_ = fileFields
+	// fileDescCreateTime is the schema descriptor for create_time field.
+	fileDescCreateTime := fileMixinFields1[0].Descriptor()
+	// file.DefaultCreateTime holds the default value on creation for the create_time field.
+	file.DefaultCreateTime = fileDescCreateTime.Default.(func() time.Time)
+	// fileDescUpdateTime is the schema descriptor for update_time field.
+	fileDescUpdateTime := fileMixinFields1[1].Descriptor()
+	// file.DefaultUpdateTime holds the default value on creation for the update_time field.
+	file.DefaultUpdateTime = fileDescUpdateTime.Default.(func() time.Time)
+	// file.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	file.UpdateDefaultUpdateTime = fileDescUpdateTime.UpdateDefault.(func() time.Time)
+	// fileDescFilename is the schema descriptor for filename field.
+	fileDescFilename := fileFields[0].Descriptor()
+	// file.DefaultFilename holds the default value on creation for the filename field.
+	file.DefaultFilename = fileDescFilename.Default.(string)
+	// file.FilenameValidator is a validator for the "filename" field. It is called by the builders before save.
+	file.FilenameValidator = func() func(string) error {
+		validators := fileDescFilename.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(filename string) error {
+			for _, fn := range fns {
+				if err := fn(filename); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileDescPath is the schema descriptor for path field.
+	fileDescPath := fileFields[1].Descriptor()
+	// file.DefaultPath holds the default value on creation for the path field.
+	file.DefaultPath = fileDescPath.Default.(string)
+	// file.PathValidator is a validator for the "path" field. It is called by the builders before save.
+	file.PathValidator = func() func(string) error {
+		validators := fileDescPath.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(_path string) error {
+			for _, fn := range fns {
+				if err := fn(_path); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileDescMime is the schema descriptor for mime field.
+	fileDescMime := fileFields[2].Descriptor()
+	// file.DefaultMime holds the default value on creation for the mime field.
+	file.DefaultMime = fileDescMime.Default.(string)
+	// file.MimeValidator is a validator for the "mime" field. It is called by the builders before save.
+	file.MimeValidator = func() func(string) error {
+		validators := fileDescMime.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(mime string) error {
+			for _, fn := range fns {
+				if err := fn(mime); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// fileDescStatus is the schema descriptor for status field.
+	fileDescStatus := fileFields[4].Descriptor()
+	// file.DefaultStatus holds the default value on creation for the status field.
+	file.DefaultStatus = fileDescStatus.Default.(string)
+	// file.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	file.StatusValidator = fileDescStatus.Validators[0].(func(string) error)
+	// fileDescNote is the schema descriptor for note field.
+	fileDescNote := fileFields[5].Descriptor()
+	// file.NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	file.NoteValidator = fileDescNote.Validators[0].(func(string) error)
+	// fileDescID is the schema descriptor for id field.
+	fileDescID := fileMixinFields0[0].Descriptor()
+	// file.DefaultID holds the default value on creation for the id field.
+	file.DefaultID = fileDescID.Default.(func() uuid.UUID)
 	profileMixin := schema.Profile{}.Mixin()
 	profileMixinFields0 := profileMixin[0].Fields()
 	_ = profileMixinFields0

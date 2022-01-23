@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"street/ent/account"
 	"street/ent/episode"
+	"street/ent/file"
 	"street/ent/profile"
 	"street/ent/series"
 	"street/ent/token"
@@ -35,6 +36,7 @@ func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		account.Table: account.ValidColumn,
 		episode.Table: episode.ValidColumn,
+		file.Table:    file.ValidColumn,
 		profile.Table: profile.ValidColumn,
 		series.Table:  series.ValidColumn,
 		token.Table:   token.ValidColumn,

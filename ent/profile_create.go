@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"street/ent/account"
 	"street/ent/episode"
+	"street/ent/file"
 	"street/ent/profile"
 	"street/ent/series"
 	"time"
@@ -115,6 +116,21 @@ func (pc *ProfileCreate) AddSeries(s ...*Series) *ProfileCreate {
 		ids[i] = s[i].ID
 	}
 	return pc.AddSeriesIDs(ids...)
+}
+
+// AddFileIDs adds the "file" edge to the File entity by IDs.
+func (pc *ProfileCreate) AddFileIDs(ids ...uuid.UUID) *ProfileCreate {
+	pc.mutation.AddFileIDs(ids...)
+	return pc
+}
+
+// AddFile adds the "file" edges to the File entity.
+func (pc *ProfileCreate) AddFile(f ...*File) *ProfileCreate {
+	ids := make([]uuid.UUID, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return pc.AddFileIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -359,6 +375,25 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: series.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.FileTable,
+			Columns: []string{profile.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: file.FieldID,
 				},
 			},
 		}

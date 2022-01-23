@@ -26,6 +26,7 @@ type config struct {
 type hooks struct {
 	Account []ent.Hook
 	Episode []ent.Hook
+	File    []ent.Hook
 	Profile []ent.Hook
 	Series  []ent.Hook
 	Token   []ent.Hook

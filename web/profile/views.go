@@ -26,7 +26,6 @@ type ID struct {
 
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	var profile Profile
-	//fmt.Println(ioutil.ReadAll(ctx.Request.Body))
 	err := ctx.ShouldBindJSON(&profile)
 	if err != nil {
 		return 0, nil, errs.BindingError(err)
@@ -50,7 +49,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 }
 
 func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, interface{}, error) {
-	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
 	var profile Profile
 	err := ctx.ShouldBindJSON(&profile)
@@ -58,7 +57,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 		return 0, nil, errs.BindingError(err)
 	}
 
-	p, err := store.UpdateProfile(ctx, *objectID, profile.Title, profile.CallSign, profile.Category)
+	p, err := store.UpdateProfile(ctx, objectID, profile.Title, profile.CallSign, profile.Category)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -68,8 +67,8 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 }
 
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
-	ps, err := store.FindProfileByID(ctx, *objectID)
+	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
+	ps, err := store.FindProfileByID(ctx, objectID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -82,8 +81,8 @@ func accountProfiles(_ *gin.Context, _ *data.Store, identity *controller.Identit
 }
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
-	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
-	ok, err := store.Profile().IsOwner(ctx, operator.Profile().ID, *objectID)
+	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
+	ok, err := store.Profile().IsOwner(ctx, operator.Profile().ID, objectID)
 	if err != nil {
 		return err
 	}

@@ -11,8 +11,10 @@ import (
 	"street/ent"
 	"street/pkg/controller"
 	"street/pkg/data"
+	"street/pkg/data/storage"
 	"street/web/account"
 	"street/web/episode"
+	"street/web/file"
 	"street/web/middleware"
 	"street/web/profile"
 	"street/web/series"
@@ -37,7 +39,7 @@ func storeSetup() controller.Controller {
 	if err != nil {
 		panic(err)
 	}
-	store := data.New(client)
+	store := data.New(client, storage.New())
 	return controller.New(store)
 }
 
@@ -64,10 +66,16 @@ func setup() *gin.Engine {
 	g = r.Group("/episode")
 	episode.Routers(g, ctrl)
 
+	g = r.Group("/file")
+	file.Routers(g, ctrl)
+
 	return r
 }
 
 func main() {
 
-	setup().Run(fmt.Sprintf("%s:%s", os.Getenv("address"), os.Getenv("port")))
+	err := setup().Run(fmt.Sprintf("%s:%s", os.Getenv("address"), os.Getenv("port")))
+	if err != nil {
+		panic(err)
+	}
 }

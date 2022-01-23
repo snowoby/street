@@ -29,6 +29,8 @@ const (
 	EdgeEpisode = "episode"
 	// EdgeSeries holds the string denoting the series edge name in mutations.
 	EdgeSeries = "series"
+	// EdgeFile holds the string denoting the file edge name in mutations.
+	EdgeFile = "file"
 	// Table holds the table name of the profile in the database.
 	Table = "profiles"
 	// AccountTable is the table that holds the account relation/edge.
@@ -52,6 +54,13 @@ const (
 	SeriesInverseTable = "series"
 	// SeriesColumn is the table column denoting the series relation/edge.
 	SeriesColumn = "profile_series"
+	// FileTable is the table that holds the file relation/edge.
+	FileTable = "files"
+	// FileInverseTable is the table name for the File entity.
+	// It exists in this package in order to avoid circular dependency with the "file" package.
+	FileInverseTable = "files"
+	// FileColumn is the table column denoting the file relation/edge.
+	FileColumn = "profile_file"
 )
 
 // Columns holds all SQL columns for profile fields.

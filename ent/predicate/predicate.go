@@ -12,6 +12,9 @@ type Account func(*sql.Selector)
 // Episode is the predicate function for episode builders.
 type Episode func(*sql.Selector)
 
+// File is the predicate function for file builders.
+type File func(*sql.Selector)
+
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
 

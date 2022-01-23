@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
-	"street/ent"
 	"street/errs"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -20,8 +19,8 @@ type ID struct {
 	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
 }
 
-func create(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	profile := ctx.MustGet(value.StringProfile).(*ent.Profile)
+func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
+	profile := identity.Profile()
 
 	var series TitleContent
 	err := ctx.ShouldBindJSON(&series)
@@ -38,7 +37,7 @@ func create(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 }
 
 func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	id := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
 	var series TitleContent
 	err := ctx.ShouldBindJSON(&series)
@@ -46,7 +45,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	ep, err := store.Series().Update(ctx, *id, series.Title, series.Content)
+	ep, err := store.Series().Update(ctx, id, series.Title, series.Content)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -55,9 +54,9 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 }
 
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	id := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	ep, err := store.Series().FindByID(ctx, *id)
+	ep, err := store.Series().FindByID(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -67,9 +66,9 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 }
 
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	id := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
+	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	err := store.Series().Delete(ctx, *id)
+	err := store.Series().Delete(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -79,8 +78,8 @@ func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 }
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
-	objectID := ctx.MustGet(value.StringObjectUUID).(*uuid.UUID)
-	ok, err := store.Series().IsOwner(ctx, operator.Profile().ID, *objectID)
+	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
+	ok, err := store.Series().IsOwner(ctx, operator.Profile().ID, objectID)
 	if err != nil {
 		return err
 	}

@@ -59,6 +59,33 @@ var (
 			},
 		},
 	}
+	// FilesColumns holds the columns for the "files" table.
+	FilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "filename", Type: field.TypeString, Size: 320, Default: "file"},
+		{Name: "path", Type: field.TypeString, Size: 64, Default: "media"},
+		{Name: "mime", Type: field.TypeString, Size: 320, Default: "application/octet-stream"},
+		{Name: "size", Type: field.TypeInt},
+		{Name: "status", Type: field.TypeString, Size: 16, Default: "created"},
+		{Name: "note", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "profile_file", Type: field.TypeUUID, Nullable: true},
+	}
+	// FilesTable holds the schema information for the "files" table.
+	FilesTable = &schema.Table{
+		Name:       "files",
+		Columns:    FilesColumns,
+		PrimaryKey: []*schema.Column{FilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "files_profiles_file",
+				Columns:    []*schema.Column{FilesColumns[9]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// ProfilesColumns holds the columns for the "profiles" table.
 	ProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -161,6 +188,7 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		EpisodesTable,
+		FilesTable,
 		ProfilesTable,
 		SeriesTable,
 		TokensTable,
@@ -170,6 +198,7 @@ var (
 func init() {
 	EpisodesTable.ForeignKeys[0].RefTable = ProfilesTable
 	EpisodesTable.ForeignKeys[1].RefTable = SeriesTable
+	FilesTable.ForeignKeys[0].RefTable = ProfilesTable
 	ProfilesTable.ForeignKeys[0].RefTable = AccountsTable
 	SeriesTable.ForeignKeys[0].RefTable = ProfilesTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable

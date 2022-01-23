@@ -14,10 +14,8 @@ func TryUriUUID(ctx *gin.Context) {
 
 	var id ID
 	err := ctx.ShouldBindUri(id)
-	if err != nil {
-		ctx.Set(value.StringObjectUUID, nil)
-	} else {
-		ctx.Set(value.StringObjectUUID, &id)
+	if err == nil {
+		ctx.Set(value.StringObjectUUID, id)
 	}
 	ctx.Next()
 }
