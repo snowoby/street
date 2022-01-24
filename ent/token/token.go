@@ -74,8 +74,6 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultSID holds the default value on creation for the "SID" field.
 	DefaultSID func() schema.ID
-	// SIDValidator is a validator for the "SID" field. It is called by the builders before save.
-	SIDValidator func(string) error
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.

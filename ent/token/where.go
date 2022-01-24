@@ -213,60 +213,6 @@ func SIDLTE(v schema.ID) predicate.Token {
 	})
 }
 
-// SIDContains applies the Contains predicate on the "SID" field.
-func SIDContains(v schema.ID) predicate.Token {
-	vc := string(v)
-	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldSID), vc))
-	})
-}
-
-// SIDHasPrefix applies the HasPrefix predicate on the "SID" field.
-func SIDHasPrefix(v schema.ID) predicate.Token {
-	vc := string(v)
-	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldSID), vc))
-	})
-}
-
-// SIDHasSuffix applies the HasSuffix predicate on the "SID" field.
-func SIDHasSuffix(v schema.ID) predicate.Token {
-	vc := string(v)
-	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldSID), vc))
-	})
-}
-
-// SIDIsNil applies the IsNil predicate on the "SID" field.
-func SIDIsNil() predicate.Token {
-	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldSID)))
-	})
-}
-
-// SIDNotNil applies the NotNil predicate on the "SID" field.
-func SIDNotNil() predicate.Token {
-	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldSID)))
-	})
-}
-
-// SIDEqualFold applies the EqualFold predicate on the "SID" field.
-func SIDEqualFold(v schema.ID) predicate.Token {
-	vc := string(v)
-	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldSID), vc))
-	})
-}
-
-// SIDContainsFold applies the ContainsFold predicate on the "SID" field.
-func SIDContainsFold(v schema.ID) predicate.Token {
-	vc := string(v)
-	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldSID), vc))
-	})
-}
-
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {

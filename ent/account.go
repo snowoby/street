@@ -19,7 +19,7 @@ type Account struct {
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
 	// SID holds the value of the "SID" field.
-	SID *schema.ID `json:"SID,omitempty"`
+	SID schema.ID `json:"SID,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
@@ -68,7 +68,7 @@ func (*Account) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case account.FieldSID:
-			values[i] = &sql.NullScanner{S: new(schema.ID)}
+			values[i] = new(schema.ID)
 		case account.FieldEmail, account.FieldPassword:
 			values[i] = new(sql.NullString)
 		case account.FieldCreateTime, account.FieldUpdateTime:
@@ -97,11 +97,10 @@ func (a *Account) assignValues(columns []string, values []interface{}) error {
 				a.ID = *value
 			}
 		case account.FieldSID:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
+			if value, ok := values[i].(*schema.ID); !ok {
 				return fmt.Errorf("unexpected type %T for field SID", values[i])
-			} else if value.Valid {
-				a.SID = new(schema.ID)
-				*a.SID = *value.S.(*schema.ID)
+			} else if value != nil {
+				a.SID = *value
 			}
 		case account.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -165,10 +164,8 @@ func (a *Account) String() string {
 	var builder strings.Builder
 	builder.WriteString("Account(")
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
-	if v := a.SID; v != nil {
-		builder.WriteString(", SID=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString(", SID=")
+	builder.WriteString(fmt.Sprintf("%v", a.SID))
 	builder.WriteString(", create_time=")
 	builder.WriteString(a.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")

@@ -47,12 +47,6 @@ func (pu *ProfileUpdate) SetNillableSID(s *schema.ID) *ProfileUpdate {
 	return pu
 }
 
-// ClearSID clears the value of the "SID" field.
-func (pu *ProfileUpdate) ClearSID() *ProfileUpdate {
-	pu.mutation.ClearSID()
-	return pu
-}
-
 // SetTitle sets the "title" field.
 func (pu *ProfileUpdate) SetTitle(s string) *ProfileUpdate {
 	pu.mutation.SetTitle(s)
@@ -272,11 +266,6 @@ func (pu *ProfileUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pu *ProfileUpdate) check() error {
-	if v, ok := pu.mutation.SID(); ok {
-		if err := profile.SIDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
-		}
-	}
 	if v, ok := pu.mutation.Title(); ok {
 		if err := profile.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
@@ -318,14 +307,8 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.SID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt64,
 			Value:  value,
-			Column: profile.FieldSID,
-		})
-	}
-	if pu.mutation.SIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: profile.FieldSID,
 		})
 	}
@@ -587,12 +570,6 @@ func (puo *ProfileUpdateOne) SetNillableSID(s *schema.ID) *ProfileUpdateOne {
 	return puo
 }
 
-// ClearSID clears the value of the "SID" field.
-func (puo *ProfileUpdateOne) ClearSID() *ProfileUpdateOne {
-	puo.mutation.ClearSID()
-	return puo
-}
-
 // SetTitle sets the "title" field.
 func (puo *ProfileUpdateOne) SetTitle(s string) *ProfileUpdateOne {
 	puo.mutation.SetTitle(s)
@@ -819,11 +796,6 @@ func (puo *ProfileUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (puo *ProfileUpdateOne) check() error {
-	if v, ok := puo.mutation.SID(); ok {
-		if err := profile.SIDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
-		}
-	}
 	if v, ok := puo.mutation.Title(); ok {
 		if err := profile.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
@@ -882,14 +854,8 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 	}
 	if value, ok := puo.mutation.SID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt64,
 			Value:  value,
-			Column: profile.FieldSID,
-		})
-	}
-	if puo.mutation.SIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: profile.FieldSID,
 		})
 	}

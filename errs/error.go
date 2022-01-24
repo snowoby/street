@@ -65,20 +65,14 @@ func DatabaseError(err error) HTTPError {
 
 func Detect(err error) HTTPError {
 	// TODO
-	switch err.(type) {
+	switch t := err.(type) {
 	case HTTPError:
-		e := err.(HTTPError)
-		return e
-	case *ent.NotFoundError:
-	case *ent.NotLoadedError:
-	case *ent.NotSingularError:
-	case *ent.ValidationError:
-	case *ent.ConstraintError:
-		return DatabaseError(err)
+		return t
+	case *ent.NotFoundError, *ent.NotLoadedError, *ent.NotSingularError, *ent.ValidationError, *ent.ConstraintError:
+		return DatabaseError(t)
 	default:
 		return WTF(err)
 	}
-	return HTTPError{}
 }
 
 var (

@@ -163,7 +163,7 @@ func (m *AccountMutation) SID() (r schema.ID, exists bool) {
 // OldSID returns the old "SID" field's value of the Account entity.
 // If the Account object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
+func (m *AccountMutation) OldSID(ctx context.Context) (v schema.ID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSID is only allowed on UpdateOne operations")
 	}
@@ -177,22 +177,9 @@ func (m *AccountMutation) OldSID(ctx context.Context) (v *schema.ID, err error) 
 	return oldValue.SID, nil
 }
 
-// ClearSID clears the value of the "SID" field.
-func (m *AccountMutation) ClearSID() {
-	m._SID = nil
-	m.clearedFields[account.FieldSID] = struct{}{}
-}
-
-// SIDCleared returns if the "SID" field was cleared in this mutation.
-func (m *AccountMutation) SIDCleared() bool {
-	_, ok := m.clearedFields[account.FieldSID]
-	return ok
-}
-
 // ResetSID resets all changes to the "SID" field.
 func (m *AccountMutation) ResetSID() {
 	m._SID = nil
-	delete(m.clearedFields, account.FieldSID)
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -570,13 +557,16 @@ func (m *AccountMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *AccountMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *AccountMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -592,11 +582,7 @@ func (m *AccountMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AccountMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(account.FieldSID) {
-		fields = append(fields, account.FieldSID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -609,11 +595,6 @@ func (m *AccountMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AccountMutation) ClearField(name string) error {
-	switch name {
-	case account.FieldSID:
-		m.ClearSID()
-		return nil
-	}
 	return fmt.Errorf("unknown Account nullable field %s", name)
 }
 
@@ -873,7 +854,7 @@ func (m *EpisodeMutation) SID() (r schema.ID, exists bool) {
 // OldSID returns the old "SID" field's value of the Episode entity.
 // If the Episode object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EpisodeMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
+func (m *EpisodeMutation) OldSID(ctx context.Context) (v schema.ID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSID is only allowed on UpdateOne operations")
 	}
@@ -887,22 +868,9 @@ func (m *EpisodeMutation) OldSID(ctx context.Context) (v *schema.ID, err error) 
 	return oldValue.SID, nil
 }
 
-// ClearSID clears the value of the "SID" field.
-func (m *EpisodeMutation) ClearSID() {
-	m._SID = nil
-	m.clearedFields[episode.FieldSID] = struct{}{}
-}
-
-// SIDCleared returns if the "SID" field was cleared in this mutation.
-func (m *EpisodeMutation) SIDCleared() bool {
-	_, ok := m.clearedFields[episode.FieldSID]
-	return ok
-}
-
 // ResetSID resets all changes to the "SID" field.
 func (m *EpisodeMutation) ResetSID() {
 	m._SID = nil
-	delete(m.clearedFields, episode.FieldSID)
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -1250,13 +1218,16 @@ func (m *EpisodeMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *EpisodeMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *EpisodeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -1272,11 +1243,7 @@ func (m *EpisodeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *EpisodeMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(episode.FieldSID) {
-		fields = append(fields, episode.FieldSID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1289,11 +1256,6 @@ func (m *EpisodeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *EpisodeMutation) ClearField(name string) error {
-	switch name {
-	case episode.FieldSID:
-		m.ClearSID()
-		return nil
-	}
 	return fmt.Errorf("unknown Episode nullable field %s", name)
 }
 
@@ -1540,7 +1502,7 @@ func (m *FileMutation) SID() (r schema.ID, exists bool) {
 // OldSID returns the old "SID" field's value of the File entity.
 // If the File object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FileMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
+func (m *FileMutation) OldSID(ctx context.Context) (v schema.ID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSID is only allowed on UpdateOne operations")
 	}
@@ -1554,22 +1516,9 @@ func (m *FileMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
 	return oldValue.SID, nil
 }
 
-// ClearSID clears the value of the "SID" field.
-func (m *FileMutation) ClearSID() {
-	m._SID = nil
-	m.clearedFields[file.FieldSID] = struct{}{}
-}
-
-// SIDCleared returns if the "SID" field was cleared in this mutation.
-func (m *FileMutation) SIDCleared() bool {
-	_, ok := m.clearedFields[file.FieldSID]
-	return ok
-}
-
 // ResetSID resets all changes to the "SID" field.
 func (m *FileMutation) ResetSID() {
 	m._SID = nil
-	delete(m.clearedFields, file.FieldSID)
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -2149,9 +2098,6 @@ func (m *FileMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *FileMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(file.FieldSID) {
-		fields = append(fields, file.FieldSID)
-	}
 	if m.FieldCleared(file.FieldNote) {
 		fields = append(fields, file.FieldNote)
 	}
@@ -2169,9 +2115,6 @@ func (m *FileMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *FileMutation) ClearField(name string) error {
 	switch name {
-	case file.FieldSID:
-		m.ClearSID()
-		return nil
 	case file.FieldNote:
 		m.ClearNote()
 		return nil
@@ -2421,7 +2364,7 @@ func (m *ProfileMutation) SID() (r schema.ID, exists bool) {
 // OldSID returns the old "SID" field's value of the Profile entity.
 // If the Profile object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProfileMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
+func (m *ProfileMutation) OldSID(ctx context.Context) (v schema.ID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSID is only allowed on UpdateOne operations")
 	}
@@ -2435,22 +2378,9 @@ func (m *ProfileMutation) OldSID(ctx context.Context) (v *schema.ID, err error) 
 	return oldValue.SID, nil
 }
 
-// ClearSID clears the value of the "SID" field.
-func (m *ProfileMutation) ClearSID() {
-	m._SID = nil
-	m.clearedFields[profile.FieldSID] = struct{}{}
-}
-
-// SIDCleared returns if the "SID" field was cleared in this mutation.
-func (m *ProfileMutation) SIDCleared() bool {
-	_, ok := m.clearedFields[profile.FieldSID]
-	return ok
-}
-
 // ResetSID resets all changes to the "SID" field.
 func (m *ProfileMutation) ResetSID() {
 	m._SID = nil
-	delete(m.clearedFields, profile.FieldSID)
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -2971,13 +2901,16 @@ func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *ProfileMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *ProfileMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -2993,11 +2926,7 @@ func (m *ProfileMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ProfileMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(profile.FieldSID) {
-		fields = append(fields, profile.FieldSID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3010,11 +2939,6 @@ func (m *ProfileMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ProfileMutation) ClearField(name string) error {
-	switch name {
-	case profile.FieldSID:
-		m.ClearSID()
-		return nil
-	}
 	return fmt.Errorf("unknown Profile nullable field %s", name)
 }
 
@@ -3323,7 +3247,7 @@ func (m *SeriesMutation) SID() (r schema.ID, exists bool) {
 // OldSID returns the old "SID" field's value of the Series entity.
 // If the Series object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SeriesMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
+func (m *SeriesMutation) OldSID(ctx context.Context) (v schema.ID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSID is only allowed on UpdateOne operations")
 	}
@@ -3337,22 +3261,9 @@ func (m *SeriesMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
 	return oldValue.SID, nil
 }
 
-// ClearSID clears the value of the "SID" field.
-func (m *SeriesMutation) ClearSID() {
-	m._SID = nil
-	m.clearedFields[series.FieldSID] = struct{}{}
-}
-
-// SIDCleared returns if the "SID" field was cleared in this mutation.
-func (m *SeriesMutation) SIDCleared() bool {
-	_, ok := m.clearedFields[series.FieldSID]
-	return ok
-}
-
 // ResetSID resets all changes to the "SID" field.
 func (m *SeriesMutation) ResetSID() {
 	m._SID = nil
-	delete(m.clearedFields, series.FieldSID)
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -3778,13 +3689,16 @@ func (m *SeriesMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SeriesMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SeriesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -3801,9 +3715,6 @@ func (m *SeriesMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *SeriesMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(series.FieldSID) {
-		fields = append(fields, series.FieldSID)
-	}
 	if m.FieldCleared(series.FieldCallSign) {
 		fields = append(fields, series.FieldCallSign)
 	}
@@ -3821,9 +3732,6 @@ func (m *SeriesMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *SeriesMutation) ClearField(name string) error {
 	switch name {
-	case series.FieldSID:
-		m.ClearSID()
-		return nil
 	case series.FieldCallSign:
 		m.ClearCallSign()
 		return nil
@@ -4081,7 +3989,7 @@ func (m *TokenMutation) SID() (r schema.ID, exists bool) {
 // OldSID returns the old "SID" field's value of the Token entity.
 // If the Token object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TokenMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
+func (m *TokenMutation) OldSID(ctx context.Context) (v schema.ID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSID is only allowed on UpdateOne operations")
 	}
@@ -4095,22 +4003,9 @@ func (m *TokenMutation) OldSID(ctx context.Context) (v *schema.ID, err error) {
 	return oldValue.SID, nil
 }
 
-// ClearSID clears the value of the "SID" field.
-func (m *TokenMutation) ClearSID() {
-	m._SID = nil
-	m.clearedFields[token.FieldSID] = struct{}{}
-}
-
-// SIDCleared returns if the "SID" field was cleared in this mutation.
-func (m *TokenMutation) SIDCleared() bool {
-	_, ok := m.clearedFields[token.FieldSID]
-	return ok
-}
-
 // ResetSID resets all changes to the "SID" field.
 func (m *TokenMutation) ResetSID() {
 	m._SID = nil
-	delete(m.clearedFields, token.FieldSID)
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -4469,13 +4364,16 @@ func (m *TokenMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TokenMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TokenMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -4491,11 +4389,7 @@ func (m *TokenMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TokenMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(token.FieldSID) {
-		fields = append(fields, token.FieldSID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -4508,11 +4402,6 @@ func (m *TokenMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TokenMutation) ClearField(name string) error {
-	switch name {
-	case token.FieldSID:
-		m.ClearSID()
-		return nil
-	}
 	return fmt.Errorf("unknown Token nullable field %s", name)
 }
 

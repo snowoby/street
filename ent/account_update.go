@@ -44,12 +44,6 @@ func (au *AccountUpdate) SetNillableSID(s *schema.ID) *AccountUpdate {
 	return au
 }
 
-// ClearSID clears the value of the "SID" field.
-func (au *AccountUpdate) ClearSID() *AccountUpdate {
-	au.mutation.ClearSID()
-	return au
-}
-
 // SetEmail sets the "email" field.
 func (au *AccountUpdate) SetEmail(s string) *AccountUpdate {
 	au.mutation.SetEmail(s)
@@ -210,11 +204,6 @@ func (au *AccountUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (au *AccountUpdate) check() error {
-	if v, ok := au.mutation.SID(); ok {
-		if err := account.SIDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
-		}
-	}
 	if v, ok := au.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf("ent: validator failed for field \"email\": %w", err)}
@@ -243,14 +232,8 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.SID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt64,
 			Value:  value,
-			Column: account.FieldSID,
-		})
-	}
-	if au.mutation.SIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: account.FieldSID,
 		})
 	}
@@ -413,12 +396,6 @@ func (auo *AccountUpdateOne) SetNillableSID(s *schema.ID) *AccountUpdateOne {
 	if s != nil {
 		auo.SetSID(*s)
 	}
-	return auo
-}
-
-// ClearSID clears the value of the "SID" field.
-func (auo *AccountUpdateOne) ClearSID() *AccountUpdateOne {
-	auo.mutation.ClearSID()
 	return auo
 }
 
@@ -589,11 +566,6 @@ func (auo *AccountUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (auo *AccountUpdateOne) check() error {
-	if v, ok := auo.mutation.SID(); ok {
-		if err := account.SIDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
-		}
-	}
 	if v, ok := auo.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf("ent: validator failed for field \"email\": %w", err)}
@@ -639,14 +611,8 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	if value, ok := auo.mutation.SID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt64,
 			Value:  value,
-			Column: account.FieldSID,
-		})
-	}
-	if auo.mutation.SIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: account.FieldSID,
 		})
 	}

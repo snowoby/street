@@ -20,7 +20,7 @@ type Token struct {
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
 	// SID holds the value of the "SID" field.
-	SID *schema.ID `json:"SID,omitempty"`
+	SID schema.ID `json:"SID,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
@@ -66,7 +66,7 @@ func (*Token) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case token.FieldSID:
-			values[i] = &sql.NullScanner{S: new(schema.ID)}
+			values[i] = new(schema.ID)
 		case token.FieldBody, token.FieldType:
 			values[i] = new(sql.NullString)
 		case token.FieldCreateTime, token.FieldUpdateTime, token.FieldExpireTime:
@@ -97,11 +97,10 @@ func (t *Token) assignValues(columns []string, values []interface{}) error {
 				t.ID = *value
 			}
 		case token.FieldSID:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
+			if value, ok := values[i].(*schema.ID); !ok {
 				return fmt.Errorf("unexpected type %T for field SID", values[i])
-			} else if value.Valid {
-				t.SID = new(schema.ID)
-				*t.SID = *value.S.(*schema.ID)
+			} else if value != nil {
+				t.SID = *value
 			}
 		case token.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -173,10 +172,8 @@ func (t *Token) String() string {
 	var builder strings.Builder
 	builder.WriteString("Token(")
 	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	if v := t.SID; v != nil {
-		builder.WriteString(", SID=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString(", SID=")
+	builder.WriteString(fmt.Sprintf("%v", t.SID))
 	builder.WriteString(", create_time=")
 	builder.WriteString(t.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")

@@ -11,7 +11,7 @@ var (
 	// AccountsColumns holds the columns for the "accounts" table.
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "sid", Type: field.TypeInt64, Unique: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 320},
@@ -33,7 +33,7 @@ var (
 	// EpisodesColumns holds the columns for the "episodes" table.
 	EpisodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "sid", Type: field.TypeInt64, Unique: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
@@ -64,7 +64,7 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "sid", Type: field.TypeInt64, Unique: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "filename", Type: field.TypeString, Size: 320, Default: "file"},
@@ -92,7 +92,7 @@ var (
 	// ProfilesColumns holds the columns for the "profiles" table.
 	ProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "sid", Type: field.TypeInt64, Unique: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
@@ -129,7 +129,7 @@ var (
 	// SeriesColumns holds the columns for the "series" table.
 	SeriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "sid", Type: field.TypeInt64, Unique: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
@@ -161,7 +161,7 @@ var (
 	// TokensColumns holds the columns for the "tokens" table.
 	TokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "sid", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "sid", Type: field.TypeInt64, Unique: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "body", Type: field.TypeString, Unique: true, Size: 320},

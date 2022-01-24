@@ -227,10 +227,8 @@ func (sc *SeriesCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SeriesCreate) check() error {
-	if v, ok := sc.mutation.SID(); ok {
-		if err := series.SIDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "SID", err: fmt.Errorf(`ent: validator failed for field "SID": %w`, err)}
-		}
+	if _, ok := sc.mutation.SID(); !ok {
+		return &ValidationError{Name: "SID", err: errors.New(`ent: missing required field "SID"`)}
 	}
 	if _, ok := sc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
@@ -291,11 +289,11 @@ func (sc *SeriesCreate) createSpec() (*Series, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := sc.mutation.SID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: series.FieldSID,
 		})
-		_node.SID = &value
+		_node.SID = value
 	}
 	if value, ok := sc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

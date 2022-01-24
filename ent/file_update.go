@@ -44,12 +44,6 @@ func (fu *FileUpdate) SetNillableSID(s *schema.ID) *FileUpdate {
 	return fu
 }
 
-// ClearSID clears the value of the "SID" field.
-func (fu *FileUpdate) ClearSID() *FileUpdate {
-	fu.mutation.ClearSID()
-	return fu
-}
-
 // SetFilename sets the "filename" field.
 func (fu *FileUpdate) SetFilename(s string) *FileUpdate {
 	fu.mutation.SetFilename(s)
@@ -232,11 +226,6 @@ func (fu *FileUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fu *FileUpdate) check() error {
-	if v, ok := fu.mutation.SID(); ok {
-		if err := file.SIDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
-		}
-	}
 	if v, ok := fu.mutation.Filename(); ok {
 		if err := file.FilenameValidator(v); err != nil {
 			return &ValidationError{Name: "filename", err: fmt.Errorf("ent: validator failed for field \"filename\": %w", err)}
@@ -288,14 +277,8 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := fu.mutation.SID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt64,
 			Value:  value,
-			Column: file.FieldSID,
-		})
-	}
-	if fu.mutation.SIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: file.FieldSID,
 		})
 	}
@@ -426,12 +409,6 @@ func (fuo *FileUpdateOne) SetNillableSID(s *schema.ID) *FileUpdateOne {
 	if s != nil {
 		fuo.SetSID(*s)
 	}
-	return fuo
-}
-
-// ClearSID clears the value of the "SID" field.
-func (fuo *FileUpdateOne) ClearSID() *FileUpdateOne {
-	fuo.mutation.ClearSID()
 	return fuo
 }
 
@@ -624,11 +601,6 @@ func (fuo *FileUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fuo *FileUpdateOne) check() error {
-	if v, ok := fuo.mutation.SID(); ok {
-		if err := file.SIDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "SID", err: fmt.Errorf("ent: validator failed for field \"SID\": %w", err)}
-		}
-	}
 	if v, ok := fuo.mutation.Filename(); ok {
 		if err := file.FilenameValidator(v); err != nil {
 			return &ValidationError{Name: "filename", err: fmt.Errorf("ent: validator failed for field \"filename\": %w", err)}
@@ -697,14 +669,8 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 	}
 	if value, ok := fuo.mutation.SID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt64,
 			Value:  value,
-			Column: file.FieldSID,
-		})
-	}
-	if fuo.mutation.SIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: file.FieldSID,
 		})
 	}

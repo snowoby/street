@@ -93,7 +93,7 @@ func (s *Storage) CompleteMultiPart(key string, uploadID string, fileParts []*s3
 	//		PartNumber: aws.Int64(int64(part.PartNumber)),
 	//	}
 	//}
-
+	// TODO sort
 	completeInput := &s3.CompleteMultipartUploadInput{
 		Bucket:   aws.String(s.bucketName),
 		Key:      aws.String(key),

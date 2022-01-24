@@ -19,7 +19,7 @@ type IDMixin struct {
 
 type ID string
 
-func (i *ID) Value() (driver.Value, error) {
+func (i ID) Value() (driver.Value, error) {
 
 	return i.ToInt64()
 }
@@ -66,16 +66,9 @@ func Int64ToString(value int64) string {
 
 func (IDMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("SID").GoType(ID("")).DefaultFunc(func() ID {
+		field.Int64("SID").GoType(ID("")).DefaultFunc(func() ID {
 			return ID(utils.RandomString(10))
-		}).Unique().Validate(func(s string) error {
-			for i := 0; i < len(s); i++ {
-				if strings.IndexByte(alphabet, s[i]) == -1 {
-					return errors.New("not a valid base62")
-				}
-			}
-			return nil
-		}).Nillable().Optional(),
+		}).Unique(),
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
 	}
 }
