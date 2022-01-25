@@ -7,17 +7,17 @@ package middleware
 //	var object ID
 //	ok := utils.MustBindUri(ctx, &object)
 //	if !ok {
-//		ctx.AbortWithStatusJSON(errs.NotFoundError.Code(), errs.NotFoundError)
+//		ctx.AbortWithStatusJSON(errs.NotFoundError.Code, errs.NotFoundError)
 //		return
 //	}
 //	ok, err := owner.IsOwner(ctx, operator.ID, object.ID)
 //	if err != nil {
 //		e := errs.DatabaseError(err)
-//		ctx.AbortWithStatusJSON(e.Code(), e)
+//		ctx.AbortWithStatusJSON(e.Code, e)
 //		return
 //	}
 //	if !ok {
-//		ctx.AbortWithStatusJSON(errs.NotBelongsToOperator.Code(), errs.NotBelongsToOperator)
+//		ctx.AbortWithStatusJSON(errs.NotBelongsToOperator.Code, errs.NotBelongsToOperator)
 //		return
 //	}
 //

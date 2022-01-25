@@ -46,7 +46,7 @@ func TryProfile(ctx *gin.Context, store *data.Store) {
 func MustProfile(ctx *gin.Context) {
 	_, ok := ctx.Get(value.StringProfile)
 	if !ok {
-		ctx.AbortWithStatusJSON(errs.ProfileIdentityError.Code(), errs.ProfileIdentityError)
+		ctx.AbortWithStatusJSON(errs.ProfileIdentityError.Code, errs.ProfileIdentityError)
 		return
 	}
 	ctx.Next()

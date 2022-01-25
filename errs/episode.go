@@ -3,5 +3,5 @@ package errs
 import "net/http"
 
 var (
-	NotBelongsToOperator = HTTPError{code: http.StatusForbidden, message: "cannot operate"}
+	NotBelongsToOperator = HTTPError{Code: http.StatusForbidden, Message: "cannot operate"}
 )

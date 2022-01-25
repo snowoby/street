@@ -23,7 +23,7 @@ func TryUriUUID(ctx *gin.Context) {
 func MustUriUUID(ctx *gin.Context) {
 	_, ok := ctx.Get(value.StringObjectUUID)
 	if !ok {
-		ctx.AbortWithStatusJSON(errs.NotFoundError.Code(), errs.NotFoundError)
+		ctx.AbortWithStatusJSON(errs.NotFoundError.Code, errs.NotFoundError)
 	}
 	ctx.Next()
 }

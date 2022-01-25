@@ -16,7 +16,7 @@ import (
 	"street/pkg/data/value"
 )
 
-type FileMeta struct {
+type Meta struct {
 	Filename string `json:"filename"`
 	Mime     string `json:"mime" binding:"required"`
 	Size     int    `json:"size" binding:"required"`
@@ -39,7 +39,7 @@ type CreateOutput struct {
 }
 
 func create(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
-	var meta FileMeta
+	var meta Meta
 	err := ctx.ShouldBindJSON(&meta)
 	if err != nil {
 		return 0, nil, err

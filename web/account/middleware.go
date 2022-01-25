@@ -60,7 +60,7 @@ func tryToken(ctx *gin.Context, store *data.Store, tokenType string) *ent.Token 
 func MustLogin(ctx *gin.Context) {
 	_, ok := ctx.Get(value.StringAccount)
 	if !ok {
-		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code(), errs.UnauthorizedError)
+		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, &errs.UnauthorizedError)
 		return
 	}
 	ctx.Next()

@@ -36,9 +36,9 @@ func New(store *data.Store) *controller {
 func resultProcess(ctx *gin.Context, code int, responseValue interface{}, err error) {
 	if err != nil {
 		responseError := errs.Detect(err)
-		ctx.AbortWithStatusJSON(responseError.Code(), struct {
+		ctx.AbortWithStatusJSON(responseError.Code, struct {
 			Message string `json:"message"`
-		}{responseError.Message()})
+		}{responseError.Message})
 		return
 	}
 
@@ -104,7 +104,7 @@ func (controller *controller) General(nf Func) gin.HandlerFunc {
 //
 //		if err != nil {
 //			responseError := errs.Detect(err)
-//			ctx.AbortWithStatusJSON(responseError.Code(), responseError.Message())
+//			ctx.AbortWithStatusJSON(responseError.Code, responseError.Message)
 //			return
 //		}
 //
@@ -119,7 +119,7 @@ func (controller *controller) Owned(f OwnerFunc) gin.HandlerFunc {
 		err := f(ctx, controller.store, id)
 		if err != nil {
 			responseError := errs.Detect(err)
-			ctx.AbortWithStatusJSON(responseError.Code(), responseError.Message())
+			ctx.AbortWithStatusJSON(responseError.Code, responseError.Message)
 			return
 		}
 		ctx.Next()
