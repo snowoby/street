@@ -35,8 +35,16 @@ func New() *Storage {
 		panic(err)
 	}
 
+	client := s3.New(newSession)
+
+	//_, err = client.CreateBucket(&s3.CreateBucketInput{
+	//	Bucket: aws.String("develop"),
+	//})
+	if err != nil {
+		panic(err)
+	}
 	return &Storage{
-		client:     s3.New(newSession),
+		client:     client,
 		bucketName: "develop",
 	}
 

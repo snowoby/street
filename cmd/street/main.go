@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"os"
@@ -39,7 +41,14 @@ func storeSetup() controller.Controller {
 	if err != nil {
 		panic(err)
 	}
-	store := data.New(client, storage.New())
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	store := data.New(client, storage.New(), rdb)
 	return controller.New(store)
 }
 

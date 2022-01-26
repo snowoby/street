@@ -1,6 +1,7 @@
 package data
 
 import (
+	"github.com/go-redis/redis/v8"
 	"street/ent"
 	"street/pkg/data/storage"
 	"time"
@@ -14,6 +15,7 @@ type siteConfig struct {
 type Store struct {
 	*db
 	*siteConfig
+	*rds
 	*storage.Storage
 	*series
 	*episode
@@ -25,7 +27,7 @@ type db struct {
 	client *ent.Client
 }
 
-func New(client *ent.Client, s3 *storage.Storage) *Store {
+func New(client *ent.Client, s3 *storage.Storage, redis *redis.Client) *Store {
 
 	return &Store{
 		&db{client},
@@ -34,6 +36,7 @@ func New(client *ent.Client, s3 *storage.Storage) *Store {
 			RefreshTokenExpireTime: time.Hour * 24 * 7 * 4,
 			AccessTokenExpireTime:  time.Hour,
 		},
+		&rds{redis},
 		s3,
 		&series{client.Series},
 		&episode{client.Episode},
@@ -64,4 +67,8 @@ func (s *Store) Profile() *profile {
 
 func (s *Store) File() *file {
 	return s.file
+}
+
+func (s *Store) Redis() *rds {
+	return s.rds
 }

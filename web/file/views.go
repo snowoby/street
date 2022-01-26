@@ -68,7 +68,6 @@ func create(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (
 
 func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	type FilePartUpload struct {
-		Bucket     string `json:"bucket" binding:"required"`
 		Key        string `json:"key" binding:"required"`
 		UploadID   string `json:"upload_id" binding:"required"`
 		PartNumber int    `json:"part_number" binding:"required"`

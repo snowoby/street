@@ -12,6 +12,10 @@ type profile struct {
 	client *ent.ProfileClient
 }
 
+func (profile *profile) Client() *ent.ProfileClient {
+	return profile.client
+}
+
 func (profile *profile) FindProfile(ctx context.Context, callSign string) (*ent.Profile, error) {
 	p, err := profile.client.Query().Where(ep.CallSign(callSign)).WithAccount().Only(ctx)
 	return p, err
