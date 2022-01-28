@@ -15,7 +15,7 @@ type siteConfig struct {
 type Store struct {
 	*db
 	*siteConfig
-	*rds
+	*FileRedis
 	*storage.Storage
 	*series
 	*episode
@@ -27,7 +27,7 @@ type db struct {
 	client *ent.Client
 }
 
-func New(client *ent.Client, s3 *storage.Storage, redis *redis.Client) *Store {
+func New(client *ent.Client, s3 *storage.Storage, fileRedis *redis.Client) *Store {
 
 	return &Store{
 		&db{client},
@@ -36,7 +36,7 @@ func New(client *ent.Client, s3 *storage.Storage, redis *redis.Client) *Store {
 			RefreshTokenExpireTime: time.Hour * 24 * 7 * 4,
 			AccessTokenExpireTime:  time.Hour,
 		},
-		&rds{redis},
+		&FileRedis{fileRedis},
 		s3,
 		&series{client.Series},
 		&episode{client.Episode},
@@ -67,8 +67,4 @@ func (s *Store) Profile() *profile {
 
 func (s *Store) File() *file {
 	return s.file
-}
-
-func (s *Store) Redis() *rds {
-	return s.rds
 }

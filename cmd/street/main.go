@@ -42,13 +42,13 @@ func storeSetup() controller.Controller {
 		panic(err)
 	}
 
-	rdb := redis.NewClient(&redis.Options{
+	filePartRedis := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
 
-	store := data.New(client, storage.New(), rdb)
+	store := data.New(client, storage.New(), filePartRedis)
 	return controller.New(store)
 }
 
