@@ -9,7 +9,7 @@ import (
 func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
 	//group.Use(account.MustLogin, profile.MustProfile)
 	group.POST("/", ctrl.General(create))
-	group.PUT("/", ctrl.Bare(upload))
+	group.PUT("/:id/:part_id", ctrl.Bare(upload))
 	group.POST("/:id", middleware.MustUriUUID, ctrl.Owned(owned), ctrl.Bare(done))
 
 }

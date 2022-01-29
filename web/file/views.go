@@ -2,13 +2,13 @@ package file
 
 import (
 	"bytes"
-	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"street/ent"
 	"street/errs"
 	"street/pkg/controller"
@@ -58,35 +58,52 @@ func create(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (
 		Key:      *createOutput.Key,
 		UploadId: *createOutput.UploadId,
 	}
+	err = store.FileRedis.Create(ctx, file.ID.String(), output)
+	if err != nil {
+		return 0, nil, err
+	}
 
-	return http.StatusCreated, CreateResponse{
-		UploadCredential: output,
-		File:             *file,
-		Path:             filepath.Join(meta.Category, file.ID.String(), file.Filename),
-	}, nil
+	return http.StatusCreated, file, nil
 }
 
 func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+	//type FilePartUpload struct {
+	//	Key        string `json:"key" binding:"required"`
+	//	UploadID   string `json:"upload_id" binding:"required"`
+	//	PartNumber int    `json:"part_number" binding:"required"`
+	//	Content    string `json:"content" binding:"required"`
+	//}
+
 	type FilePartUpload struct {
-		Key        string `json:"key" binding:"required"`
-		UploadID   string `json:"upload_id" binding:"required"`
-		PartNumber int    `json:"part_number" binding:"required"`
-		Content    string `json:"content" binding:"required"`
+		UploadID string `uri:"id" binding:"required"`
+		PartID   int    `uri:"part_id" binding:"required"`
 	}
 
-	var chunk FilePartUpload
-	err := ctx.ShouldBindUri(&chunk)
+	var ids FilePartUpload
+	err := ctx.ShouldBindUri(&ids)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	raw, err := base64.StdEncoding.DecodeString(chunk.Content)
+	createObj, err := store.FileRedis.Get(ctx, ids.UploadID)
 	if err != nil {
 		return 0, nil, err
 	}
 
+	var createOutput CreateOutput
+	err = json.Unmarshal([]byte(createObj), &createOutput)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	raw, _ := ioutil.ReadAll(ctx.Request.Body)
 	reader := bytes.NewReader(raw)
-	part, err := store.Storage.PutMultiPart(reader, chunk.Key, chunk.UploadID, chunk.PartNumber)
+	part, err := store.Storage.PutMultiPart(reader, createOutput.Key, ids.UploadID, ids.PartID)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	err = store.FileRedis.Part(ctx, ids.UploadID, ids.PartID, part)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -101,6 +118,7 @@ type Finish struct {
 }
 
 func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+	//TODO
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 	var finish Finish
 	err := ctx.ShouldBindJSON(&finish)

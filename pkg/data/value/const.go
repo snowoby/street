@@ -5,6 +5,7 @@ const (
 	StringAccessToken  = "access"
 	StringAccount      = "account"
 	StringObjectUUID   = "objectUUID"
+	StringSID          = "sid"
 	StringProfile      = "profile"
 	StringAllProfiles  = "allProfiles"
 )

@@ -56,10 +56,7 @@ func setup() *gin.Engine {
 	r := gin.Default()
 	ctrl := storeSetup()
 
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{os.Getenv("site")}
-	config.AddAllowMethods("OPTIONS")
-	r.Use(cors.New(config))
+	r.Use(cors.Default())
 
 	r.Use(ctrl.Original(account.TryAccessToken), ctrl.Original(profile.TryProfile), middleware.TryUriUUID)
 

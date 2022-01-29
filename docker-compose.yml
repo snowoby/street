@@ -3,6 +3,8 @@ services:
   database:
     image: "postgres:13-alpine3.15"
     restart: always
+    env_file:
+      - ./.env
     volumes:
       - ./.develop/db:/var/lib/postgresql/data
     ports:
