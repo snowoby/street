@@ -12,6 +12,10 @@ type episode struct {
 	client *ent.EpisodeClient
 }
 
+func (e *episode) All(ctx context.Context) ([]*ent.Episode, error) {
+	return e.client.Query().WithProfile().WithSeries().All(ctx)
+}
+
 func (e *episode) Create(ctx context.Context, title, cleanContent string, profileID uuid.UUID) (*ent.Episode, error) {
 	return e.client.Create().SetTitle(title).SetContent(cleanContent).SetProfileID(profileID).Save(ctx)
 }

@@ -20,10 +20,6 @@ type Profile struct {
 	Category string `json:"category" binding:"required"`
 }
 
-type ID struct {
-	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
-}
-
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	var profile Profile
 	err := ctx.ShouldBindJSON(&profile)

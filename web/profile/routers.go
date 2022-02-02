@@ -12,6 +12,6 @@ func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
 	group.Use(account.MustLogin)
 	group.GET("/", ctrl.General(accountProfiles))
 	group.POST("/", ctrl.General(create))
-	group.PUT("/:id", middleware.MustUriUUID, MustProfile, ctrl.Owned(owned), ctrl.General(update))
+	group.PUT("/:pid", MustProfile, ctrl.Owned(owned), ctrl.General(update))
 
 }

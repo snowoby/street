@@ -38,6 +38,10 @@ type CreateOutput struct {
 	UploadId string `json:"upload_id" binding:"required"`
 }
 
+//func normal(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
+//
+//}
+
 func create(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
 	var meta Meta
 	err := ctx.ShouldBindJSON(&meta)
@@ -98,12 +102,12 @@ func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 	raw, _ := ioutil.ReadAll(ctx.Request.Body)
 	reader := bytes.NewReader(raw)
-	part, err := store.Storage.PutMultiPart(reader, createOutput.Key, ids.UploadID, ids.PartID)
+	part, err := store.Storage.PutMultiPart(reader, createOutput.Key, createOutput.UploadId, ids.PartID)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	err = store.FileRedis.Part(ctx, ids.UploadID, ids.PartID, part)
+	err = store.FileRedis.Part(ctx, ids.UploadID, part)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -118,13 +122,42 @@ type Finish struct {
 }
 
 func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	//TODO
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 	var finish Finish
-	err := ctx.ShouldBindJSON(&finish)
+	partStringArray, err := store.GetParts(ctx, id.String())
 	if err != nil {
 		return 0, nil, err
 	}
+	parts := make([]*s3.CompletedPart, len(partStringArray)+1)
+	if len(parts) == 0 {
+		return 0, nil, errs.NoParts
+	}
+	max := 0
+	for _, partString := range partStringArray {
+		var partObj s3.CompletedPart
+		err = json.Unmarshal([]byte(partString), &partObj)
+		if err != nil {
+			return 0, nil, err
+		}
+		partNumber := int(*partObj.PartNumber)
+		if partNumber > max {
+			max = partNumber
+		}
+		parts[partNumber] = &partObj
+	}
+	if len(parts) < max+1 {
+		return 0, nil, errs.PartsExceeded
+	}
+
+	finish.Parts = parts[1 : max+1]
+
+	var createOutput CreateOutput
+	createObj, err := store.Get(ctx, id.String())
+	err = json.Unmarshal([]byte(createObj), &createOutput)
+	if err != nil {
+		return 0, nil, err
+	}
+	finish.CreateOutput = createOutput
 
 	completeOutput, err := store.Storage.CompleteMultiPart(finish.CreateOutput.Key, finish.CreateOutput.UploadId, finish.Parts)
 	fmt.Println(completeOutput)
@@ -133,6 +166,11 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 
 	file, err := store.File().UpdateStatus(ctx, id, "uploaded")
+	if err != nil {
+		return 0, nil, err
+	}
+
+	err = store.FileRedis.Finish(ctx, id.String())
 	if err != nil {
 		return 0, nil, err
 	}

@@ -10,13 +10,13 @@ import (
 
 func TryUriUUID(ctx *gin.Context) {
 	type ID struct {
-		ID uuid.UUID `uri:"id" binding:"uuid"`
+		ID string `uri:"id" binding:"uuid,required"`
 	}
 
 	var id ID
-	err := ctx.ShouldBindUri(id)
+	err := ctx.ShouldBindUri(&id)
 	if err == nil {
-		ctx.Set(value.StringObjectUUID, id)
+		ctx.Set(value.StringObjectUUID, uuid.MustParse(id.ID))
 	}
 	ctx.Next()
 }

@@ -18,7 +18,7 @@ func TryProfile(ctx *gin.Context, store *data.Store) {
 
 	account := a.(*ent.Account)
 	type ID struct {
-		ID uuid.UUID `binding:"uuid" header:"Profile" uri:"id"`
+		ID string `uri:"pid" binding:"uuid,required"`
 	}
 
 	ps, err := store.FindProfilesByAccountID(ctx, account.ID)
@@ -28,15 +28,16 @@ func TryProfile(ctx *gin.Context, store *data.Store) {
 	}
 	ctx.Set(value.StringAllProfiles, ps)
 
-	var id ID
-	err = ctx.ShouldBindHeader(&id)
+	var idString ID
+	err = ctx.ShouldBindUri(&idString)
 	if err != nil {
 		ctx.Next()
 		return
 	}
 
+	id, _ := uuid.Parse(idString.ID)
 	for _, profile := range ps {
-		if profile.ID == id.ID {
+		if profile.ID == id {
 			ctx.Set(value.StringProfile, profile)
 		}
 	}

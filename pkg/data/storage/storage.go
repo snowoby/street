@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
-	"path/filepath"
+	"strings"
 )
 
 type FilePart struct {
@@ -53,7 +53,7 @@ func New() *Storage {
 func (s *Storage) CreateMultiPart(path string, id uuid.UUID, filename string, mime string) (*s3.CreateMultipartUploadOutput, error) {
 	input := &s3.CreateMultipartUploadInput{
 		Bucket:      aws.String(s.bucketName),
-		Key:         aws.String(filepath.Join(path, id.String(), filename)),
+		Key:         aws.String(strings.Join([]string{path, id.String(), filename}, "/")),
 		ContentType: aws.String(mime),
 	}
 

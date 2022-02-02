@@ -64,6 +64,17 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	return http.StatusOK, ep, nil
 
 }
+func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+
+	eps, err := store.Episode().All(ctx)
+	if err != nil {
+		return 0, nil, err
+
+	}
+
+	return http.StatusOK, eps, nil
+
+}
 
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)

@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"time"
@@ -29,30 +30,32 @@ func filePartKey(fileID string) string {
 }
 
 func (r *FileRedis) Create(ctx context.Context, fileID string, fileCreateObj interface{}) error {
-	return r.client.Set(ctx, fileCreateKey(fileID), fileCreateObj, FilePartAge).Err()
+	data, err := json.Marshal(fileCreateObj)
+	if err != nil {
+		return err
+	}
+	return r.client.Set(ctx, fileCreateKey(fileID), data, FilePartAge).Err()
 }
 
 func (r *FileRedis) Get(ctx context.Context, fileID string) (string, error) {
 	return r.client.Get(ctx, fileCreateKey(fileID)).Result()
 }
 
-func (r *FileRedis) Part(ctx context.Context, fileID string, partID int, partUploadObj interface{}) error {
-	return r.client.ZAdd(ctx, filePartKey(fileID), &redis.Z{Score: float64(partID), Member: partUploadObj}).Err()
+func (r *FileRedis) Part(ctx context.Context, fileID string, partUploadObj interface{}) error {
+	data, err := json.Marshal(partUploadObj)
+	if err != nil {
+		return err
+	}
+	r.client.Expire(ctx, filePartKey(fileID), FilePartAge)
+	return r.client.RPush(ctx, filePartKey(fileID), data).Err()
 }
 
-func (r *FileRedis) Complete(ctx context.Context, fileID string) error {
-	parts, err := r.client.ZRange(ctx, filePartKey(fileID), 0, -1).Result()
+func (r *FileRedis) GetParts(ctx context.Context, fileID string) ([]string, error) {
+	parts, err := r.client.LRange(ctx, filePartKey(fileID), 0, -1).Result()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Println(parts)
-	start, err := r.client.Get(ctx, fileCreateKey(fileID)).Result()
-	if err != nil {
-		return err
-	}
-	fmt.Println(start)
-	return err
+	return parts, err
 }
 
 func (r *FileRedis) Finish(ctx context.Context, fileID string) error {
