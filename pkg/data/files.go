@@ -15,6 +15,21 @@ type file struct {
 func (f *file) Create(ctx context.Context, filename, path string, mime string, size int, profileID uuid.UUID) (*ent.File, error) {
 	return f.client.Create().SetFilename(filename).SetMime(mime).SetSize(size).SetProfileID(profileID).SetPath(path).Save(ctx)
 }
+func (f *file) CreateFinished(ctx context.Context, filename, path string, mime string, size int, profileID uuid.UUID) (*ent.File, error) {
+	return f.client.Create().SetFilename(filename).SetMime(mime).SetSize(size).SetProfileID(profileID).SetPath(path).SetStatus("uploaded").Save(ctx)
+}
+
+func (f *file) Get(ctx context.Context, fileID uuid.UUID) (*ent.File, error) {
+	return f.client.Query().Where(ef.ID(fileID)).WithProfile().First(ctx)
+}
+
+func (f *file) NotUploadedExists(ctx context.Context, fileID uuid.UUID, profileID uuid.UUID) (bool, error) {
+	return f.client.Query().Where(ef.ID(fileID), ef.HasProfileWith(ep.ID(profileID)), ef.Status("created")).Exist(ctx)
+}
+
+func (f *file) UploadedExists(ctx context.Context, fileID uuid.UUID, profileID uuid.UUID) (bool, error) {
+	return f.client.Query().Where(ef.ID(fileID), ef.HasProfileWith(ep.ID(profileID)), ef.Status("uploaded")).Exist(ctx)
+}
 
 func (f *file) UpdateStatus(ctx context.Context, fileID uuid.UUID, status string) (*ent.File, error) {
 	return f.client.UpdateOneID(fileID).SetStatus(status).Save(ctx)

@@ -50,6 +50,17 @@ func New() *Storage {
 
 }
 
+func (s *Storage) PutSingle(stream *bytes.Reader, path string, id uuid.UUID, filename string, mime string) (*s3.PutObjectOutput, error) {
+	input := &s3.PutObjectInput{
+		Bucket:      aws.String(s.bucketName),
+		Key:         aws.String(strings.Join([]string{path, id.String(), filename}, "/")),
+		ContentType: aws.String(mime),
+		Body:        stream,
+	}
+	return s.client.PutObject(input)
+
+}
+
 func (s *Storage) CreateMultiPart(path string, id uuid.UUID, filename string, mime string) (*s3.CreateMultipartUploadOutput, error) {
 	input := &s3.CreateMultipartUploadInput{
 		Bucket:      aws.String(s.bucketName),

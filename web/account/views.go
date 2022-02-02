@@ -28,7 +28,7 @@ type PublicResponse struct {
 	Password *struct{} `json:"password,omitempty"`
 }
 
-func register(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
+func register(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	var register EmailPassword
 	err := ctx.ShouldBindJSON(&register)
 	if err != nil {
@@ -39,7 +39,7 @@ func register(ctx *gin.Context, store *data.Store, identity *controller.Identity
 		return 0, nil, errs.WeakPasswordError
 	}
 
-	exists, err := store.EmailExists(ctx, register.Email)
+	exists, err := store.Account.EmailExists(ctx, register.Email)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -53,7 +53,7 @@ func register(ctx *gin.Context, store *data.Store, identity *controller.Identity
 		return 0, nil, errs.PasswordHashError
 	}
 
-	user, err := store.CreateAccount(ctx, register.Email, encryptedPassword)
+	user, err := store.Account.Create(ctx, register.Email, encryptedPassword)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -72,7 +72,7 @@ func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, errs.BindingError(err)
 	}
 
-	account, err := store.FindAccount(ctx, login.Email)
+	account, err := store.Account.Find(ctx, login.Email)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -82,7 +82,7 @@ func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 
 	tokenBody := utils.RandomString(128)
-	t, err := store.CreateToken(ctx, account.ID, tokenBody, value.StringRefreshToken, store.Config().RefreshTokenExpireTime)
+	t, err := store.Token.Create(ctx, account.ID, tokenBody, value.StringRefreshToken, store.SiteConfig.RefreshTokenExpireTime)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -91,7 +91,7 @@ func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	//ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 }
 
-func info(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
+func info(_ *gin.Context, _ *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	return http.StatusOK, struct {
 		Account  *ent.Account   `json:"account"`
 		Profiles []*ent.Profile `json:"profiles"`

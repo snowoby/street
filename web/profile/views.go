@@ -27,7 +27,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, errs.BindingError(err)
 	}
 
-	exists, err := store.CallSignExists(ctx, profile.CallSign)
+	exists, err := store.Profile.CallSignExists(ctx, profile.CallSign)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -36,7 +36,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, errs.CallSignDuplicateError
 	}
 
-	p, err := store.CreateProfile(ctx, profile.CallSign, profile.Title, profile.Category, identity.Account().ID)
+	p, err := store.Profile.Create(ctx, profile.CallSign, profile.Title, profile.Category, identity.Account().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -53,7 +53,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 		return 0, nil, errs.BindingError(err)
 	}
 
-	p, err := store.UpdateProfile(ctx, objectID, profile.Title, profile.CallSign, profile.Category)
+	p, err := store.Profile.Update(ctx, objectID, profile.Title, profile.CallSign, profile.Category)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -64,7 +64,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ps, err := store.FindProfileByID(ctx, objectID)
+	ps, err := store.Profile.FindByID(ctx, objectID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -78,7 +78,7 @@ func accountProfiles(_ *gin.Context, _ *data.Store, identity *controller.Identit
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.Profile().IsOwner(ctx, operator.Profile().ID, objectID)
+	ok, err := store.Profile.IsOwner(ctx, operator.Profile().ID, objectID)
 	if err != nil {
 		return err
 	}

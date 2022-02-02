@@ -27,7 +27,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 	if err != nil {
 		return 0, nil, err
 	}
-	ep, err := store.Episode().Create(ctx, episode.Title, episode.Content, profile.ID)
+	ep, err := store.Episode.Create(ctx, episode.Title, episode.Content, profile.ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -44,7 +44,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, errs.BindingError(err)
 	}
 
-	ep, err := store.Episode().Update(ctx, id, episode.Title, episode.Content)
+	ep, err := store.Episode.Update(ctx, id, episode.Title, episode.Content)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -55,7 +55,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	ep, err := store.Episode().FindByID(ctx, id)
+	ep, err := store.Episode.FindByID(ctx, id)
 	if err != nil {
 		return 0, nil, err
 
@@ -66,7 +66,7 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 }
 func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
-	eps, err := store.Episode().All(ctx)
+	eps, err := store.Episode.All(ctx)
 	if err != nil {
 		return 0, nil, err
 
@@ -79,7 +79,7 @@ func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	err := store.Episode().Delete(ctx, id)
+	err := store.Episode.Delete(ctx, id)
 	if err != nil {
 		return 0, nil, err
 
@@ -89,7 +89,7 @@ func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.Episode().IsOwner(ctx, operator.Profile().ID, objectID)
+	ok, err := store.Episode.IsOwner(ctx, operator.Profile().ID, objectID)
 	if err != nil {
 		return err
 	}

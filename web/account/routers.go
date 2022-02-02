@@ -8,6 +8,6 @@ import (
 func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
 	group.POST("/refresh", ctrl.Bare(MustRefresh))
 	group.POST("/login", ctrl.Bare(login))
-	group.POST("/register", ctrl.General(register))
+	group.POST("/register", ctrl.Bare(register))
 	group.GET("/", MustLogin, ctrl.General(info))
 }

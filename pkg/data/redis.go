@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type FileRedis struct {
+type multiPartRedis struct {
 	client *redis.Client
 }
 
@@ -29,7 +29,7 @@ func filePartKey(fileID string) string {
 	return fmt.Sprintf("%s:%s", fileID, StringPart)
 }
 
-func (r *FileRedis) Create(ctx context.Context, fileID string, fileCreateObj interface{}) error {
+func (r *multiPartRedis) Create(ctx context.Context, fileID string, fileCreateObj interface{}) error {
 	data, err := json.Marshal(fileCreateObj)
 	if err != nil {
 		return err
@@ -37,11 +37,11 @@ func (r *FileRedis) Create(ctx context.Context, fileID string, fileCreateObj int
 	return r.client.Set(ctx, fileCreateKey(fileID), data, FilePartAge).Err()
 }
 
-func (r *FileRedis) Get(ctx context.Context, fileID string) (string, error) {
+func (r *multiPartRedis) Get(ctx context.Context, fileID string) (string, error) {
 	return r.client.Get(ctx, fileCreateKey(fileID)).Result()
 }
 
-func (r *FileRedis) Part(ctx context.Context, fileID string, partUploadObj interface{}) error {
+func (r *multiPartRedis) Part(ctx context.Context, fileID string, partUploadObj interface{}) error {
 	data, err := json.Marshal(partUploadObj)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (r *FileRedis) Part(ctx context.Context, fileID string, partUploadObj inter
 	return r.client.RPush(ctx, filePartKey(fileID), data).Err()
 }
 
-func (r *FileRedis) GetParts(ctx context.Context, fileID string) ([]string, error) {
+func (r *multiPartRedis) GetParts(ctx context.Context, fileID string) ([]string, error) {
 	parts, err := r.client.LRange(ctx, filePartKey(fileID), 0, -1).Result()
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (r *FileRedis) GetParts(ctx context.Context, fileID string) ([]string, erro
 	return parts, err
 }
 
-func (r *FileRedis) Finish(ctx context.Context, fileID string) error {
+func (r *multiPartRedis) Finish(ctx context.Context, fileID string) error {
 	err := r.client.Del(ctx, fileCreateKey(fileID)).Err()
 	if err != nil {
 		fmt.Println(err)

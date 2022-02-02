@@ -38,18 +38,61 @@ type CreateOutput struct {
 	UploadId string `json:"upload_id" binding:"required"`
 }
 
-//func normal(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
-//
-//}
-
-func create(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
+func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
 	var meta Meta
 	err := ctx.ShouldBindJSON(&meta)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	file, err := store.File().Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
+	file, err := store.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return http.StatusCreated, file, nil
+}
+
+func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
+	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
+
+	file, err := store.File.Get(ctx, id)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if file.Edges.Profile.ID != visitor.Profile().ID {
+		return 0, nil, errs.NotFoundError
+	}
+
+	if file.Status != "created" {
+		return 0, nil, errs.FileUploadedError
+	}
+
+	raw, _ := ioutil.ReadAll(ctx.Request.Body)
+	reader := bytes.NewReader(raw)
+	_, err = store.Storage.PutSingle(reader, file.Path, id, file.Filename, file.Mime)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	file, err = store.File.UpdateStatus(ctx, id, "uploaded")
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return http.StatusOK, file, nil
+
+}
+
+func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
+	var meta Meta
+	err := ctx.ShouldBindJSON(&meta)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	file, err := store.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -62,7 +105,7 @@ func create(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (
 		Key:      *createOutput.Key,
 		UploadId: *createOutput.UploadId,
 	}
-	err = store.FileRedis.Create(ctx, file.ID.String(), output)
+	err = store.MultiPartRedis.Create(ctx, file.ID.String(), output)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -89,7 +132,7 @@ func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	createObj, err := store.FileRedis.Get(ctx, ids.UploadID)
+	createObj, err := store.MultiPartRedis.Get(ctx, ids.UploadID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -107,7 +150,7 @@ func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	err = store.FileRedis.Part(ctx, ids.UploadID, part)
+	err = store.MultiPartRedis.Part(ctx, ids.UploadID, part)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -124,7 +167,7 @@ type Finish struct {
 func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 	var finish Finish
-	partStringArray, err := store.GetParts(ctx, id.String())
+	partStringArray, err := store.MultiPartRedis.GetParts(ctx, id.String())
 	if err != nil {
 		return 0, nil, err
 	}
@@ -152,7 +195,7 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	finish.Parts = parts[1 : max+1]
 
 	var createOutput CreateOutput
-	createObj, err := store.Get(ctx, id.String())
+	createObj, err := store.MultiPartRedis.Get(ctx, id.String())
 	err = json.Unmarshal([]byte(createObj), &createOutput)
 	if err != nil {
 		return 0, nil, err
@@ -165,12 +208,12 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	file, err := store.File().UpdateStatus(ctx, id, "uploaded")
+	file, err := store.File.UpdateStatus(ctx, id, "uploaded")
 	if err != nil {
 		return 0, nil, err
 	}
 
-	err = store.FileRedis.Finish(ctx, id.String())
+	err = store.MultiPartRedis.Finish(ctx, id.String())
 	if err != nil {
 		return 0, nil, err
 	}
@@ -180,7 +223,7 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.File().IsOwner(ctx, operator.Profile().ID, objectID)
+	ok, err := store.File.IsOwner(ctx, operator.Profile().ID, objectID)
 	if err != nil {
 		return err
 	}
