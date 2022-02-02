@@ -10,10 +10,8 @@ import (
 
 func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
 	group.Use(account.MustLogin, profile.MustProfile)
-
-	large := group.Group("large")
-	large.POST("/:pid", ctrl.General(create))
-	large.PUT("/:pid/:id/:part_id", ctrl.Bare(upload))
-	large.POST("/:pid/:id", middleware.MustUriUUID, ctrl.Owned(owned), ctrl.Bare(done))
+	group.POST("/:pid", ctrl.General(create))
+	group.PUT("/:pid/:id/:part_id", ctrl.Bare(upload))
+	group.POST("/:pid/:id", middleware.MustUriUUID, ctrl.Owned(owned), ctrl.Bare(done))
 
 }
