@@ -5,6 +5,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/mvrilo/go-redoc"
+	"github.com/mvrilo/go-redoc/gin"
 	"os"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -25,7 +27,17 @@ func init() {
 }
 
 func setup() *gin.Engine {
+
+	doc := redoc.Redoc{
+		Title:       "Example API",
+		Description: "Example API Description",
+		SpecFile:    "./docs/swagger.json",
+		SpecPath:    "/openapi.json",
+		DocsPath:    "/docs",
+	}
+
 	r := gin.Default()
+	r.Use(ginredoc.New(doc))
 	ctrl := controller.New(data.NewDefaultEnv())
 
 	r.Use(cors.Default())

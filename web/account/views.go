@@ -28,6 +28,15 @@ type PublicResponse struct {
 	Password *struct{} `json:"password,omitempty"`
 }
 
+// register godoc
+// @Summary ping exampleasdasdasd
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {string} aaaa
+// @Router /account/register [get]
 func register(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	var register EmailPassword
 	err := ctx.ShouldBindJSON(&register)
