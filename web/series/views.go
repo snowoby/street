@@ -28,7 +28,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, err
 	}
 
-	ep, err := store.Series.Create(ctx, series.Title, series.Content, profile.ID)
+	ep, err := store.DB.Series.Create(ctx, series.Title, series.Content, profile.ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -45,7 +45,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	ep, err := store.Series.Update(ctx, id, series.Title, series.Content)
+	ep, err := store.DB.Series.Update(ctx, id, series.Title, series.Content)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -56,7 +56,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	ep, err := store.Series.FindByID(ctx, id)
+	ep, err := store.DB.Series.FindByID(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -68,7 +68,7 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	err := store.Series.Delete(ctx, id)
+	err := store.DB.Series.Delete(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -79,7 +79,7 @@ func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.Series.IsOwner(ctx, operator.Profile().ID, objectID)
+	ok, err := store.DB.Series.IsOwner(ctx, operator.Profile().ID, objectID)
 	if err != nil {
 		return err
 	}

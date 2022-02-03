@@ -39,7 +39,7 @@ func register(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, errs.WeakPasswordError
 	}
 
-	exists, err := store.Account.EmailExists(ctx, register.Email)
+	exists, err := store.DB.Account.EmailExists(ctx, register.Email)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -53,7 +53,7 @@ func register(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, errs.PasswordHashError
 	}
 
-	user, err := store.Account.Create(ctx, register.Email, encryptedPassword)
+	user, err := store.DB.Account.Create(ctx, register.Email, encryptedPassword)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -72,7 +72,7 @@ func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, errs.BindingError(err)
 	}
 
-	account, err := store.Account.Find(ctx, login.Email)
+	account, err := store.DB.Account.Find(ctx, login.Email)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -82,7 +82,7 @@ func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 
 	tokenBody := utils.RandomString(128)
-	t, err := store.Token.Create(ctx, account.ID, tokenBody, value.StringRefreshToken, store.SiteConfig.RefreshTokenExpireTime)
+	t, err := store.DB.Token.Create(ctx, account.ID, tokenBody, value.StringRefreshToken, store.SiteConfig.RefreshTokenExpireTime)
 	if err != nil {
 		return 0, nil, err
 	}

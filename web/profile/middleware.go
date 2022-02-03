@@ -21,7 +21,7 @@ func TryProfile(ctx *gin.Context, store *data.Store) {
 		ID string `uri:"pid" binding:"uuid,required"`
 	}
 
-	ps, err := store.Profile.FindByAccountID(ctx, account.ID)
+	ps, err := store.DB.Profile.FindByAccountID(ctx, account.ID)
 	if err != nil {
 		ctx.Next()
 		return

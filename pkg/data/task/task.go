@@ -3,6 +3,7 @@ package task
 import (
 	"encoding/json"
 	"github.com/hibiken/asynq"
+	"os"
 	"street/ent"
 	"street/pkg/data/value"
 	"time"
@@ -10,6 +11,10 @@ import (
 
 type Task struct {
 	client *asynq.Client
+}
+
+func NewDefaultConfig() *asynq.Client {
+	return asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("redis"), DB: 1})
 }
 
 func New(client *asynq.Client) *Task {

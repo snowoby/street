@@ -23,7 +23,7 @@ func MustRefresh(ctx *gin.Context, store *data.Store) (int, interface{}, error) 
 
 	tokenBody := utils.RandomString(128)
 	// Create access token
-	t, err := store.Token.Create(ctx, t.Edges.Account.ID, tokenBody, value.StringAccessToken, store.SiteConfig.RefreshTokenExpireTime)
+	t, err := store.DB.Token.Create(ctx, t.Edges.Account.ID, tokenBody, value.StringAccessToken, store.SiteConfig.RefreshTokenExpireTime)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -47,7 +47,7 @@ func tryToken(ctx *gin.Context, store *data.Store, tokenType string) *ent.Token 
 	if err == nil {
 		if len(token.Token) > 7 {
 			tokenBody := token.Token[7:]
-			t, err := store.Token.Find(ctx, tokenBody, tokenType, true)
+			t, err := store.DB.Token.Find(ctx, tokenBody, tokenType, true)
 			if err == nil {
 				if TokenIsValid(t) {
 					return t

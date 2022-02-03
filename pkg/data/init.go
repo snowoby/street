@@ -1,13 +1,10 @@
 package data
 
 import (
-	"github.com/go-redis/redis/v8"
-	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"golang.org/x/net/context"
-	"os"
-	"street/ent"
+	"street/pkg/data/db"
+	"street/pkg/data/redis"
 	"street/pkg/data/storage"
 	"street/pkg/data/task"
 	"time"
@@ -19,55 +16,34 @@ type siteConfig struct {
 	Domain                 string        `json:"domain"`
 }
 type Store struct {
-	Account        *account
-	Token          *token
-	SiteConfig     *siteConfig
-	MultiPartRedis *multiPartRedis
+	DB             *db.DB
 	Storage        *storage.Storage
-	Series         *series
-	Episode        *episode
-	Profile        *profile
-	File           *file
+	SiteConfig     *siteConfig
+	MultiPartRedis *redis.MultiPartRedis
 	Task           *task.Task
 }
 
 func NewDefaultEnv() *Store {
-	err := godotenv.Load()
-	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		panic(err)
-	}
-	err = client.Schema.Create(context.Background())
-	if err != nil {
-		panic(err)
-	}
+	_ = godotenv.Load()
 
-	filePartRedis := redis.NewClient(&redis.Options{
-		Addr: os.Getenv("redis"),
-		DB:   0, // use default DB
-	})
-	taskClient := asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("redis"), DB: 1})
-
-	store := New(client, storage.New(storage.NewDefaultConfig()), filePartRedis, task.New(taskClient))
+	store := New(db.New(db.NewDefaultConfig()),
+		storage.New(storage.NewDefaultConfig()),
+		redis.New(redis.NewDefaultConfig()),
+		task.New(task.NewDefaultConfig()))
 	return store
 }
 
-func New(client *ent.Client, s3 *storage.Storage, fileRedis *redis.Client, taskClient *task.Task) *Store {
+func New(dbClient *db.DB, s3 *storage.Storage, fileRedis *redis.MultiPartRedis, taskClient *task.Task) *Store {
 
 	return &Store{
-		Account: &account{client.Account},
-		Token:   &token{client.Token},
 		SiteConfig: &siteConfig{
 			//TODO config
 			RefreshTokenExpireTime: time.Hour * 24 * 7 * 4,
 			AccessTokenExpireTime:  time.Hour,
 		},
-		MultiPartRedis: &multiPartRedis{fileRedis},
+		DB:             dbClient,
+		MultiPartRedis: fileRedis,
 		Storage:        s3,
-		Series:         &series{client.Series},
-		Episode:        &episode{client.Episode},
-		Profile:        &profile{client.Profile},
-		File:           &file{client.File},
 		Task:           taskClient,
 	}
 }

@@ -96,7 +96,7 @@ func (controller *controller) Task(f TaskFunc) TaskHandleFunc {
 func (controller *controller) General(nf Func) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := extractOperator(ctx)
-		id.profile, _ = controller.store.Profile.Client().Query().First(ctx)
+		id.profile, _ = controller.store.DB.Profile.Client().Query().First(ctx)
 		code, responseValue, err := nf(ctx, controller.store, id)
 		resultProcess(ctx, code, responseValue, err)
 	}

@@ -46,7 +46,7 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 		return 0, nil, err
 	}
 
-	file, err := store.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
+	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -57,7 +57,7 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	file, err := store.File.Get(ctx, id)
+	file, err := store.DB.File.Get(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -77,7 +77,7 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 		return 0, nil, err
 	}
 
-	file, err = store.File.UpdateStatus(ctx, id, "uploaded")
+	file, err = store.DB.File.UpdateStatus(ctx, id, "uploaded")
 	if err != nil {
 		return 0, nil, err
 	}
@@ -101,7 +101,7 @@ func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identi
 		return 0, nil, err
 	}
 
-	file, err := store.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
+	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -211,7 +211,7 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	file, err := store.File.UpdateStatus(ctx, id, "uploaded")
+	file, err := store.DB.File.UpdateStatus(ctx, id, "uploaded")
 	if err != nil {
 		return 0, nil, err
 	}
@@ -234,7 +234,7 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.File.IsOwner(ctx, operator.Profile().ID, objectID)
+	ok, err := store.DB.File.IsOwner(ctx, operator.Profile().ID, objectID)
 	if err != nil {
 		return err
 	}
