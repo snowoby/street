@@ -15,10 +15,16 @@ type Episode struct {
 	Content string `json:"content"`
 }
 
-type ID struct {
-	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
-}
-
+// create godoc
+// @Summary create episode
+// @Tags episode
+// @Accept json
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param episode body Episode true "episode info"
+// @Success 201 {object} ent.Episode
+// @Failure 400 {object} errs.HTTPError
+// @Router /episode/{pid} [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	profile := identity.Profile()
 
@@ -35,6 +41,17 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 
 }
 
+// update godoc
+// @Summary update episode
+// @Tags episode
+// @Accept json
+// @Produce json
+// @Param id path string true "episode id"
+// @Param pid path string true "profile id"
+// @Param episode body Episode true "episode info"
+// @Success 200 {object} ent.Episode
+// @Failure 400 {object} errs.HTTPError
+// @Router /episode/{pid}/{id} [put]
 func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -52,6 +69,15 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 }
 
+// get godoc
+// @Summary get episode
+// @Tags episode
+// @Accept json
+// @Produce json
+// @Param id path string true "episode id"
+// @Success 200 {object} ent.Episode
+// @Failure 400 {object} errs.HTTPError
+// @Router /episode/{id} [get]
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -64,6 +90,14 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	return http.StatusOK, ep, nil
 
 }
+
+// getAll godoc
+// @Summary get all episodes
+// @Tags episode
+// @Produce json
+// @Success 200 {object} []ent.Episode
+// @Failure 400 {object} errs.HTTPError
+// @Router /episode [get]
 func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 	eps, err := store.DB.Episode.All(ctx)
@@ -76,6 +110,15 @@ func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 }
 
+// del godoc
+// @Summary delete one episode
+// @Tags episode
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param id path string true "episode id"
+// @Success 204
+// @Failure 400 {object} errs.HTTPError
+// @Router /episode/{pid}/{id} [delete]
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 

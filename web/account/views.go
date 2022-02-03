@@ -29,14 +29,14 @@ type PublicResponse struct {
 }
 
 // register godoc
-// @Summary ping exampleasdasdasd
-// @Schemes
-// @Description do ping
-// @Tags example
+// @Summary register an account
+// @Tags account
 // @Accept json
 // @Produce json
-// @Success 200 {string} aaaa
-// @Router /account/register [get]
+// @Param accountInfo body EmailPassword true "account info"
+// @Success 201 {object} PublicResponse
+// @Failure 400 {object} errs.HTTPError
+// @Router /account/register [post]
 func register(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	var register EmailPassword
 	err := ctx.ShouldBindJSON(&register)
@@ -74,6 +74,15 @@ func register(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	return http.StatusCreated, responseData, nil
 }
 
+// login godoc
+// @Summary login an account
+// @Tags account
+// @Accept json
+// @Produce json
+// @Param accountInfo body EmailPassword true "account info"
+// @Success 201 {object} ent.Token
+// @Failure 400 {object} errs.HTTPError
+// @Router /account/login [post]
 func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	var login EmailPassword
 	err := ctx.ShouldBindJSON(&login)
@@ -100,11 +109,21 @@ func login(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	//ctx.SetCookie(value.StringRefreshToken, t.Body, int(t.ExpireTime.Sub(time.Now()).Seconds()), "/account/refresh", store.Config().Domain, false, true)
 }
 
+type Identity struct {
+	Account  *ent.Account   `json:"account"`
+	Profiles []*ent.Profile `json:"profiles"`
+}
+
+// info godoc
+// @Summary info an account
+// @Tags account,profile
+// @Produce json
+// @Success 201 {object} Identity
+// @Failure 400 {object} errs.HTTPError
+// @Router /account [get]
 func info(_ *gin.Context, _ *data.Store, identity *controller.Identity) (int, interface{}, error) {
-	return http.StatusOK, struct {
-		Account  *ent.Account   `json:"account"`
-		Profiles []*ent.Profile `json:"profiles"`
-	}{
+
+	return http.StatusOK, &Identity{
 		Account:  identity.Account(),
 		Profiles: identity.AllProfiles(),
 	}, nil

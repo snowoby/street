@@ -14,6 +14,13 @@ type Token struct {
 	Token string `header:"Authorization" binding:"required"`
 }
 
+// MustRefresh godoc
+// @Summary refresh token
+// @Tags account,token
+// @Produce json
+// @Success 201 {object} ent.Token
+// @Failure 400 {object} errs.HTTPError
+// @Router /account/refresh [post]
 func MustRefresh(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	tokenType := value.StringRefreshToken
 	t := tryToken(ctx, store, tokenType)
@@ -65,5 +72,4 @@ func MustLogin(ctx *gin.Context) {
 	}
 	ctx.Next()
 	return
-
 }

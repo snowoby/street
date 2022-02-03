@@ -15,10 +15,16 @@ type TitleContent struct {
 	Content string `json:"content"`
 }
 
-type ID struct {
-	ID uuid.UUID `uri:"id" binding:"required,uuid" json:"id"`
-}
-
+// create godoc
+// @Summary create a series
+// @Tags series
+// @Accept json
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param series body TitleContent true "series info"
+// @Success 201 {object} ent.Series
+// @Failure 400 {object} errs.HTTPError
+// @Router /series/{pid} [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	profile := identity.Profile()
 
@@ -36,6 +42,17 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 	return http.StatusCreated, ep, nil
 }
 
+// update godoc
+// @Summary update a series
+// @Tags series
+// @Accept json
+// @Produce json
+// @Param series body TitleContent true "series info"
+// @Param pid path string true "profile id"
+// @Param id path string true "series id"
+// @Success 200 {object} ent.Series
+// @Failure 400 {object} errs.HTTPError
+// @Router /series/{pid}/{id} [put]
 func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -53,6 +70,14 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 }
 
+// get godoc
+// @Summary get a series
+// @Tags series
+// @Produce json
+// @Param id path string true "series id"
+// @Success 200 {object} ent.Series
+// @Failure 400 {object} errs.HTTPError
+// @Router /series/{id} [get]
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -65,6 +90,15 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 }
 
+// del godoc
+// @Summary del a series
+// @Tags series
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param id path string true "series id"
+// @Success 200 {object} ent.Series
+// @Failure 400 {object} errs.HTTPError
+// @Router /series/{pid}/{id} [delete]
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 

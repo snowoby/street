@@ -39,6 +39,16 @@ type CreateOutput struct {
 	UploadId string `json:"upload_id" binding:"required"`
 }
 
+// createSingle godoc
+// @Summary create single file upload
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param meta body Meta true "file meta"
+// @Success 201 {object} ent.File
+// @Failure 400 {object} errs.HTTPError
+// @Router /file/single/{pid} [post]
 func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
 	var meta Meta
 	err := ctx.ShouldBindJSON(&meta)
@@ -54,6 +64,17 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 	return http.StatusCreated, file, nil
 }
 
+// putSingle godoc
+// @Summary single file content upload
+// @Tags file
+// @Accept application/octet-stream
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param id path string true "file id"
+// @Param data body array true "file content"
+// @Success 200 {object} ent.File
+// @Failure 400 {object} errs.HTTPError
+// @Router /file/single/{pid}/{id} [put]
 func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -94,6 +115,16 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 
 }
 
+// createMulti godoc
+// @Summary create multipart upload
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param meta body Meta true "file meta"
+// @Success 200 {object} ent.File
+// @Failure 400 {object} errs.HTTPError
+// @Router /file/large/{pid} [post]
 func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
 	var meta Meta
 	err := ctx.ShouldBindJSON(&meta)
@@ -122,6 +153,18 @@ func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identi
 	return http.StatusCreated, file, nil
 }
 
+// upload godoc
+// @Summary create multipart upload
+// @Tags file
+// @Accept application/octet-stream
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param id path string true "file id"
+// @Param part_id path int true "part id"
+// @Param data body array true "file content"
+// @Success 200 {object} ent.File
+// @Failure 400 {object} errs.HTTPError
+// @Router /file/large/{pid}/{id}/{part_id} [put]
 func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 	type FilePartUpload struct {
@@ -167,6 +210,15 @@ type Finish struct {
 	CreateOutput CreateOutput        `json:"createOutput" binding:"required"`
 }
 
+// done godoc
+// @Summary finish multipart upload
+// @Tags file
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param id path string true "file id"
+// @Success 201 {object} ent.File
+// @Failure 400 {object} errs.HTTPError
+// @Router /file/large/{pid}/{id} [post]
 func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 	var finish Finish

@@ -4,9 +4,34 @@
         "contact": {}
     },
     "paths": {
-        "/account/register": {
+        "/account": {
             "get": {
-                "description": "do ping",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account",
+                    "profile"
+                ],
+                "summary": "info an account",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/account.Identity"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/login": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
@@ -14,16 +39,1311 @@
                     "application/json"
                 ],
                 "tags": [
-                    "example"
+                    "account"
                 ],
-                "summary": "ping exampleasdasdasd",
+                "summary": "login an account",
+                "parameters": [
+                    {
+                        "description": "account info",
+                        "name": "accountInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.EmailPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Token"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/refresh": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account",
+                    "token"
+                ],
+                "summary": "refresh token",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Token"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/account/register": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "account"
+                ],
+                "summary": "register an account",
+                "parameters": [
+                    {
+                        "description": "account info",
+                        "name": "accountInfo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.EmailPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/account.PublicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/episode": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "episode"
+                ],
+                "summary": "get all episodes",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.Episode"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
                         }
                     }
+                }
+            }
+        },
+        "/episode/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "episode"
+                ],
+                "summary": "get episode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "episode id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Episode"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/episode/{pid}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "episode"
+                ],
+                "summary": "create episode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "episode info",
+                        "name": "episode",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/episode.Episode"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Episode"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/episode/{pid}/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "episode"
+                ],
+                "summary": "update episode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "episode id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "episode info",
+                        "name": "episode",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/episode.Episode"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Episode"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "episode"
+                ],
+                "summary": "delete one episode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "episode id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/large/{pid}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "create multipart upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "file meta",
+                        "name": "meta",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/file.Meta"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/large/{pid}/{id}": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "finish multipart upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/large/{pid}/{id}/{part_id}": {
+            "put": {
+                "consumes": [
+                    "application/octet-stream"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "create multipart upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "part id",
+                        "name": "part_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "file content",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/single/{pid}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "create single file upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "file meta",
+                        "name": "meta",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/file.Meta"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/single/{pid}/{id}": {
+            "put": {
+                "consumes": [
+                    "application/octet-stream"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "single file content upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "file id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "file content",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "get all self profiles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ent.Profile"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "create profile",
+                "parameters": [
+                    {
+                        "description": "profile info",
+                        "name": "profile",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/profile.Profile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Profile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/profile/{pid}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "get profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Profile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "update profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "profile info",
+                        "name": "profile",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/profile.Profile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Profile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/series/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "series"
+                ],
+                "summary": "get a series",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "series id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Series"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/series/{pid}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "series"
+                ],
+                "summary": "create a series",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "series info",
+                        "name": "series",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/series.TitleContent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Series"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/series/{pid}/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "series"
+                ],
+                "summary": "update a series",
+                "parameters": [
+                    {
+                        "description": "series info",
+                        "name": "series",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/series.TitleContent"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "series id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Series"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "series"
+                ],
+                "summary": "del a series",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "series id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ent.Series"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "account.EmailPassword": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "account.Identity": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "$ref": "#/definitions/ent.Account"
+                },
+                "profiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Profile"
+                    }
+                }
+            }
+        },
+        "account.PublicResponse": {
+            "type": "object",
+            "required": [
+                "email",
+                "id",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "object"
+                }
+            }
+        },
+        "ent.Account": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the AccountQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.AccountEdges"
+                },
+                "email": {
+                    "description": "Email holds the value of the \"email\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.AccountEdges": {
+            "type": "object",
+            "properties": {
+                "profile": {
+                    "description": "Profile holds the value of the profile edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Profile"
+                    }
+                },
+                "token": {
+                    "description": "Token holds the value of the token edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Token"
+                    }
+                }
+            }
+        },
+        "ent.Episode": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Content holds the value of the \"content\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EpisodeQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.EpisodeEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.EpisodeEdges": {
+            "type": "object",
+            "properties": {
+                "profile": {
+                    "description": "Profile holds the value of the profile edge.",
+                    "$ref": "#/definitions/ent.Profile"
+                },
+                "series": {
+                    "description": "Series holds the value of the series edge.",
+                    "$ref": "#/definitions/ent.Series"
+                }
+            }
+        },
+        "ent.File": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the FileQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.FileEdges"
+                },
+                "filename": {
+                    "description": "Filename holds the value of the \"filename\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "mime": {
+                    "description": "Mime holds the value of the \"mime\" field.",
+                    "type": "string"
+                },
+                "note": {
+                    "description": "Note holds the value of the \"note\" field.",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Path holds the value of the \"path\" field.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "size": {
+                    "description": "Size holds the value of the \"size\" field.",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "Status holds the value of the \"status\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.FileEdges": {
+            "type": "object",
+            "properties": {
+                "profile": {
+                    "description": "Profile holds the value of the profile edge.",
+                    "$ref": "#/definitions/ent.Profile"
+                }
+            }
+        },
+        "ent.Profile": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "Avatar holds the value of the \"avatar\" field.",
+                    "type": "string"
+                },
+                "call": {
+                    "description": "Call holds the value of the \"call\" field.",
+                    "type": "string"
+                },
+                "category": {
+                    "description": "Category holds the value of the \"category\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the ProfileQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.ProfileEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.ProfileEdges": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "description": "Account holds the value of the account edge.",
+                    "$ref": "#/definitions/ent.Account"
+                },
+                "episode": {
+                    "description": "Episode holds the value of the episode edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Episode"
+                    }
+                },
+                "file": {
+                    "description": "File holds the value of the file edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.File"
+                    }
+                },
+                "series": {
+                    "description": "Series holds the value of the series edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Series"
+                    }
+                }
+            }
+        },
+        "ent.Series": {
+            "type": "object",
+            "properties": {
+                "call": {
+                    "description": "Call holds the value of the \"call\" field.",
+                    "type": "string"
+                },
+                "content": {
+                    "description": "Content holds the value of the \"content\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the SeriesQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.SeriesEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.SeriesEdges": {
+            "type": "object",
+            "properties": {
+                "episode": {
+                    "description": "Episode holds the value of the episode edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Episode"
+                    }
+                },
+                "profile": {
+                    "description": "Profile holds the value of the profile edge.",
+                    "$ref": "#/definitions/ent.Profile"
+                }
+            }
+        },
+        "ent.Token": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "Body holds the value of the \"body\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the TokenQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.TokenEdges"
+                },
+                "expire": {
+                    "description": "Expire holds the value of the \"expire\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type holds the value of the \"type\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.TokenEdges": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "description": "Account holds the value of the account edge.",
+                    "$ref": "#/definitions/ent.Account"
+                }
+            }
+        },
+        "episode.Episode": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "errs.HTTPError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "file.Meta": {
+            "type": "object",
+            "required": [
+                "category",
+                "mime",
+                "size"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "profile.Profile": {
+            "type": "object",
+            "required": [
+                "call",
+                "category",
+                "title"
+            ],
+            "properties": {
+                "call": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "series.TitleContent": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         }

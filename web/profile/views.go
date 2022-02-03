@@ -20,6 +20,15 @@ type Profile struct {
 	Category string `json:"category" binding:"required"`
 }
 
+// create godoc
+// @Summary create profile
+// @Tags profile
+// @Accept json
+// @Produce json
+// @Param profile body Profile true "profile info"
+// @Success 201 {object} ent.Profile
+// @Failure 400 {object} errs.HTTPError
+// @Router /profile [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	var profile Profile
 	err := ctx.ShouldBindJSON(&profile)
@@ -44,6 +53,16 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 	return http.StatusCreated, p, nil
 }
 
+// create godoc
+// @Summary update profile
+// @Tags profile
+// @Accept json
+// @Produce json
+// @Param pid path string true "profile id"
+// @Param profile body Profile true "profile info"
+// @Success 201 {object} ent.Profile
+// @Failure 400 {object} errs.HTTPError
+// @Router /profile/{pid} [put]
 func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, interface{}, error) {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -62,6 +81,14 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 
 }
 
+// get godoc
+// @Summary get profile
+// @Tags profile
+// @Produce json
+// @Param pid path string true "profile id"
+// @Success 200 {object} ent.Profile
+// @Failure 400 {object} errs.HTTPError
+// @Router /profile/{pid} [get]
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 	ps, err := store.DB.Profile.FindByID(ctx, objectID)
@@ -72,6 +99,13 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	return http.StatusOK, ps, nil
 }
 
+// accountProfiles godoc
+// @Summary get all self profiles
+// @Tags profile
+// @Produce json
+// @Success 200 {object} []ent.Profile
+// @Failure 400 {object} errs.HTTPError
+// @Router /profile [get]
 func accountProfiles(_ *gin.Context, _ *data.Store, identity *controller.Identity) (int, interface{}, error) {
 	return http.StatusOK, identity.AllProfiles(), nil
 }

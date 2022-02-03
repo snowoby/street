@@ -1,19 +1,916 @@
+definitions:
+  account.EmailPassword:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  account.Identity:
+    properties:
+      account:
+        $ref: '#/definitions/ent.Account'
+      profiles:
+        items:
+          $ref: '#/definitions/ent.Profile'
+        type: array
+    type: object
+  account.PublicResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: object
+    required:
+    - email
+    - id
+    - password
+    type: object
+  ent.Account:
+    properties:
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.AccountEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the AccountQuery when eager-loading is set.
+      email:
+        description: Email holds the value of the "email" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.AccountEdges:
+    properties:
+      profile:
+        description: Profile holds the value of the profile edge.
+        items:
+          $ref: '#/definitions/ent.Profile'
+        type: array
+      token:
+        description: Token holds the value of the token edge.
+        items:
+          $ref: '#/definitions/ent.Token'
+        type: array
+    type: object
+  ent.Episode:
+    properties:
+      content:
+        description: Content holds the value of the "content" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.EpisodeEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the EpisodeQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      title:
+        description: Title holds the value of the "title" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.EpisodeEdges:
+    properties:
+      profile:
+        $ref: '#/definitions/ent.Profile'
+        description: Profile holds the value of the profile edge.
+      series:
+        $ref: '#/definitions/ent.Series'
+        description: Series holds the value of the series edge.
+    type: object
+  ent.File:
+    properties:
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.FileEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the FileQuery when eager-loading is set.
+      filename:
+        description: Filename holds the value of the "filename" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: string
+      mime:
+        description: Mime holds the value of the "mime" field.
+        type: string
+      note:
+        description: Note holds the value of the "note" field.
+        type: string
+      path:
+        description: Path holds the value of the "path" field.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      size:
+        description: Size holds the value of the "size" field.
+        type: integer
+      status:
+        description: Status holds the value of the "status" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.FileEdges:
+    properties:
+      profile:
+        $ref: '#/definitions/ent.Profile'
+        description: Profile holds the value of the profile edge.
+    type: object
+  ent.Profile:
+    properties:
+      avatar:
+        description: Avatar holds the value of the "avatar" field.
+        type: string
+      call:
+        description: Call holds the value of the "call" field.
+        type: string
+      category:
+        description: Category holds the value of the "category" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.ProfileEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the ProfileQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      title:
+        description: Title holds the value of the "title" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.ProfileEdges:
+    properties:
+      account:
+        $ref: '#/definitions/ent.Account'
+        description: Account holds the value of the account edge.
+      episode:
+        description: Episode holds the value of the episode edge.
+        items:
+          $ref: '#/definitions/ent.Episode'
+        type: array
+      file:
+        description: File holds the value of the file edge.
+        items:
+          $ref: '#/definitions/ent.File'
+        type: array
+      series:
+        description: Series holds the value of the series edge.
+        items:
+          $ref: '#/definitions/ent.Series'
+        type: array
+    type: object
+  ent.Series:
+    properties:
+      call:
+        description: Call holds the value of the "call" field.
+        type: string
+      content:
+        description: Content holds the value of the "content" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.SeriesEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the SeriesQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      title:
+        description: Title holds the value of the "title" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.SeriesEdges:
+    properties:
+      episode:
+        description: Episode holds the value of the episode edge.
+        items:
+          $ref: '#/definitions/ent.Episode'
+        type: array
+      profile:
+        $ref: '#/definitions/ent.Profile'
+        description: Profile holds the value of the profile edge.
+    type: object
+  ent.Token:
+    properties:
+      body:
+        description: Body holds the value of the "body" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.TokenEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the TokenQuery when eager-loading is set.
+      expire:
+        description: Expire holds the value of the "expire" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      type:
+        description: Type holds the value of the "type" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.TokenEdges:
+    properties:
+      account:
+        $ref: '#/definitions/ent.Account'
+        description: Account holds the value of the account edge.
+    type: object
+  episode.Episode:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  errs.HTTPError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  file.Meta:
+    properties:
+      category:
+        type: string
+      filename:
+        type: string
+      mime:
+        type: string
+      size:
+        type: integer
+    required:
+    - category
+    - mime
+    - size
+    type: object
+  profile.Profile:
+    properties:
+      call:
+        type: string
+      category:
+        type: string
+      title:
+        type: string
+    required:
+    - call
+    - category
+    - title
+    type: object
+  series.TitleContent:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    required:
+    - title
+    type: object
 info:
   contact: {}
 paths:
-  /account/register:
+  /account:
     get:
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/account.Identity'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: info an account
+      tags:
+      - account
+      - profile
+  /account/login:
+    post:
       consumes:
       - application/json
-      description: do ping
+      parameters:
+      - description: account info
+        in: body
+        name: accountInfo
+        required: true
+        schema:
+          $ref: '#/definitions/account.EmailPassword'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: login an account
+      tags:
+      - account
+  /account/refresh:
+    post:
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Token'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: refresh token
+      tags:
+      - account
+      - token
+  /account/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: account info
+        in: body
+        name: accountInfo
+        required: true
+        schema:
+          $ref: '#/definitions/account.EmailPassword'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/account.PublicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: register an account
+      tags:
+      - account
+  /episode:
+    get:
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-      summary: ping exampleasdasdasd
+            items:
+              $ref: '#/definitions/ent.Episode'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: get all episodes
       tags:
-      - example
+      - episode
+  /episode/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: episode id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Episode'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: get episode
+      tags:
+      - episode
+  /episode/{pid}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: episode info
+        in: body
+        name: episode
+        required: true
+        schema:
+          $ref: '#/definitions/episode.Episode'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Episode'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: create episode
+      tags:
+      - episode
+  /episode/{pid}/{id}:
+    delete:
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: episode id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: delete one episode
+      tags:
+      - episode
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: episode id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: episode info
+        in: body
+        name: episode
+        required: true
+        schema:
+          $ref: '#/definitions/episode.Episode'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Episode'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: update episode
+      tags:
+      - episode
+  /file/large/{pid}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: file meta
+        in: body
+        name: meta
+        required: true
+        schema:
+          $ref: '#/definitions/file.Meta'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: create multipart upload
+      tags:
+      - file
+  /file/large/{pid}/{id}:
+    post:
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: file id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: finish multipart upload
+      tags:
+      - file
+  /file/large/{pid}/{id}/{part_id}:
+    put:
+      consumes:
+      - application/octet-stream
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: file id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: part id
+        in: path
+        name: part_id
+        required: true
+        type: integer
+      - description: file content
+        in: body
+        name: data
+        required: true
+        schema:
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: create multipart upload
+      tags:
+      - file
+  /file/single/{pid}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: file meta
+        in: body
+        name: meta
+        required: true
+        schema:
+          $ref: '#/definitions/file.Meta'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: create single file upload
+      tags:
+      - file
+  /file/single/{pid}/{id}:
+    put:
+      consumes:
+      - application/octet-stream
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: file id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: file content
+        in: body
+        name: data
+        required: true
+        schema:
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: single file content upload
+      tags:
+      - file
+  /profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ent.Profile'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: get all self profiles
+      tags:
+      - profile
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile info
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/profile.Profile'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: create profile
+      tags:
+      - profile
+  /profile/{pid}:
+    get:
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: get profile
+      tags:
+      - profile
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: profile info
+        in: body
+        name: profile
+        required: true
+        schema:
+          $ref: '#/definitions/profile.Profile'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Profile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: update profile
+      tags:
+      - profile
+  /series/{id}:
+    get:
+      parameters:
+      - description: series id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Series'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: get a series
+      tags:
+      - series
+  /series/{pid}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: series info
+        in: body
+        name: series
+        required: true
+        schema:
+          $ref: '#/definitions/series.TitleContent'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ent.Series'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: create a series
+      tags:
+      - series
+  /series/{pid}/{id}:
+    delete:
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: series id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Series'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: del a series
+      tags:
+      - series
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: series info
+        in: body
+        name: series
+        required: true
+        schema:
+          $ref: '#/definitions/series.TitleContent'
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: series id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ent.Series'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: update a series
+      tags:
+      - series
 swagger: "2.0"
