@@ -14,18 +14,20 @@ const (
 	Label = "profile"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldSID holds the string denoting the sid field in the database.
-	FieldSID = "sid"
+	// FieldSid holds the string denoting the sid field in the database.
+	FieldSid = "sid"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
-	// FieldCallSign holds the string denoting the callsign field in the database.
-	FieldCallSign = "call_sign"
+	// FieldCall holds the string denoting the call field in the database.
+	FieldCall = "call"
 	// FieldCategory holds the string denoting the category field in the database.
 	FieldCategory = "category"
+	// FieldAvatar holds the string denoting the avatar field in the database.
+	FieldAvatar = "avatar"
 	// EdgeAccount holds the string denoting the account edge name in mutations.
 	EdgeAccount = "account"
 	// EdgeEpisode holds the string denoting the episode edge name in mutations.
@@ -69,12 +71,13 @@ const (
 // Columns holds all SQL columns for profile fields.
 var Columns = []string{
 	FieldID,
-	FieldSID,
+	FieldSid,
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldTitle,
-	FieldCallSign,
+	FieldCall,
 	FieldCategory,
+	FieldAvatar,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "profiles"
@@ -99,8 +102,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultSID holds the default value on creation for the "SID" field.
-	DefaultSID func() schema.ID
+	// DefaultSid holds the default value on creation for the "sid" field.
+	DefaultSid func() schema.ID
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
@@ -109,10 +112,12 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
-	// CallSignValidator is a validator for the "callSign" field. It is called by the builders before save.
-	CallSignValidator func(string) error
+	// CallValidator is a validator for the "call" field. It is called by the builders before save.
+	CallValidator func(string) error
 	// CategoryValidator is a validator for the "category" field. It is called by the builders before save.
 	CategoryValidator func(string) error
+	// AvatarValidator is a validator for the "avatar" field. It is called by the builders before save.
+	AvatarValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

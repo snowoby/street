@@ -2,8 +2,14 @@ package data
 
 import (
 	"github.com/go-redis/redis/v8"
+	"github.com/hibiken/asynq"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"golang.org/x/net/context"
+	"os"
 	"street/ent"
 	"street/pkg/data/storage"
+	"street/pkg/data/task"
 	"time"
 )
 
@@ -22,9 +28,31 @@ type Store struct {
 	Episode        *episode
 	Profile        *profile
 	File           *file
+	Task           *task.Task
 }
 
-func New(client *ent.Client, s3 *storage.Storage, fileRedis *redis.Client) *Store {
+func NewDefaultEnv() *Store {
+	err := godotenv.Load()
+	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(err)
+	}
+	err = client.Schema.Create(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	filePartRedis := redis.NewClient(&redis.Options{
+		Addr: os.Getenv("redis"),
+		DB:   0, // use default DB
+	})
+	taskClient := asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("redis"), DB: 1})
+
+	store := New(client, storage.New(storage.NewDefaultConfig()), filePartRedis, task.New(taskClient))
+	return store
+}
+
+func New(client *ent.Client, s3 *storage.Storage, fileRedis *redis.Client, taskClient *task.Task) *Store {
 
 	return &Store{
 		Account: &account{client.Account},
@@ -40,36 +68,6 @@ func New(client *ent.Client, s3 *storage.Storage, fileRedis *redis.Client) *Stor
 		Episode:        &episode{client.Episode},
 		Profile:        &profile{client.Profile},
 		File:           &file{client.File},
+		Task:           taskClient,
 	}
 }
-
-//func (s *Store) DB() *db {
-//	return s.db
-//}
-//
-//func (s *Store) Config() *siteConfig {
-//	return s.siteConfig
-//}
-//
-//func (s *Store) Series() *series {
-//	return s.series
-//}
-//
-//func (s *Store) Episode() *episode {
-//	return s.episode
-//}
-//
-//func (s *Store) Profile() *profile {
-//	return s.profile
-//}
-//
-//func (s *Store) File() *file {
-//	return s.file
-//}
-//func (s *Store) Storage() *storage.Storage {
-//	return s.storage
-//}
-//
-//func (s *Store) MultiPartRedis() *file {
-//	return s.file
-//}

@@ -30,16 +30,16 @@ func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	return fu
 }
 
-// SetSID sets the "SID" field.
-func (fu *FileUpdate) SetSID(s schema.ID) *FileUpdate {
-	fu.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (fu *FileUpdate) SetSid(s schema.ID) *FileUpdate {
+	fu.mutation.SetSid(s)
 	return fu
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableSID(s *schema.ID) *FileUpdate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (fu *FileUpdate) SetNillableSid(s *schema.ID) *FileUpdate {
 	if s != nil {
-		fu.SetSID(*s)
+		fu.SetSid(*s)
 	}
 	return fu
 }
@@ -275,11 +275,11 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := fu.mutation.SID(); ok {
+	if value, ok := fu.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: file.FieldSID,
+			Column: file.FieldSid,
 		})
 	}
 	if value, ok := fu.mutation.UpdateTime(); ok {
@@ -398,16 +398,16 @@ type FileUpdateOne struct {
 	mutation *FileMutation
 }
 
-// SetSID sets the "SID" field.
-func (fuo *FileUpdateOne) SetSID(s schema.ID) *FileUpdateOne {
-	fuo.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (fuo *FileUpdateOne) SetSid(s schema.ID) *FileUpdateOne {
+	fuo.mutation.SetSid(s)
 	return fuo
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableSID(s *schema.ID) *FileUpdateOne {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableSid(s *schema.ID) *FileUpdateOne {
 	if s != nil {
-		fuo.SetSID(*s)
+		fuo.SetSid(*s)
 	}
 	return fuo
 }
@@ -667,11 +667,11 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			}
 		}
 	}
-	if value, ok := fuo.mutation.SID(); ok {
+	if value, ok := fuo.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: file.FieldSID,
+			Column: file.FieldSid,
 		})
 	}
 	if value, ok := fuo.mutation.UpdateTime(); ok {

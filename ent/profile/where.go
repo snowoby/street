@@ -95,10 +95,10 @@ func IDLTE(id uuid.UUID) predicate.Profile {
 	})
 }
 
-// SID applies equality check predicate on the "SID" field. It's identical to SIDEQ.
-func SID(v schema.ID) predicate.Profile {
+// Sid applies equality check predicate on the "sid" field. It's identical to SidEQ.
+func Sid(v schema.ID) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSID), v))
+		s.Where(sql.EQ(s.C(FieldSid), v))
 	})
 }
 
@@ -123,10 +123,10 @@ func Title(v string) predicate.Profile {
 	})
 }
 
-// CallSign applies equality check predicate on the "callSign" field. It's identical to CallSignEQ.
-func CallSign(v string) predicate.Profile {
+// Call applies equality check predicate on the "call" field. It's identical to CallEQ.
+func Call(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCallSign), v))
+		s.Where(sql.EQ(s.C(FieldCall), v))
 	})
 }
 
@@ -137,22 +137,29 @@ func Category(v string) predicate.Profile {
 	})
 }
 
-// SIDEQ applies the EQ predicate on the "SID" field.
-func SIDEQ(v schema.ID) predicate.Profile {
+// Avatar applies equality check predicate on the "avatar" field. It's identical to AvatarEQ.
+func Avatar(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSID), v))
+		s.Where(sql.EQ(s.C(FieldAvatar), v))
 	})
 }
 
-// SIDNEQ applies the NEQ predicate on the "SID" field.
-func SIDNEQ(v schema.ID) predicate.Profile {
+// SidEQ applies the EQ predicate on the "sid" field.
+func SidEQ(v schema.ID) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSID), v))
+		s.Where(sql.EQ(s.C(FieldSid), v))
 	})
 }
 
-// SIDIn applies the In predicate on the "SID" field.
-func SIDIn(vs ...schema.ID) predicate.Profile {
+// SidNEQ applies the NEQ predicate on the "sid" field.
+func SidNEQ(v schema.ID) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSid), v))
+	})
+}
+
+// SidIn applies the In predicate on the "sid" field.
+func SidIn(vs ...schema.ID) predicate.Profile {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -164,12 +171,12 @@ func SIDIn(vs ...schema.ID) predicate.Profile {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldSID), v...))
+		s.Where(sql.In(s.C(FieldSid), v...))
 	})
 }
 
-// SIDNotIn applies the NotIn predicate on the "SID" field.
-func SIDNotIn(vs ...schema.ID) predicate.Profile {
+// SidNotIn applies the NotIn predicate on the "sid" field.
+func SidNotIn(vs ...schema.ID) predicate.Profile {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -181,35 +188,35 @@ func SIDNotIn(vs ...schema.ID) predicate.Profile {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldSID), v...))
+		s.Where(sql.NotIn(s.C(FieldSid), v...))
 	})
 }
 
-// SIDGT applies the GT predicate on the "SID" field.
-func SIDGT(v schema.ID) predicate.Profile {
+// SidGT applies the GT predicate on the "sid" field.
+func SidGT(v schema.ID) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSID), v))
+		s.Where(sql.GT(s.C(FieldSid), v))
 	})
 }
 
-// SIDGTE applies the GTE predicate on the "SID" field.
-func SIDGTE(v schema.ID) predicate.Profile {
+// SidGTE applies the GTE predicate on the "sid" field.
+func SidGTE(v schema.ID) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSID), v))
+		s.Where(sql.GTE(s.C(FieldSid), v))
 	})
 }
 
-// SIDLT applies the LT predicate on the "SID" field.
-func SIDLT(v schema.ID) predicate.Profile {
+// SidLT applies the LT predicate on the "sid" field.
+func SidLT(v schema.ID) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSID), v))
+		s.Where(sql.LT(s.C(FieldSid), v))
 	})
 }
 
-// SIDLTE applies the LTE predicate on the "SID" field.
-func SIDLTE(v schema.ID) predicate.Profile {
+// SidLTE applies the LTE predicate on the "sid" field.
+func SidLTE(v schema.ID) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSID), v))
+		s.Where(sql.LTE(s.C(FieldSid), v))
 	})
 }
 
@@ -476,22 +483,22 @@ func TitleContainsFold(v string) predicate.Profile {
 	})
 }
 
-// CallSignEQ applies the EQ predicate on the "callSign" field.
-func CallSignEQ(v string) predicate.Profile {
+// CallEQ applies the EQ predicate on the "call" field.
+func CallEQ(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCallSign), v))
+		s.Where(sql.EQ(s.C(FieldCall), v))
 	})
 }
 
-// CallSignNEQ applies the NEQ predicate on the "callSign" field.
-func CallSignNEQ(v string) predicate.Profile {
+// CallNEQ applies the NEQ predicate on the "call" field.
+func CallNEQ(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCallSign), v))
+		s.Where(sql.NEQ(s.C(FieldCall), v))
 	})
 }
 
-// CallSignIn applies the In predicate on the "callSign" field.
-func CallSignIn(vs ...string) predicate.Profile {
+// CallIn applies the In predicate on the "call" field.
+func CallIn(vs ...string) predicate.Profile {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -503,12 +510,12 @@ func CallSignIn(vs ...string) predicate.Profile {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldCallSign), v...))
+		s.Where(sql.In(s.C(FieldCall), v...))
 	})
 }
 
-// CallSignNotIn applies the NotIn predicate on the "callSign" field.
-func CallSignNotIn(vs ...string) predicate.Profile {
+// CallNotIn applies the NotIn predicate on the "call" field.
+func CallNotIn(vs ...string) predicate.Profile {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -520,70 +527,70 @@ func CallSignNotIn(vs ...string) predicate.Profile {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldCallSign), v...))
+		s.Where(sql.NotIn(s.C(FieldCall), v...))
 	})
 }
 
-// CallSignGT applies the GT predicate on the "callSign" field.
-func CallSignGT(v string) predicate.Profile {
+// CallGT applies the GT predicate on the "call" field.
+func CallGT(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCallSign), v))
+		s.Where(sql.GT(s.C(FieldCall), v))
 	})
 }
 
-// CallSignGTE applies the GTE predicate on the "callSign" field.
-func CallSignGTE(v string) predicate.Profile {
+// CallGTE applies the GTE predicate on the "call" field.
+func CallGTE(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCallSign), v))
+		s.Where(sql.GTE(s.C(FieldCall), v))
 	})
 }
 
-// CallSignLT applies the LT predicate on the "callSign" field.
-func CallSignLT(v string) predicate.Profile {
+// CallLT applies the LT predicate on the "call" field.
+func CallLT(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCallSign), v))
+		s.Where(sql.LT(s.C(FieldCall), v))
 	})
 }
 
-// CallSignLTE applies the LTE predicate on the "callSign" field.
-func CallSignLTE(v string) predicate.Profile {
+// CallLTE applies the LTE predicate on the "call" field.
+func CallLTE(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCallSign), v))
+		s.Where(sql.LTE(s.C(FieldCall), v))
 	})
 }
 
-// CallSignContains applies the Contains predicate on the "callSign" field.
-func CallSignContains(v string) predicate.Profile {
+// CallContains applies the Contains predicate on the "call" field.
+func CallContains(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldCallSign), v))
+		s.Where(sql.Contains(s.C(FieldCall), v))
 	})
 }
 
-// CallSignHasPrefix applies the HasPrefix predicate on the "callSign" field.
-func CallSignHasPrefix(v string) predicate.Profile {
+// CallHasPrefix applies the HasPrefix predicate on the "call" field.
+func CallHasPrefix(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldCallSign), v))
+		s.Where(sql.HasPrefix(s.C(FieldCall), v))
 	})
 }
 
-// CallSignHasSuffix applies the HasSuffix predicate on the "callSign" field.
-func CallSignHasSuffix(v string) predicate.Profile {
+// CallHasSuffix applies the HasSuffix predicate on the "call" field.
+func CallHasSuffix(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldCallSign), v))
+		s.Where(sql.HasSuffix(s.C(FieldCall), v))
 	})
 }
 
-// CallSignEqualFold applies the EqualFold predicate on the "callSign" field.
-func CallSignEqualFold(v string) predicate.Profile {
+// CallEqualFold applies the EqualFold predicate on the "call" field.
+func CallEqualFold(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldCallSign), v))
+		s.Where(sql.EqualFold(s.C(FieldCall), v))
 	})
 }
 
-// CallSignContainsFold applies the ContainsFold predicate on the "callSign" field.
-func CallSignContainsFold(v string) predicate.Profile {
+// CallContainsFold applies the ContainsFold predicate on the "call" field.
+func CallContainsFold(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldCallSign), v))
+		s.Where(sql.ContainsFold(s.C(FieldCall), v))
 	})
 }
 
@@ -695,6 +702,131 @@ func CategoryEqualFold(v string) predicate.Profile {
 func CategoryContainsFold(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldCategory), v))
+	})
+}
+
+// AvatarEQ applies the EQ predicate on the "avatar" field.
+func AvatarEQ(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarNEQ applies the NEQ predicate on the "avatar" field.
+func AvatarNEQ(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarIn applies the In predicate on the "avatar" field.
+func AvatarIn(vs ...string) predicate.Profile {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Profile(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAvatar), v...))
+	})
+}
+
+// AvatarNotIn applies the NotIn predicate on the "avatar" field.
+func AvatarNotIn(vs ...string) predicate.Profile {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Profile(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAvatar), v...))
+	})
+}
+
+// AvatarGT applies the GT predicate on the "avatar" field.
+func AvatarGT(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarGTE applies the GTE predicate on the "avatar" field.
+func AvatarGTE(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarLT applies the LT predicate on the "avatar" field.
+func AvatarLT(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarLTE applies the LTE predicate on the "avatar" field.
+func AvatarLTE(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarContains applies the Contains predicate on the "avatar" field.
+func AvatarContains(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarHasPrefix applies the HasPrefix predicate on the "avatar" field.
+func AvatarHasPrefix(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarHasSuffix applies the HasSuffix predicate on the "avatar" field.
+func AvatarHasSuffix(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarIsNil applies the IsNil predicate on the "avatar" field.
+func AvatarIsNil() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAvatar)))
+	})
+}
+
+// AvatarNotNil applies the NotNil predicate on the "avatar" field.
+func AvatarNotNil() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAvatar)))
+	})
+}
+
+// AvatarEqualFold applies the EqualFold predicate on the "avatar" field.
+func AvatarEqualFold(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAvatar), v))
+	})
+}
+
+// AvatarContainsFold applies the ContainsFold predicate on the "avatar" field.
+func AvatarContainsFold(v string) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAvatar), v))
 	})
 }
 

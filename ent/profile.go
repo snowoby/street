@@ -19,18 +19,20 @@ type Profile struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// SID holds the value of the "SID" field.
-	SID schema.ID `json:"SID,omitempty"`
+	// Sid holds the value of the "sid" field.
+	Sid schema.ID `json:"sid,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
-	// CallSign holds the value of the "callSign" field.
-	CallSign string `json:"callSign,omitempty"`
+	// Call holds the value of the "call" field.
+	Call string `json:"call,omitempty"`
 	// Category holds the value of the "category" field.
 	Category string `json:"category,omitempty"`
+	// Avatar holds the value of the "avatar" field.
+	Avatar *string `json:"avatar,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProfileQuery when eager-loading is set.
 	Edges           ProfileEdges `json:"edges"`
@@ -98,9 +100,9 @@ func (*Profile) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profile.FieldSID:
+		case profile.FieldSid:
 			values[i] = new(schema.ID)
-		case profile.FieldTitle, profile.FieldCallSign, profile.FieldCategory:
+		case profile.FieldTitle, profile.FieldCall, profile.FieldCategory, profile.FieldAvatar:
 			values[i] = new(sql.NullString)
 		case profile.FieldCreateTime, profile.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -129,11 +131,11 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				pr.ID = *value
 			}
-		case profile.FieldSID:
+		case profile.FieldSid:
 			if value, ok := values[i].(*schema.ID); !ok {
-				return fmt.Errorf("unexpected type %T for field SID", values[i])
+				return fmt.Errorf("unexpected type %T for field sid", values[i])
 			} else if value != nil {
-				pr.SID = *value
+				pr.Sid = *value
 			}
 		case profile.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -153,17 +155,24 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				pr.Title = value.String
 			}
-		case profile.FieldCallSign:
+		case profile.FieldCall:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field callSign", values[i])
+				return fmt.Errorf("unexpected type %T for field call", values[i])
 			} else if value.Valid {
-				pr.CallSign = value.String
+				pr.Call = value.String
 			}
 		case profile.FieldCategory:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field category", values[i])
 			} else if value.Valid {
 				pr.Category = value.String
+			}
+		case profile.FieldAvatar:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field avatar", values[i])
+			} else if value.Valid {
+				pr.Avatar = new(string)
+				*pr.Avatar = value.String
 			}
 		case profile.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -220,18 +229,22 @@ func (pr *Profile) String() string {
 	var builder strings.Builder
 	builder.WriteString("Profile(")
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
-	builder.WriteString(", SID=")
-	builder.WriteString(fmt.Sprintf("%v", pr.SID))
+	builder.WriteString(", sid=")
+	builder.WriteString(fmt.Sprintf("%v", pr.Sid))
 	builder.WriteString(", create_time=")
 	builder.WriteString(pr.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(pr.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", title=")
 	builder.WriteString(pr.Title)
-	builder.WriteString(", callSign=")
-	builder.WriteString(pr.CallSign)
+	builder.WriteString(", call=")
+	builder.WriteString(pr.Call)
 	builder.WriteString(", category=")
 	builder.WriteString(pr.Category)
+	if v := pr.Avatar; v != nil {
+		builder.WriteString(", avatar=")
+		builder.WriteString(*v)
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

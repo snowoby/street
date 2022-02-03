@@ -10,13 +10,13 @@ import (
 	"street/pkg/data/value"
 )
 
-type CallSign struct {
-	CallSign string `json:"callSign" binding:"required"`
+type Call struct {
+	Call string `json:"call" binding:"required"`
 }
 
 type Profile struct {
 	Title    string `json:"title" binding:"required"`
-	CallSign string `json:"callSign" binding:"required"`
+	Call     string `json:"call" binding:"required"`
 	Category string `json:"category" binding:"required"`
 }
 
@@ -27,16 +27,16 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, errs.BindingError(err)
 	}
 
-	exists, err := store.Profile.CallSignExists(ctx, profile.CallSign)
+	exists, err := store.Profile.CallExists(ctx, profile.Call)
 	if err != nil {
 		return 0, nil, err
 	}
 
 	if exists {
-		return 0, nil, errs.CallSignDuplicateError
+		return 0, nil, errs.CallDuplicateError
 	}
 
-	p, err := store.Profile.Create(ctx, profile.CallSign, profile.Title, profile.Category, identity.Account().ID)
+	p, err := store.Profile.Create(ctx, profile.Call, profile.Title, profile.Category, identity.Account().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -53,7 +53,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 		return 0, nil, errs.BindingError(err)
 	}
 
-	p, err := store.Profile.Update(ctx, objectID, profile.Title, profile.CallSign, profile.Category)
+	p, err := store.Profile.Update(ctx, objectID, profile.Title, profile.Call, profile.Category)
 	if err != nil {
 		return 0, nil, err
 	}

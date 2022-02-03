@@ -2,6 +2,8 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
+	"golang.org/x/net/context"
 	"street/ent"
 	"street/errs"
 	"street/pkg/data"
@@ -11,9 +13,8 @@ import (
 type OriginalF func(ctx *gin.Context, store *data.Store)
 type F func(ctx *gin.Context, store *data.Store) (int, interface{}, error)
 type Func func(ctx *gin.Context, store *data.Store, visitor *Identity) (int, interface{}, error)
-
-//type UUIDFunc func(ctx *gin.Context, store *data.Store, visitor *Identity, uuid *uuid.UUID) (int, interface{}, error)
-
+type TaskFunc func(ctx context.Context, task *asynq.Task, store *data.Store) error
+type TaskHandleFunc func(context.Context, *asynq.Task) error
 type OwnerFunc func(ctx *gin.Context, store *data.Store, visitor *Identity) error
 
 type controller struct {
@@ -25,6 +26,7 @@ type Controller interface {
 	Bare(f F) gin.HandlerFunc
 	// General will try to bind visitor identity as param.
 	General(f Func) gin.HandlerFunc
+	Task(f TaskFunc) TaskHandleFunc
 	Store() *data.Store
 	Owned(f OwnerFunc) gin.HandlerFunc
 }
@@ -83,6 +85,11 @@ func (controller *controller) Bare(f F) gin.HandlerFunc {
 		code, responseValue, err := f(ctx, controller.store)
 		resultProcess(ctx, code, responseValue, err)
 
+	}
+}
+func (controller *controller) Task(f TaskFunc) TaskHandleFunc {
+	return func(ctx context.Context, task *asynq.Task) error {
+		return f(ctx, task, controller.store)
 	}
 }
 

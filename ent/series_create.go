@@ -24,16 +24,16 @@ type SeriesCreate struct {
 	hooks    []Hook
 }
 
-// SetSID sets the "SID" field.
-func (sc *SeriesCreate) SetSID(s schema.ID) *SeriesCreate {
-	sc.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (sc *SeriesCreate) SetSid(s schema.ID) *SeriesCreate {
+	sc.mutation.SetSid(s)
 	return sc
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (sc *SeriesCreate) SetNillableSID(s *schema.ID) *SeriesCreate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (sc *SeriesCreate) SetNillableSid(s *schema.ID) *SeriesCreate {
 	if s != nil {
-		sc.SetSID(*s)
+		sc.SetSid(*s)
 	}
 	return sc
 }
@@ -72,16 +72,16 @@ func (sc *SeriesCreate) SetTitle(s string) *SeriesCreate {
 	return sc
 }
 
-// SetCallSign sets the "callSign" field.
-func (sc *SeriesCreate) SetCallSign(s string) *SeriesCreate {
-	sc.mutation.SetCallSign(s)
+// SetCall sets the "call" field.
+func (sc *SeriesCreate) SetCall(s string) *SeriesCreate {
+	sc.mutation.SetCall(s)
 	return sc
 }
 
-// SetNillableCallSign sets the "callSign" field if the given value is not nil.
-func (sc *SeriesCreate) SetNillableCallSign(s *string) *SeriesCreate {
+// SetNillableCall sets the "call" field if the given value is not nil.
+func (sc *SeriesCreate) SetNillableCall(s *string) *SeriesCreate {
 	if s != nil {
-		sc.SetCallSign(*s)
+		sc.SetCall(*s)
 	}
 	return sc
 }
@@ -203,9 +203,9 @@ func (sc *SeriesCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (sc *SeriesCreate) defaults() {
-	if _, ok := sc.mutation.SID(); !ok {
-		v := series.DefaultSID()
-		sc.mutation.SetSID(v)
+	if _, ok := sc.mutation.Sid(); !ok {
+		v := series.DefaultSid()
+		sc.mutation.SetSid(v)
 	}
 	if _, ok := sc.mutation.CreateTime(); !ok {
 		v := series.DefaultCreateTime()
@@ -227,8 +227,8 @@ func (sc *SeriesCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SeriesCreate) check() error {
-	if _, ok := sc.mutation.SID(); !ok {
-		return &ValidationError{Name: "SID", err: errors.New(`ent: missing required field "SID"`)}
+	if _, ok := sc.mutation.Sid(); !ok {
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
 	}
 	if _, ok := sc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
@@ -244,9 +244,9 @@ func (sc *SeriesCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
 		}
 	}
-	if v, ok := sc.mutation.CallSign(); ok {
-		if err := series.CallSignValidator(v); err != nil {
-			return &ValidationError{Name: "callSign", err: fmt.Errorf(`ent: validator failed for field "callSign": %w`, err)}
+	if v, ok := sc.mutation.Call(); ok {
+		if err := series.CallValidator(v); err != nil {
+			return &ValidationError{Name: "call", err: fmt.Errorf(`ent: validator failed for field "call": %w`, err)}
 		}
 	}
 	if _, ok := sc.mutation.Content(); !ok {
@@ -287,13 +287,13 @@ func (sc *SeriesCreate) createSpec() (*Series, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := sc.mutation.SID(); ok {
+	if value, ok := sc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: series.FieldSID,
+			Column: series.FieldSid,
 		})
-		_node.SID = value
+		_node.Sid = value
 	}
 	if value, ok := sc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -319,13 +319,13 @@ func (sc *SeriesCreate) createSpec() (*Series, *sqlgraph.CreateSpec) {
 		})
 		_node.Title = value
 	}
-	if value, ok := sc.mutation.CallSign(); ok {
+	if value, ok := sc.mutation.Call(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: series.FieldCallSign,
+			Column: series.FieldCall,
 		})
-		_node.CallSign = &value
+		_node.Call = &value
 	}
 	if value, ok := sc.mutation.Content(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

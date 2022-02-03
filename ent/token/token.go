@@ -14,8 +14,8 @@ const (
 	Label = "token"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldSID holds the string denoting the sid field in the database.
-	FieldSID = "sid"
+	// FieldSid holds the string denoting the sid field in the database.
+	FieldSid = "sid"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
@@ -24,8 +24,8 @@ const (
 	FieldBody = "body"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
-	// FieldExpireTime holds the string denoting the expire_time field in the database.
-	FieldExpireTime = "expire_time"
+	// FieldExpire holds the string denoting the expire field in the database.
+	FieldExpire = "expire"
 	// EdgeAccount holds the string denoting the account edge name in mutations.
 	EdgeAccount = "account"
 	// Table holds the table name of the token in the database.
@@ -42,12 +42,12 @@ const (
 // Columns holds all SQL columns for token fields.
 var Columns = []string{
 	FieldID,
-	FieldSID,
+	FieldSid,
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldBody,
 	FieldType,
-	FieldExpireTime,
+	FieldExpire,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tokens"
@@ -72,8 +72,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultSID holds the default value on creation for the "SID" field.
-	DefaultSID func() schema.ID
+	// DefaultSid holds the default value on creation for the "sid" field.
+	DefaultSid func() schema.ID
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.

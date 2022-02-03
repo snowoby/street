@@ -33,16 +33,16 @@ func (pu *ProfileUpdate) Where(ps ...predicate.Profile) *ProfileUpdate {
 	return pu
 }
 
-// SetSID sets the "SID" field.
-func (pu *ProfileUpdate) SetSID(s schema.ID) *ProfileUpdate {
-	pu.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (pu *ProfileUpdate) SetSid(s schema.ID) *ProfileUpdate {
+	pu.mutation.SetSid(s)
 	return pu
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (pu *ProfileUpdate) SetNillableSID(s *schema.ID) *ProfileUpdate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (pu *ProfileUpdate) SetNillableSid(s *schema.ID) *ProfileUpdate {
 	if s != nil {
-		pu.SetSID(*s)
+		pu.SetSid(*s)
 	}
 	return pu
 }
@@ -53,15 +53,35 @@ func (pu *ProfileUpdate) SetTitle(s string) *ProfileUpdate {
 	return pu
 }
 
-// SetCallSign sets the "callSign" field.
-func (pu *ProfileUpdate) SetCallSign(s string) *ProfileUpdate {
-	pu.mutation.SetCallSign(s)
+// SetCall sets the "call" field.
+func (pu *ProfileUpdate) SetCall(s string) *ProfileUpdate {
+	pu.mutation.SetCall(s)
 	return pu
 }
 
 // SetCategory sets the "category" field.
 func (pu *ProfileUpdate) SetCategory(s string) *ProfileUpdate {
 	pu.mutation.SetCategory(s)
+	return pu
+}
+
+// SetAvatar sets the "avatar" field.
+func (pu *ProfileUpdate) SetAvatar(s string) *ProfileUpdate {
+	pu.mutation.SetAvatar(s)
+	return pu
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (pu *ProfileUpdate) SetNillableAvatar(s *string) *ProfileUpdate {
+	if s != nil {
+		pu.SetAvatar(*s)
+	}
+	return pu
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (pu *ProfileUpdate) ClearAvatar() *ProfileUpdate {
+	pu.mutation.ClearAvatar()
 	return pu
 }
 
@@ -271,14 +291,19 @@ func (pu *ProfileUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
 		}
 	}
-	if v, ok := pu.mutation.CallSign(); ok {
-		if err := profile.CallSignValidator(v); err != nil {
-			return &ValidationError{Name: "callSign", err: fmt.Errorf("ent: validator failed for field \"callSign\": %w", err)}
+	if v, ok := pu.mutation.Call(); ok {
+		if err := profile.CallValidator(v); err != nil {
+			return &ValidationError{Name: "call", err: fmt.Errorf("ent: validator failed for field \"call\": %w", err)}
 		}
 	}
 	if v, ok := pu.mutation.Category(); ok {
 		if err := profile.CategoryValidator(v); err != nil {
 			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
+		}
+	}
+	if v, ok := pu.mutation.Avatar(); ok {
+		if err := profile.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf("ent: validator failed for field \"avatar\": %w", err)}
 		}
 	}
 	if _, ok := pu.mutation.AccountID(); pu.mutation.AccountCleared() && !ok {
@@ -305,11 +330,11 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pu.mutation.SID(); ok {
+	if value, ok := pu.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: profile.FieldSID,
+			Column: profile.FieldSid,
 		})
 	}
 	if value, ok := pu.mutation.UpdateTime(); ok {
@@ -326,11 +351,11 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: profile.FieldTitle,
 		})
 	}
-	if value, ok := pu.mutation.CallSign(); ok {
+	if value, ok := pu.mutation.Call(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: profile.FieldCallSign,
+			Column: profile.FieldCall,
 		})
 	}
 	if value, ok := pu.mutation.Category(); ok {
@@ -338,6 +363,19 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: profile.FieldCategory,
+		})
+	}
+	if value, ok := pu.mutation.Avatar(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldAvatar,
+		})
+	}
+	if pu.mutation.AvatarCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: profile.FieldAvatar,
 		})
 	}
 	if pu.mutation.AccountCleared() {
@@ -556,16 +594,16 @@ type ProfileUpdateOne struct {
 	mutation *ProfileMutation
 }
 
-// SetSID sets the "SID" field.
-func (puo *ProfileUpdateOne) SetSID(s schema.ID) *ProfileUpdateOne {
-	puo.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (puo *ProfileUpdateOne) SetSid(s schema.ID) *ProfileUpdateOne {
+	puo.mutation.SetSid(s)
 	return puo
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (puo *ProfileUpdateOne) SetNillableSID(s *schema.ID) *ProfileUpdateOne {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (puo *ProfileUpdateOne) SetNillableSid(s *schema.ID) *ProfileUpdateOne {
 	if s != nil {
-		puo.SetSID(*s)
+		puo.SetSid(*s)
 	}
 	return puo
 }
@@ -576,15 +614,35 @@ func (puo *ProfileUpdateOne) SetTitle(s string) *ProfileUpdateOne {
 	return puo
 }
 
-// SetCallSign sets the "callSign" field.
-func (puo *ProfileUpdateOne) SetCallSign(s string) *ProfileUpdateOne {
-	puo.mutation.SetCallSign(s)
+// SetCall sets the "call" field.
+func (puo *ProfileUpdateOne) SetCall(s string) *ProfileUpdateOne {
+	puo.mutation.SetCall(s)
 	return puo
 }
 
 // SetCategory sets the "category" field.
 func (puo *ProfileUpdateOne) SetCategory(s string) *ProfileUpdateOne {
 	puo.mutation.SetCategory(s)
+	return puo
+}
+
+// SetAvatar sets the "avatar" field.
+func (puo *ProfileUpdateOne) SetAvatar(s string) *ProfileUpdateOne {
+	puo.mutation.SetAvatar(s)
+	return puo
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (puo *ProfileUpdateOne) SetNillableAvatar(s *string) *ProfileUpdateOne {
+	if s != nil {
+		puo.SetAvatar(*s)
+	}
+	return puo
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (puo *ProfileUpdateOne) ClearAvatar() *ProfileUpdateOne {
+	puo.mutation.ClearAvatar()
 	return puo
 }
 
@@ -801,14 +859,19 @@ func (puo *ProfileUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
 		}
 	}
-	if v, ok := puo.mutation.CallSign(); ok {
-		if err := profile.CallSignValidator(v); err != nil {
-			return &ValidationError{Name: "callSign", err: fmt.Errorf("ent: validator failed for field \"callSign\": %w", err)}
+	if v, ok := puo.mutation.Call(); ok {
+		if err := profile.CallValidator(v); err != nil {
+			return &ValidationError{Name: "call", err: fmt.Errorf("ent: validator failed for field \"call\": %w", err)}
 		}
 	}
 	if v, ok := puo.mutation.Category(); ok {
 		if err := profile.CategoryValidator(v); err != nil {
 			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
+		}
+	}
+	if v, ok := puo.mutation.Avatar(); ok {
+		if err := profile.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf("ent: validator failed for field \"avatar\": %w", err)}
 		}
 	}
 	if _, ok := puo.mutation.AccountID(); puo.mutation.AccountCleared() && !ok {
@@ -852,11 +915,11 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			}
 		}
 	}
-	if value, ok := puo.mutation.SID(); ok {
+	if value, ok := puo.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: profile.FieldSID,
+			Column: profile.FieldSid,
 		})
 	}
 	if value, ok := puo.mutation.UpdateTime(); ok {
@@ -873,11 +936,11 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Column: profile.FieldTitle,
 		})
 	}
-	if value, ok := puo.mutation.CallSign(); ok {
+	if value, ok := puo.mutation.Call(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: profile.FieldCallSign,
+			Column: profile.FieldCall,
 		})
 	}
 	if value, ok := puo.mutation.Category(); ok {
@@ -885,6 +948,19 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: profile.FieldCategory,
+		})
+	}
+	if value, ok := puo.mutation.Avatar(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldAvatar,
+		})
+	}
+	if puo.mutation.AvatarCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: profile.FieldAvatar,
 		})
 	}
 	if puo.mutation.AccountCleared() {

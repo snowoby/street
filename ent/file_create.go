@@ -23,16 +23,16 @@ type FileCreate struct {
 	hooks    []Hook
 }
 
-// SetSID sets the "SID" field.
-func (fc *FileCreate) SetSID(s schema.ID) *FileCreate {
-	fc.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (fc *FileCreate) SetSid(s schema.ID) *FileCreate {
+	fc.mutation.SetSid(s)
 	return fc
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (fc *FileCreate) SetNillableSID(s *schema.ID) *FileCreate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (fc *FileCreate) SetNillableSid(s *schema.ID) *FileCreate {
 	if s != nil {
-		fc.SetSID(*s)
+		fc.SetSid(*s)
 	}
 	return fc
 }
@@ -229,9 +229,9 @@ func (fc *FileCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (fc *FileCreate) defaults() {
-	if _, ok := fc.mutation.SID(); !ok {
-		v := file.DefaultSID()
-		fc.mutation.SetSID(v)
+	if _, ok := fc.mutation.Sid(); !ok {
+		v := file.DefaultSid()
+		fc.mutation.SetSid(v)
 	}
 	if _, ok := fc.mutation.CreateTime(); !ok {
 		v := file.DefaultCreateTime()
@@ -265,8 +265,8 @@ func (fc *FileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
-	if _, ok := fc.mutation.SID(); !ok {
-		return &ValidationError{Name: "SID", err: errors.New(`ent: missing required field "SID"`)}
+	if _, ok := fc.mutation.Sid(); !ok {
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
 	}
 	if _, ok := fc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
@@ -349,13 +349,13 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := fc.mutation.SID(); ok {
+	if value, ok := fc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: file.FieldSID,
+			Column: file.FieldSid,
 		})
-		_node.SID = value
+		_node.Sid = value
 	}
 	if value, ok := fc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

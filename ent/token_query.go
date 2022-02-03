@@ -292,12 +292,12 @@ func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
 // Example:
 //
 //	var v []struct {
-//		SID schema.ID `json:"SID,omitempty"`
+//		Sid schema.ID `json:"sid,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Token.Query().
-//		GroupBy(token.FieldSID).
+//		GroupBy(token.FieldSid).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +319,11 @@ func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 // Example:
 //
 //	var v []struct {
-//		SID schema.ID `json:"SID,omitempty"`
+//		Sid schema.ID `json:"sid,omitempty"`
 //	}
 //
 //	client.Token.Query().
-//		Select(token.FieldSID).
+//		Select(token.FieldSid).
 //		Scan(ctx, &v)
 //
 func (tq *TokenQuery) Select(fields ...string) *TokenSelect {

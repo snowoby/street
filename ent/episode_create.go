@@ -24,16 +24,16 @@ type EpisodeCreate struct {
 	hooks    []Hook
 }
 
-// SetSID sets the "SID" field.
-func (ec *EpisodeCreate) SetSID(s schema.ID) *EpisodeCreate {
-	ec.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (ec *EpisodeCreate) SetSid(s schema.ID) *EpisodeCreate {
+	ec.mutation.SetSid(s)
 	return ec
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (ec *EpisodeCreate) SetNillableSID(s *schema.ID) *EpisodeCreate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (ec *EpisodeCreate) SetNillableSid(s *schema.ID) *EpisodeCreate {
 	if s != nil {
-		ec.SetSID(*s)
+		ec.SetSid(*s)
 	}
 	return ec
 }
@@ -185,9 +185,9 @@ func (ec *EpisodeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ec *EpisodeCreate) defaults() {
-	if _, ok := ec.mutation.SID(); !ok {
-		v := episode.DefaultSID()
-		ec.mutation.SetSID(v)
+	if _, ok := ec.mutation.Sid(); !ok {
+		v := episode.DefaultSid()
+		ec.mutation.SetSid(v)
 	}
 	if _, ok := ec.mutation.CreateTime(); !ok {
 		v := episode.DefaultCreateTime()
@@ -205,8 +205,8 @@ func (ec *EpisodeCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ec *EpisodeCreate) check() error {
-	if _, ok := ec.mutation.SID(); !ok {
-		return &ValidationError{Name: "SID", err: errors.New(`ent: missing required field "SID"`)}
+	if _, ok := ec.mutation.Sid(); !ok {
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
 	}
 	if _, ok := ec.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
@@ -265,13 +265,13 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := ec.mutation.SID(); ok {
+	if value, ok := ec.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: episode.FieldSID,
+			Column: episode.FieldSid,
 		})
-		_node.SID = value
+		_node.Sid = value
 	}
 	if value, ok := ec.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

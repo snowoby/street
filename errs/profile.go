@@ -5,6 +5,6 @@ import (
 )
 
 var (
-	ProfileIdentityError   = HTTPError{Code: http.StatusForbidden, Message: "account and profile not matched"}
-	CallSignDuplicateError = HTTPError{Code: http.StatusConflict, Message: "call sign exists"}
+	ProfileIdentityError = HTTPError{Code: http.StatusForbidden, Message: "account and profile not matched"}
+	CallDuplicateError   = HTTPError{Code: http.StatusConflict, Message: "call exists"}
 )

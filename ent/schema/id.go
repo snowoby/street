@@ -66,7 +66,7 @@ func Int64ToString(value int64) string {
 
 func (IDMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("SID").GoType(ID("")).DefaultFunc(func() ID {
+		field.Int64("sid").GoType(ID("")).DefaultFunc(func() ID {
 			return ID(utils.RandomString(8))
 		}).Unique(),
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),

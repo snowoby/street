@@ -19,16 +19,16 @@ type Series struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// SID holds the value of the "SID" field.
-	SID schema.ID `json:"SID,omitempty"`
+	// Sid holds the value of the "sid" field.
+	Sid schema.ID `json:"sid,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
-	// CallSign holds the value of the "callSign" field.
-	CallSign *string `json:"callSign,omitempty"`
+	// Call holds the value of the "call" field.
+	Call *string `json:"call,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -76,9 +76,9 @@ func (*Series) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case series.FieldSID:
+		case series.FieldSid:
 			values[i] = new(schema.ID)
-		case series.FieldTitle, series.FieldCallSign, series.FieldContent:
+		case series.FieldTitle, series.FieldCall, series.FieldContent:
 			values[i] = new(sql.NullString)
 		case series.FieldCreateTime, series.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -107,11 +107,11 @@ func (s *Series) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				s.ID = *value
 			}
-		case series.FieldSID:
+		case series.FieldSid:
 			if value, ok := values[i].(*schema.ID); !ok {
-				return fmt.Errorf("unexpected type %T for field SID", values[i])
+				return fmt.Errorf("unexpected type %T for field sid", values[i])
 			} else if value != nil {
-				s.SID = *value
+				s.Sid = *value
 			}
 		case series.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -131,12 +131,12 @@ func (s *Series) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				s.Title = value.String
 			}
-		case series.FieldCallSign:
+		case series.FieldCall:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field callSign", values[i])
+				return fmt.Errorf("unexpected type %T for field call", values[i])
 			} else if value.Valid {
-				s.CallSign = new(string)
-				*s.CallSign = value.String
+				s.Call = new(string)
+				*s.Call = value.String
 			}
 		case series.FieldContent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -189,16 +189,16 @@ func (s *Series) String() string {
 	var builder strings.Builder
 	builder.WriteString("Series(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
-	builder.WriteString(", SID=")
-	builder.WriteString(fmt.Sprintf("%v", s.SID))
+	builder.WriteString(", sid=")
+	builder.WriteString(fmt.Sprintf("%v", s.Sid))
 	builder.WriteString(", create_time=")
 	builder.WriteString(s.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(s.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", title=")
 	builder.WriteString(s.Title)
-	if v := s.CallSign; v != nil {
-		builder.WriteString(", callSign=")
+	if v := s.Call; v != nil {
+		builder.WriteString(", call=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", content=")

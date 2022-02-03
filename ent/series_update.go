@@ -31,16 +31,16 @@ func (su *SeriesUpdate) Where(ps ...predicate.Series) *SeriesUpdate {
 	return su
 }
 
-// SetSID sets the "SID" field.
-func (su *SeriesUpdate) SetSID(s schema.ID) *SeriesUpdate {
-	su.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (su *SeriesUpdate) SetSid(s schema.ID) *SeriesUpdate {
+	su.mutation.SetSid(s)
 	return su
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (su *SeriesUpdate) SetNillableSID(s *schema.ID) *SeriesUpdate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (su *SeriesUpdate) SetNillableSid(s *schema.ID) *SeriesUpdate {
 	if s != nil {
-		su.SetSID(*s)
+		su.SetSid(*s)
 	}
 	return su
 }
@@ -51,23 +51,23 @@ func (su *SeriesUpdate) SetTitle(s string) *SeriesUpdate {
 	return su
 }
 
-// SetCallSign sets the "callSign" field.
-func (su *SeriesUpdate) SetCallSign(s string) *SeriesUpdate {
-	su.mutation.SetCallSign(s)
+// SetCall sets the "call" field.
+func (su *SeriesUpdate) SetCall(s string) *SeriesUpdate {
+	su.mutation.SetCall(s)
 	return su
 }
 
-// SetNillableCallSign sets the "callSign" field if the given value is not nil.
-func (su *SeriesUpdate) SetNillableCallSign(s *string) *SeriesUpdate {
+// SetNillableCall sets the "call" field if the given value is not nil.
+func (su *SeriesUpdate) SetNillableCall(s *string) *SeriesUpdate {
 	if s != nil {
-		su.SetCallSign(*s)
+		su.SetCall(*s)
 	}
 	return su
 }
 
-// ClearCallSign clears the value of the "callSign" field.
-func (su *SeriesUpdate) ClearCallSign() *SeriesUpdate {
-	su.mutation.ClearCallSign()
+// ClearCall clears the value of the "call" field.
+func (su *SeriesUpdate) ClearCall() *SeriesUpdate {
+	su.mutation.ClearCall()
 	return su
 }
 
@@ -219,9 +219,9 @@ func (su *SeriesUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
 		}
 	}
-	if v, ok := su.mutation.CallSign(); ok {
-		if err := series.CallSignValidator(v); err != nil {
-			return &ValidationError{Name: "callSign", err: fmt.Errorf("ent: validator failed for field \"callSign\": %w", err)}
+	if v, ok := su.mutation.Call(); ok {
+		if err := series.CallValidator(v); err != nil {
+			return &ValidationError{Name: "call", err: fmt.Errorf("ent: validator failed for field \"call\": %w", err)}
 		}
 	}
 	if _, ok := su.mutation.ProfileID(); su.mutation.ProfileCleared() && !ok {
@@ -248,11 +248,11 @@ func (su *SeriesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := su.mutation.SID(); ok {
+	if value, ok := su.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: series.FieldSID,
+			Column: series.FieldSid,
 		})
 	}
 	if value, ok := su.mutation.UpdateTime(); ok {
@@ -269,17 +269,17 @@ func (su *SeriesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: series.FieldTitle,
 		})
 	}
-	if value, ok := su.mutation.CallSign(); ok {
+	if value, ok := su.mutation.Call(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: series.FieldCallSign,
+			Column: series.FieldCall,
 		})
 	}
-	if su.mutation.CallSignCleared() {
+	if su.mutation.CallCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: series.FieldCallSign,
+			Column: series.FieldCall,
 		})
 	}
 	if value, ok := su.mutation.Content(); ok {
@@ -397,16 +397,16 @@ type SeriesUpdateOne struct {
 	mutation *SeriesMutation
 }
 
-// SetSID sets the "SID" field.
-func (suo *SeriesUpdateOne) SetSID(s schema.ID) *SeriesUpdateOne {
-	suo.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (suo *SeriesUpdateOne) SetSid(s schema.ID) *SeriesUpdateOne {
+	suo.mutation.SetSid(s)
 	return suo
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (suo *SeriesUpdateOne) SetNillableSID(s *schema.ID) *SeriesUpdateOne {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (suo *SeriesUpdateOne) SetNillableSid(s *schema.ID) *SeriesUpdateOne {
 	if s != nil {
-		suo.SetSID(*s)
+		suo.SetSid(*s)
 	}
 	return suo
 }
@@ -417,23 +417,23 @@ func (suo *SeriesUpdateOne) SetTitle(s string) *SeriesUpdateOne {
 	return suo
 }
 
-// SetCallSign sets the "callSign" field.
-func (suo *SeriesUpdateOne) SetCallSign(s string) *SeriesUpdateOne {
-	suo.mutation.SetCallSign(s)
+// SetCall sets the "call" field.
+func (suo *SeriesUpdateOne) SetCall(s string) *SeriesUpdateOne {
+	suo.mutation.SetCall(s)
 	return suo
 }
 
-// SetNillableCallSign sets the "callSign" field if the given value is not nil.
-func (suo *SeriesUpdateOne) SetNillableCallSign(s *string) *SeriesUpdateOne {
+// SetNillableCall sets the "call" field if the given value is not nil.
+func (suo *SeriesUpdateOne) SetNillableCall(s *string) *SeriesUpdateOne {
 	if s != nil {
-		suo.SetCallSign(*s)
+		suo.SetCall(*s)
 	}
 	return suo
 }
 
-// ClearCallSign clears the value of the "callSign" field.
-func (suo *SeriesUpdateOne) ClearCallSign() *SeriesUpdateOne {
-	suo.mutation.ClearCallSign()
+// ClearCall clears the value of the "call" field.
+func (suo *SeriesUpdateOne) ClearCall() *SeriesUpdateOne {
+	suo.mutation.ClearCall()
 	return suo
 }
 
@@ -592,9 +592,9 @@ func (suo *SeriesUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
 		}
 	}
-	if v, ok := suo.mutation.CallSign(); ok {
-		if err := series.CallSignValidator(v); err != nil {
-			return &ValidationError{Name: "callSign", err: fmt.Errorf("ent: validator failed for field \"callSign\": %w", err)}
+	if v, ok := suo.mutation.Call(); ok {
+		if err := series.CallValidator(v); err != nil {
+			return &ValidationError{Name: "call", err: fmt.Errorf("ent: validator failed for field \"call\": %w", err)}
 		}
 	}
 	if _, ok := suo.mutation.ProfileID(); suo.mutation.ProfileCleared() && !ok {
@@ -638,11 +638,11 @@ func (suo *SeriesUpdateOne) sqlSave(ctx context.Context) (_node *Series, err err
 			}
 		}
 	}
-	if value, ok := suo.mutation.SID(); ok {
+	if value, ok := suo.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: series.FieldSID,
+			Column: series.FieldSid,
 		})
 	}
 	if value, ok := suo.mutation.UpdateTime(); ok {
@@ -659,17 +659,17 @@ func (suo *SeriesUpdateOne) sqlSave(ctx context.Context) (_node *Series, err err
 			Column: series.FieldTitle,
 		})
 	}
-	if value, ok := suo.mutation.CallSign(); ok {
+	if value, ok := suo.mutation.Call(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: series.FieldCallSign,
+			Column: series.FieldCall,
 		})
 	}
-	if suo.mutation.CallSignCleared() {
+	if suo.mutation.CallCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: series.FieldCallSign,
+			Column: series.FieldCall,
 		})
 	}
 	if value, ok := suo.mutation.Content(); ok {

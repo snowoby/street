@@ -24,7 +24,7 @@ func (Series) Mixin() []ent.Mixin {
 func (Series) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").MaxLen(64).NotEmpty(),
-		field.String("callSign").MaxLen(32).Unique().Nillable().Optional(),
+		field.String("call").MaxLen(32).Unique().Nillable().Optional(),
 		field.Text("content").Default(""),
 	}
 }
@@ -40,7 +40,7 @@ func (Series) Edges() []ent.Edge {
 // Indexes of the Series.
 func (Series) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("callSign").
+		index.Fields("call").
 			Unique(),
 	}
 }

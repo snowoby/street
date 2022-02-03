@@ -19,8 +19,8 @@ type Token struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// SID holds the value of the "SID" field.
-	SID schema.ID `json:"SID,omitempty"`
+	// Sid holds the value of the "sid" field.
+	Sid schema.ID `json:"sid,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
@@ -29,8 +29,8 @@ type Token struct {
 	Body string `json:"body,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
-	// ExpireTime holds the value of the "expire_time" field.
-	ExpireTime time.Time `json:"expire_time,omitempty"`
+	// Expire holds the value of the "expire" field.
+	Expire time.Time `json:"expire,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TokenQuery when eager-loading is set.
 	Edges         TokenEdges `json:"edges"`
@@ -65,11 +65,11 @@ func (*Token) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case token.FieldSID:
+		case token.FieldSid:
 			values[i] = new(schema.ID)
 		case token.FieldBody, token.FieldType:
 			values[i] = new(sql.NullString)
-		case token.FieldCreateTime, token.FieldUpdateTime, token.FieldExpireTime:
+		case token.FieldCreateTime, token.FieldUpdateTime, token.FieldExpire:
 			values[i] = new(sql.NullTime)
 		case token.FieldID:
 			values[i] = new(uuid.UUID)
@@ -96,11 +96,11 @@ func (t *Token) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				t.ID = *value
 			}
-		case token.FieldSID:
+		case token.FieldSid:
 			if value, ok := values[i].(*schema.ID); !ok {
-				return fmt.Errorf("unexpected type %T for field SID", values[i])
+				return fmt.Errorf("unexpected type %T for field sid", values[i])
 			} else if value != nil {
-				t.SID = *value
+				t.Sid = *value
 			}
 		case token.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -126,11 +126,11 @@ func (t *Token) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				t.Type = value.String
 			}
-		case token.FieldExpireTime:
+		case token.FieldExpire:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field expire_time", values[i])
+				return fmt.Errorf("unexpected type %T for field expire", values[i])
 			} else if value.Valid {
-				t.ExpireTime = value.Time
+				t.Expire = value.Time
 			}
 		case token.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -172,8 +172,8 @@ func (t *Token) String() string {
 	var builder strings.Builder
 	builder.WriteString("Token(")
 	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	builder.WriteString(", SID=")
-	builder.WriteString(fmt.Sprintf("%v", t.SID))
+	builder.WriteString(", sid=")
+	builder.WriteString(fmt.Sprintf("%v", t.Sid))
 	builder.WriteString(", create_time=")
 	builder.WriteString(t.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
@@ -182,8 +182,8 @@ func (t *Token) String() string {
 	builder.WriteString(t.Body)
 	builder.WriteString(", type=")
 	builder.WriteString(t.Type)
-	builder.WriteString(", expire_time=")
-	builder.WriteString(t.ExpireTime.Format(time.ANSIC))
+	builder.WriteString(", expire=")
+	builder.WriteString(t.Expire.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

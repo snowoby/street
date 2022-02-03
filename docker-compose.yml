@@ -16,15 +16,13 @@ services:
     build: .
     env_file:
       - ./.env
-    environment:
-      - "database=host=database port=5432 user=postgres dbname=postgres"
     restart: always
-
     ports:
       - "127.0.0.1:8088:8088"
     depends_on:
       - database
       - storage
+      - redis
 
   storage:
     image: "minio/minio"
@@ -49,3 +47,9 @@ services:
       - ./.develop/redis:/data
     ports:
       - "6379:6379"
+
+  asynqmon:
+    image: "hibiken/asynqmon"
+    ports:
+      - "8889:8080"
+    command: --redis-addr=redis:6379 --redis-db=1

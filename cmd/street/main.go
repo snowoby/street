@@ -1,19 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
-
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"os"
-	"street/ent"
 	"street/pkg/controller"
 	"street/pkg/data"
-	"street/pkg/data/storage"
 	"street/web/account"
 	"street/web/episode"
 	"street/web/file"
@@ -30,31 +24,9 @@ func init() {
 	}
 }
 
-func storeSetup() controller.Controller {
-
-	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		panic(err)
-	}
-
-	err = client.Schema.Create(context.Background())
-	if err != nil {
-		panic(err)
-	}
-
-	filePartRedis := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	store := data.New(client, storage.New(), filePartRedis)
-	return controller.New(store)
-}
-
 func setup() *gin.Engine {
 	r := gin.Default()
-	ctrl := storeSetup()
+	ctrl := controller.New(data.NewDefaultEnv())
 
 	r.Use(cors.Default())
 

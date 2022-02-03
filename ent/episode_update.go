@@ -31,16 +31,16 @@ func (eu *EpisodeUpdate) Where(ps ...predicate.Episode) *EpisodeUpdate {
 	return eu
 }
 
-// SetSID sets the "SID" field.
-func (eu *EpisodeUpdate) SetSID(s schema.ID) *EpisodeUpdate {
-	eu.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (eu *EpisodeUpdate) SetSid(s schema.ID) *EpisodeUpdate {
+	eu.mutation.SetSid(s)
 	return eu
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (eu *EpisodeUpdate) SetNillableSID(s *schema.ID) *EpisodeUpdate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (eu *EpisodeUpdate) SetNillableSid(s *schema.ID) *EpisodeUpdate {
 	if s != nil {
-		eu.SetSID(*s)
+		eu.SetSid(*s)
 	}
 	return eu
 }
@@ -209,11 +209,11 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := eu.mutation.SID(); ok {
+	if value, ok := eu.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: episode.FieldSID,
+			Column: episode.FieldSid,
 		})
 	}
 	if value, ok := eu.mutation.UpdateTime(); ok {
@@ -326,16 +326,16 @@ type EpisodeUpdateOne struct {
 	mutation *EpisodeMutation
 }
 
-// SetSID sets the "SID" field.
-func (euo *EpisodeUpdateOne) SetSID(s schema.ID) *EpisodeUpdateOne {
-	euo.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (euo *EpisodeUpdateOne) SetSid(s schema.ID) *EpisodeUpdateOne {
+	euo.mutation.SetSid(s)
 	return euo
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (euo *EpisodeUpdateOne) SetNillableSID(s *schema.ID) *EpisodeUpdateOne {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (euo *EpisodeUpdateOne) SetNillableSid(s *schema.ID) *EpisodeUpdateOne {
 	if s != nil {
-		euo.SetSID(*s)
+		euo.SetSid(*s)
 	}
 	return euo
 }
@@ -528,11 +528,11 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 			}
 		}
 	}
-	if value, ok := euo.mutation.SID(); ok {
+	if value, ok := euo.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: episode.FieldSID,
+			Column: episode.FieldSid,
 		})
 	}
 	if value, ok := euo.mutation.UpdateTime(); ok {

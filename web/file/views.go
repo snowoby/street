@@ -14,6 +14,7 @@ import (
 	"street/pkg/controller"
 	"street/pkg/data"
 	"street/pkg/data/value"
+	"strings"
 )
 
 type Meta struct {
@@ -71,7 +72,7 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 
 	raw, _ := ioutil.ReadAll(ctx.Request.Body)
 	reader := bytes.NewReader(raw)
-	_, err = store.Storage.PutSingle(reader, file.Path, id, file.Filename, file.Mime)
+	_, err = store.Storage.PutSingle(reader, file.Path, id, file.Filename, "original", file.Mime)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -79,6 +80,14 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 	file, err = store.File.UpdateStatus(ctx, id, "uploaded")
 	if err != nil {
 		return 0, nil, err
+	}
+
+	if strings.HasPrefix(file.Mime, "image/") {
+		info, err := store.Task.ImageCompress(file)
+		if err != nil {
+			return 0, nil, err
+		}
+		fmt.Println(info)
 	}
 
 	return http.StatusOK, file, nil
@@ -114,12 +123,6 @@ func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identi
 }
 
 func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	//type FilePartUpload struct {
-	//	Key        string `json:"key" binding:"required"`
-	//	UploadID   string `json:"upload_id" binding:"required"`
-	//	PartNumber int    `json:"part_number" binding:"required"`
-	//	Content    string `json:"content" binding:"required"`
-	//}
 
 	type FilePartUpload struct {
 		UploadID string `uri:"id" binding:"required"`
@@ -216,6 +219,14 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	err = store.MultiPartRedis.Finish(ctx, id.String())
 	if err != nil {
 		return 0, nil, err
+	}
+
+	if strings.HasPrefix(file.Mime, "image/") {
+		info, err := store.Task.ImageCompress(file)
+		if err != nil {
+			return 0, nil, err
+		}
+		fmt.Println(info)
 	}
 
 	return http.StatusCreated, file, nil

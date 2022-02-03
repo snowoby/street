@@ -30,16 +30,16 @@ func (au *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
 	return au
 }
 
-// SetSID sets the "SID" field.
-func (au *AccountUpdate) SetSID(s schema.ID) *AccountUpdate {
-	au.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (au *AccountUpdate) SetSid(s schema.ID) *AccountUpdate {
+	au.mutation.SetSid(s)
 	return au
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableSID(s *schema.ID) *AccountUpdate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableSid(s *schema.ID) *AccountUpdate {
 	if s != nil {
-		au.SetSID(*s)
+		au.SetSid(*s)
 	}
 	return au
 }
@@ -230,11 +230,11 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := au.mutation.SID(); ok {
+	if value, ok := au.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: account.FieldSID,
+			Column: account.FieldSid,
 		})
 	}
 	if value, ok := au.mutation.UpdateTime(); ok {
@@ -385,16 +385,16 @@ type AccountUpdateOne struct {
 	mutation *AccountMutation
 }
 
-// SetSID sets the "SID" field.
-func (auo *AccountUpdateOne) SetSID(s schema.ID) *AccountUpdateOne {
-	auo.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (auo *AccountUpdateOne) SetSid(s schema.ID) *AccountUpdateOne {
+	auo.mutation.SetSid(s)
 	return auo
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableSID(s *schema.ID) *AccountUpdateOne {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableSid(s *schema.ID) *AccountUpdateOne {
 	if s != nil {
-		auo.SetSID(*s)
+		auo.SetSid(*s)
 	}
 	return auo
 }
@@ -609,11 +609,11 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			}
 		}
 	}
-	if value, ok := auo.mutation.SID(); ok {
+	if value, ok := auo.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: account.FieldSID,
+			Column: account.FieldSid,
 		})
 	}
 	if value, ok := auo.mutation.UpdateTime(); ok {

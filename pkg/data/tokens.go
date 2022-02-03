@@ -16,7 +16,7 @@ type token struct {
 func (s *token) Find(ctx context.Context, tokenBody, t string, validOnly bool) (*ent.Token, error) {
 	query := s.client.Query().Where(et.Body(tokenBody)).Where(et.Type(t))
 	if validOnly {
-		query = query.Where(et.ExpireTimeGT(time.Now()))
+		query = query.Where(et.ExpireGT(time.Now()))
 	}
 	return query.WithAccount().Only(ctx)
 }
@@ -26,7 +26,7 @@ func (s *token) Create(ctx context.Context, accountID uuid.UUID, tokenBody, toke
 		SetAccountID(accountID).
 		SetBody(tokenBody).
 		SetType(tokenType).
-		SetExpireTime(time.Now().Add(lifelong)).
+		SetExpire(time.Now().Add(lifelong)).
 		Save(ctx)
 	return t, err
 }

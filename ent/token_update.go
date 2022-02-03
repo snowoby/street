@@ -31,16 +31,16 @@ func (tu *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
 	return tu
 }
 
-// SetSID sets the "SID" field.
-func (tu *TokenUpdate) SetSID(s schema.ID) *TokenUpdate {
-	tu.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (tu *TokenUpdate) SetSid(s schema.ID) *TokenUpdate {
+	tu.mutation.SetSid(s)
 	return tu
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (tu *TokenUpdate) SetNillableSID(s *schema.ID) *TokenUpdate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (tu *TokenUpdate) SetNillableSid(s *schema.ID) *TokenUpdate {
 	if s != nil {
-		tu.SetSID(*s)
+		tu.SetSid(*s)
 	}
 	return tu
 }
@@ -57,9 +57,9 @@ func (tu *TokenUpdate) SetType(s string) *TokenUpdate {
 	return tu
 }
 
-// SetExpireTime sets the "expire_time" field.
-func (tu *TokenUpdate) SetExpireTime(t time.Time) *TokenUpdate {
-	tu.mutation.SetExpireTime(t)
+// SetExpire sets the "expire" field.
+func (tu *TokenUpdate) SetExpire(t time.Time) *TokenUpdate {
+	tu.mutation.SetExpire(t)
 	return tu
 }
 
@@ -190,11 +190,11 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.SID(); ok {
+	if value, ok := tu.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: token.FieldSID,
+			Column: token.FieldSid,
 		})
 	}
 	if value, ok := tu.mutation.UpdateTime(); ok {
@@ -218,11 +218,11 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: token.FieldType,
 		})
 	}
-	if value, ok := tu.mutation.ExpireTime(); ok {
+	if value, ok := tu.mutation.Expire(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldExpireTime,
+			Column: token.FieldExpire,
 		})
 	}
 	if tu.mutation.AccountCleared() {
@@ -279,16 +279,16 @@ type TokenUpdateOne struct {
 	mutation *TokenMutation
 }
 
-// SetSID sets the "SID" field.
-func (tuo *TokenUpdateOne) SetSID(s schema.ID) *TokenUpdateOne {
-	tuo.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (tuo *TokenUpdateOne) SetSid(s schema.ID) *TokenUpdateOne {
+	tuo.mutation.SetSid(s)
 	return tuo
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (tuo *TokenUpdateOne) SetNillableSID(s *schema.ID) *TokenUpdateOne {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (tuo *TokenUpdateOne) SetNillableSid(s *schema.ID) *TokenUpdateOne {
 	if s != nil {
-		tuo.SetSID(*s)
+		tuo.SetSid(*s)
 	}
 	return tuo
 }
@@ -305,9 +305,9 @@ func (tuo *TokenUpdateOne) SetType(s string) *TokenUpdateOne {
 	return tuo
 }
 
-// SetExpireTime sets the "expire_time" field.
-func (tuo *TokenUpdateOne) SetExpireTime(t time.Time) *TokenUpdateOne {
-	tuo.mutation.SetExpireTime(t)
+// SetExpire sets the "expire" field.
+func (tuo *TokenUpdateOne) SetExpire(t time.Time) *TokenUpdateOne {
+	tuo.mutation.SetExpire(t)
 	return tuo
 }
 
@@ -462,11 +462,11 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 			}
 		}
 	}
-	if value, ok := tuo.mutation.SID(); ok {
+	if value, ok := tuo.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: token.FieldSID,
+			Column: token.FieldSid,
 		})
 	}
 	if value, ok := tuo.mutation.UpdateTime(); ok {
@@ -490,11 +490,11 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 			Column: token.FieldType,
 		})
 	}
-	if value, ok := tuo.mutation.ExpireTime(); ok {
+	if value, ok := tuo.mutation.Expire(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: token.FieldExpireTime,
+			Column: token.FieldExpire,
 		})
 	}
 	if tuo.mutation.AccountCleared() {

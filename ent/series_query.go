@@ -329,12 +329,12 @@ func (sq *SeriesQuery) WithEpisode(opts ...func(*EpisodeQuery)) *SeriesQuery {
 // Example:
 //
 //	var v []struct {
-//		SID schema.ID `json:"SID,omitempty"`
+//		Sid schema.ID `json:"sid,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Series.Query().
-//		GroupBy(series.FieldSID).
+//		GroupBy(series.FieldSid).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -356,11 +356,11 @@ func (sq *SeriesQuery) GroupBy(field string, fields ...string) *SeriesGroupBy {
 // Example:
 //
 //	var v []struct {
-//		SID schema.ID `json:"SID,omitempty"`
+//		Sid schema.ID `json:"sid,omitempty"`
 //	}
 //
 //	client.Series.Query().
-//		Select(series.FieldSID).
+//		Select(series.FieldSid).
 //		Scan(ctx, &v)
 //
 func (sq *SeriesQuery) Select(fields ...string) *SeriesSelect {

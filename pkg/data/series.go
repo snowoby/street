@@ -18,7 +18,7 @@ func (s *series) Create(ctx context.Context, title, cleanContent string, profile
 }
 
 func (s *series) FindByCallSign(ctx context.Context, callSign string) (*ent.Series, error) {
-	return s.client.Query().Where(es.CallSign(callSign)).WithProfile().Only(ctx)
+	return s.client.Query().Where(es.Call(callSign)).WithProfile().Only(ctx)
 }
 func (s *series) FindByID(ctx context.Context, id uuid.UUID) (*ent.Series, error) {
 	return s.client.Query().Where(es.ID(id)).WithProfile().Only(ctx)
@@ -52,6 +52,6 @@ func (s *series) Delete(ctx context.Context, seriesID uuid.UUID) error {
 	return s.client.DeleteOneID(seriesID).Exec(ctx)
 }
 
-func (s *series) SetCallSign(ctx context.Context, seriesID uuid.UUID, callSign string) (*ent.Series, error) {
-	return s.client.UpdateOneID(seriesID).SetCallSign(callSign).Save(ctx)
+func (s *series) SetCall(ctx context.Context, seriesID uuid.UUID, callSign string) (*ent.Series, error) {
+	return s.client.UpdateOneID(seriesID).SetCall(callSign).Save(ctx)
 }

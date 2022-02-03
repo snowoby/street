@@ -95,10 +95,10 @@ func IDLTE(id uuid.UUID) predicate.Token {
 	})
 }
 
-// SID applies equality check predicate on the "SID" field. It's identical to SIDEQ.
-func SID(v schema.ID) predicate.Token {
+// Sid applies equality check predicate on the "sid" field. It's identical to SidEQ.
+func Sid(v schema.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSID), v))
+		s.Where(sql.EQ(s.C(FieldSid), v))
 	})
 }
 
@@ -130,29 +130,29 @@ func Type(v string) predicate.Token {
 	})
 }
 
-// ExpireTime applies equality check predicate on the "expire_time" field. It's identical to ExpireTimeEQ.
-func ExpireTime(v time.Time) predicate.Token {
+// Expire applies equality check predicate on the "expire" field. It's identical to ExpireEQ.
+func Expire(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExpireTime), v))
+		s.Where(sql.EQ(s.C(FieldExpire), v))
 	})
 }
 
-// SIDEQ applies the EQ predicate on the "SID" field.
-func SIDEQ(v schema.ID) predicate.Token {
+// SidEQ applies the EQ predicate on the "sid" field.
+func SidEQ(v schema.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSID), v))
+		s.Where(sql.EQ(s.C(FieldSid), v))
 	})
 }
 
-// SIDNEQ applies the NEQ predicate on the "SID" field.
-func SIDNEQ(v schema.ID) predicate.Token {
+// SidNEQ applies the NEQ predicate on the "sid" field.
+func SidNEQ(v schema.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSID), v))
+		s.Where(sql.NEQ(s.C(FieldSid), v))
 	})
 }
 
-// SIDIn applies the In predicate on the "SID" field.
-func SIDIn(vs ...schema.ID) predicate.Token {
+// SidIn applies the In predicate on the "sid" field.
+func SidIn(vs ...schema.ID) predicate.Token {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -164,12 +164,12 @@ func SIDIn(vs ...schema.ID) predicate.Token {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldSID), v...))
+		s.Where(sql.In(s.C(FieldSid), v...))
 	})
 }
 
-// SIDNotIn applies the NotIn predicate on the "SID" field.
-func SIDNotIn(vs ...schema.ID) predicate.Token {
+// SidNotIn applies the NotIn predicate on the "sid" field.
+func SidNotIn(vs ...schema.ID) predicate.Token {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -181,35 +181,35 @@ func SIDNotIn(vs ...schema.ID) predicate.Token {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldSID), v...))
+		s.Where(sql.NotIn(s.C(FieldSid), v...))
 	})
 }
 
-// SIDGT applies the GT predicate on the "SID" field.
-func SIDGT(v schema.ID) predicate.Token {
+// SidGT applies the GT predicate on the "sid" field.
+func SidGT(v schema.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSID), v))
+		s.Where(sql.GT(s.C(FieldSid), v))
 	})
 }
 
-// SIDGTE applies the GTE predicate on the "SID" field.
-func SIDGTE(v schema.ID) predicate.Token {
+// SidGTE applies the GTE predicate on the "sid" field.
+func SidGTE(v schema.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSID), v))
+		s.Where(sql.GTE(s.C(FieldSid), v))
 	})
 }
 
-// SIDLT applies the LT predicate on the "SID" field.
-func SIDLT(v schema.ID) predicate.Token {
+// SidLT applies the LT predicate on the "sid" field.
+func SidLT(v schema.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSID), v))
+		s.Where(sql.LT(s.C(FieldSid), v))
 	})
 }
 
-// SIDLTE applies the LTE predicate on the "SID" field.
-func SIDLTE(v schema.ID) predicate.Token {
+// SidLTE applies the LTE predicate on the "sid" field.
+func SidLTE(v schema.ID) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSID), v))
+		s.Where(sql.LTE(s.C(FieldSid), v))
 	})
 }
 
@@ -587,22 +587,22 @@ func TypeContainsFold(v string) predicate.Token {
 	})
 }
 
-// ExpireTimeEQ applies the EQ predicate on the "expire_time" field.
-func ExpireTimeEQ(v time.Time) predicate.Token {
+// ExpireEQ applies the EQ predicate on the "expire" field.
+func ExpireEQ(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExpireTime), v))
+		s.Where(sql.EQ(s.C(FieldExpire), v))
 	})
 }
 
-// ExpireTimeNEQ applies the NEQ predicate on the "expire_time" field.
-func ExpireTimeNEQ(v time.Time) predicate.Token {
+// ExpireNEQ applies the NEQ predicate on the "expire" field.
+func ExpireNEQ(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldExpireTime), v))
+		s.Where(sql.NEQ(s.C(FieldExpire), v))
 	})
 }
 
-// ExpireTimeIn applies the In predicate on the "expire_time" field.
-func ExpireTimeIn(vs ...time.Time) predicate.Token {
+// ExpireIn applies the In predicate on the "expire" field.
+func ExpireIn(vs ...time.Time) predicate.Token {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -614,12 +614,12 @@ func ExpireTimeIn(vs ...time.Time) predicate.Token {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldExpireTime), v...))
+		s.Where(sql.In(s.C(FieldExpire), v...))
 	})
 }
 
-// ExpireTimeNotIn applies the NotIn predicate on the "expire_time" field.
-func ExpireTimeNotIn(vs ...time.Time) predicate.Token {
+// ExpireNotIn applies the NotIn predicate on the "expire" field.
+func ExpireNotIn(vs ...time.Time) predicate.Token {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -631,35 +631,35 @@ func ExpireTimeNotIn(vs ...time.Time) predicate.Token {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldExpireTime), v...))
+		s.Where(sql.NotIn(s.C(FieldExpire), v...))
 	})
 }
 
-// ExpireTimeGT applies the GT predicate on the "expire_time" field.
-func ExpireTimeGT(v time.Time) predicate.Token {
+// ExpireGT applies the GT predicate on the "expire" field.
+func ExpireGT(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldExpireTime), v))
+		s.Where(sql.GT(s.C(FieldExpire), v))
 	})
 }
 
-// ExpireTimeGTE applies the GTE predicate on the "expire_time" field.
-func ExpireTimeGTE(v time.Time) predicate.Token {
+// ExpireGTE applies the GTE predicate on the "expire" field.
+func ExpireGTE(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldExpireTime), v))
+		s.Where(sql.GTE(s.C(FieldExpire), v))
 	})
 }
 
-// ExpireTimeLT applies the LT predicate on the "expire_time" field.
-func ExpireTimeLT(v time.Time) predicate.Token {
+// ExpireLT applies the LT predicate on the "expire" field.
+func ExpireLT(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldExpireTime), v))
+		s.Where(sql.LT(s.C(FieldExpire), v))
 	})
 }
 
-// ExpireTimeLTE applies the LTE predicate on the "expire_time" field.
-func ExpireTimeLTE(v time.Time) predicate.Token {
+// ExpireLTE applies the LTE predicate on the "expire" field.
+func ExpireLTE(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldExpireTime), v))
+		s.Where(sql.LTE(s.C(FieldExpire), v))
 	})
 }
 

@@ -26,16 +26,16 @@ type ProfileCreate struct {
 	hooks    []Hook
 }
 
-// SetSID sets the "SID" field.
-func (pc *ProfileCreate) SetSID(s schema.ID) *ProfileCreate {
-	pc.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (pc *ProfileCreate) SetSid(s schema.ID) *ProfileCreate {
+	pc.mutation.SetSid(s)
 	return pc
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (pc *ProfileCreate) SetNillableSID(s *schema.ID) *ProfileCreate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableSid(s *schema.ID) *ProfileCreate {
 	if s != nil {
-		pc.SetSID(*s)
+		pc.SetSid(*s)
 	}
 	return pc
 }
@@ -74,15 +74,29 @@ func (pc *ProfileCreate) SetTitle(s string) *ProfileCreate {
 	return pc
 }
 
-// SetCallSign sets the "callSign" field.
-func (pc *ProfileCreate) SetCallSign(s string) *ProfileCreate {
-	pc.mutation.SetCallSign(s)
+// SetCall sets the "call" field.
+func (pc *ProfileCreate) SetCall(s string) *ProfileCreate {
+	pc.mutation.SetCall(s)
 	return pc
 }
 
 // SetCategory sets the "category" field.
 func (pc *ProfileCreate) SetCategory(s string) *ProfileCreate {
 	pc.mutation.SetCategory(s)
+	return pc
+}
+
+// SetAvatar sets the "avatar" field.
+func (pc *ProfileCreate) SetAvatar(s string) *ProfileCreate {
+	pc.mutation.SetAvatar(s)
+	return pc
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableAvatar(s *string) *ProfileCreate {
+	if s != nil {
+		pc.SetAvatar(*s)
+	}
 	return pc
 }
 
@@ -219,9 +233,9 @@ func (pc *ProfileCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pc *ProfileCreate) defaults() {
-	if _, ok := pc.mutation.SID(); !ok {
-		v := profile.DefaultSID()
-		pc.mutation.SetSID(v)
+	if _, ok := pc.mutation.Sid(); !ok {
+		v := profile.DefaultSid()
+		pc.mutation.SetSid(v)
 	}
 	if _, ok := pc.mutation.CreateTime(); !ok {
 		v := profile.DefaultCreateTime()
@@ -239,8 +253,8 @@ func (pc *ProfileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProfileCreate) check() error {
-	if _, ok := pc.mutation.SID(); !ok {
-		return &ValidationError{Name: "SID", err: errors.New(`ent: missing required field "SID"`)}
+	if _, ok := pc.mutation.Sid(); !ok {
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
 	}
 	if _, ok := pc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
@@ -256,12 +270,12 @@ func (pc *ProfileCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
 		}
 	}
-	if _, ok := pc.mutation.CallSign(); !ok {
-		return &ValidationError{Name: "callSign", err: errors.New(`ent: missing required field "callSign"`)}
+	if _, ok := pc.mutation.Call(); !ok {
+		return &ValidationError{Name: "call", err: errors.New(`ent: missing required field "call"`)}
 	}
-	if v, ok := pc.mutation.CallSign(); ok {
-		if err := profile.CallSignValidator(v); err != nil {
-			return &ValidationError{Name: "callSign", err: fmt.Errorf(`ent: validator failed for field "callSign": %w`, err)}
+	if v, ok := pc.mutation.Call(); ok {
+		if err := profile.CallValidator(v); err != nil {
+			return &ValidationError{Name: "call", err: fmt.Errorf(`ent: validator failed for field "call": %w`, err)}
 		}
 	}
 	if _, ok := pc.mutation.Category(); !ok {
@@ -270,6 +284,11 @@ func (pc *ProfileCreate) check() error {
 	if v, ok := pc.mutation.Category(); ok {
 		if err := profile.CategoryValidator(v); err != nil {
 			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "category": %w`, err)}
+		}
+	}
+	if v, ok := pc.mutation.Avatar(); ok {
+		if err := profile.AvatarValidator(v); err != nil {
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "avatar": %w`, err)}
 		}
 	}
 	if _, ok := pc.mutation.AccountID(); !ok {
@@ -307,13 +326,13 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := pc.mutation.SID(); ok {
+	if value, ok := pc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: profile.FieldSID,
+			Column: profile.FieldSid,
 		})
-		_node.SID = value
+		_node.Sid = value
 	}
 	if value, ok := pc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -339,13 +358,13 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 		})
 		_node.Title = value
 	}
-	if value, ok := pc.mutation.CallSign(); ok {
+	if value, ok := pc.mutation.Call(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: profile.FieldCallSign,
+			Column: profile.FieldCall,
 		})
-		_node.CallSign = value
+		_node.Call = value
 	}
 	if value, ok := pc.mutation.Category(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -354,6 +373,14 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 			Column: profile.FieldCategory,
 		})
 		_node.Category = value
+	}
+	if value, ok := pc.mutation.Avatar(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: profile.FieldAvatar,
+		})
+		_node.Avatar = &value
 	}
 	if nodes := pc.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

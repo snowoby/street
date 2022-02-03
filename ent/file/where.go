@@ -95,10 +95,10 @@ func IDLTE(id uuid.UUID) predicate.File {
 	})
 }
 
-// SID applies equality check predicate on the "SID" field. It's identical to SIDEQ.
-func SID(v schema.ID) predicate.File {
+// Sid applies equality check predicate on the "sid" field. It's identical to SidEQ.
+func Sid(v schema.ID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSID), v))
+		s.Where(sql.EQ(s.C(FieldSid), v))
 	})
 }
 
@@ -158,22 +158,22 @@ func Note(v string) predicate.File {
 	})
 }
 
-// SIDEQ applies the EQ predicate on the "SID" field.
-func SIDEQ(v schema.ID) predicate.File {
+// SidEQ applies the EQ predicate on the "sid" field.
+func SidEQ(v schema.ID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSID), v))
+		s.Where(sql.EQ(s.C(FieldSid), v))
 	})
 }
 
-// SIDNEQ applies the NEQ predicate on the "SID" field.
-func SIDNEQ(v schema.ID) predicate.File {
+// SidNEQ applies the NEQ predicate on the "sid" field.
+func SidNEQ(v schema.ID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSID), v))
+		s.Where(sql.NEQ(s.C(FieldSid), v))
 	})
 }
 
-// SIDIn applies the In predicate on the "SID" field.
-func SIDIn(vs ...schema.ID) predicate.File {
+// SidIn applies the In predicate on the "sid" field.
+func SidIn(vs ...schema.ID) predicate.File {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -185,12 +185,12 @@ func SIDIn(vs ...schema.ID) predicate.File {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldSID), v...))
+		s.Where(sql.In(s.C(FieldSid), v...))
 	})
 }
 
-// SIDNotIn applies the NotIn predicate on the "SID" field.
-func SIDNotIn(vs ...schema.ID) predicate.File {
+// SidNotIn applies the NotIn predicate on the "sid" field.
+func SidNotIn(vs ...schema.ID) predicate.File {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -202,35 +202,35 @@ func SIDNotIn(vs ...schema.ID) predicate.File {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldSID), v...))
+		s.Where(sql.NotIn(s.C(FieldSid), v...))
 	})
 }
 
-// SIDGT applies the GT predicate on the "SID" field.
-func SIDGT(v schema.ID) predicate.File {
+// SidGT applies the GT predicate on the "sid" field.
+func SidGT(v schema.ID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSID), v))
+		s.Where(sql.GT(s.C(FieldSid), v))
 	})
 }
 
-// SIDGTE applies the GTE predicate on the "SID" field.
-func SIDGTE(v schema.ID) predicate.File {
+// SidGTE applies the GTE predicate on the "sid" field.
+func SidGTE(v schema.ID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSID), v))
+		s.Where(sql.GTE(s.C(FieldSid), v))
 	})
 }
 
-// SIDLT applies the LT predicate on the "SID" field.
-func SIDLT(v schema.ID) predicate.File {
+// SidLT applies the LT predicate on the "sid" field.
+func SidLT(v schema.ID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSID), v))
+		s.Where(sql.LT(s.C(FieldSid), v))
 	})
 }
 
-// SIDLTE applies the LTE predicate on the "SID" field.
-func SIDLTE(v schema.ID) predicate.File {
+// SidLTE applies the LTE predicate on the "sid" field.
+func SidLTE(v schema.ID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSID), v))
+		s.Where(sql.LTE(s.C(FieldSid), v))
 	})
 }
 

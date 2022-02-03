@@ -96,8 +96,9 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
-		{Name: "call_sign", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "call", Type: field.TypeString, Unique: true, Size: 64},
 		{Name: "category", Type: field.TypeString, Size: 16},
+		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 64},
 		{Name: "account_profile", Type: field.TypeUUID, Nullable: true},
 	}
 	// ProfilesTable holds the schema information for the "profiles" table.
@@ -108,14 +109,14 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "profiles_accounts_profile",
-				Columns:    []*schema.Column{ProfilesColumns[7]},
+				Columns:    []*schema.Column{ProfilesColumns[8]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "profile_call_sign",
+				Name:    "profile_call",
 				Unique:  true,
 				Columns: []*schema.Column{ProfilesColumns[5]},
 			},
@@ -133,7 +134,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
-		{Name: "call_sign", Type: field.TypeString, Unique: true, Nullable: true, Size: 32},
+		{Name: "call", Type: field.TypeString, Unique: true, Nullable: true, Size: 32},
 		{Name: "content", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "profile_series", Type: field.TypeUUID, Nullable: true},
 	}
@@ -152,7 +153,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "series_call_sign",
+				Name:    "series_call",
 				Unique:  true,
 				Columns: []*schema.Column{SeriesColumns[5]},
 			},
@@ -166,7 +167,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "body", Type: field.TypeString, Unique: true, Size: 320},
 		{Name: "type", Type: field.TypeString, Size: 16},
-		{Name: "expire_time", Type: field.TypeTime},
+		{Name: "expire", Type: field.TypeTime},
 		{Name: "account_token", Type: field.TypeUUID, Nullable: true},
 	}
 	// TokensTable holds the schema information for the "tokens" table.

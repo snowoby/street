@@ -19,8 +19,8 @@ type File struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// SID holds the value of the "SID" field.
-	SID schema.ID `json:"SID,omitempty"`
+	// Sid holds the value of the "sid" field.
+	Sid schema.ID `json:"sid,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
@@ -71,7 +71,7 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case file.FieldSID:
+		case file.FieldSid:
 			values[i] = new(schema.ID)
 		case file.FieldSize:
 			values[i] = new(sql.NullInt64)
@@ -104,11 +104,11 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				f.ID = *value
 			}
-		case file.FieldSID:
+		case file.FieldSid:
 			if value, ok := values[i].(*schema.ID); !ok {
-				return fmt.Errorf("unexpected type %T for field SID", values[i])
+				return fmt.Errorf("unexpected type %T for field sid", values[i])
 			} else if value != nil {
-				f.SID = *value
+				f.Sid = *value
 			}
 		case file.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -198,8 +198,8 @@ func (f *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
 	builder.WriteString(fmt.Sprintf("id=%v", f.ID))
-	builder.WriteString(", SID=")
-	builder.WriteString(fmt.Sprintf("%v", f.SID))
+	builder.WriteString(", sid=")
+	builder.WriteString(fmt.Sprintf("%v", f.Sid))
 	builder.WriteString(", create_time=")
 	builder.WriteString(f.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")

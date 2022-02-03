@@ -17,8 +17,9 @@ type Profile struct {
 func (Profile) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").MaxLen(64).NotEmpty(),
-		field.String("callSign").Unique().MaxLen(64).NotEmpty(),
+		field.String("call").Unique().MaxLen(64).NotEmpty(),
 		field.String("category").MaxLen(16).NotEmpty(),
+		field.String("avatar").MaxLen(64).Optional().Nillable(),
 	}
 }
 
@@ -42,7 +43,7 @@ func (Profile) Edges() []ent.Edge {
 // Indexes of the Profile.
 func (Profile) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("callSign").
+		index.Fields("call").
 			Unique(),
 		index.Fields("category"),
 	}

@@ -105,7 +105,7 @@ func TokenIsValid(token *ent.Token) bool {
 	if token == nil {
 		return false
 	}
-	if token.ExpireTime.Before(time.Now()) {
+	if token.Expire.Before(time.Now()) {
 		return false
 	}
 	return true

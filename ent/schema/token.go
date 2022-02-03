@@ -18,7 +18,7 @@ func (Token) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("body").Unique().MaxLen(320).NotEmpty(),
 		field.String("type").MaxLen(16).NotEmpty(),
-		field.Time("expire_time"),
+		field.Time("expire"),
 	}
 }
 

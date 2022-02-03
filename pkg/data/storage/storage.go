@@ -8,7 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
+	"os"
 	"strings"
 )
 
@@ -19,18 +21,25 @@ type FilePart struct {
 
 type Storage struct {
 	client     *s3.S3
+	uploader   *s3manager.Uploader
+	downloader *s3manager.Downloader
 	bucketName string
 }
 
-func New() *Storage {
-	s3Config := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials("minioadmin", "minioadmin", ""),
-		Endpoint:         aws.String("http://localhost:9000"),
-		Region:           aws.String("us-east-1"),
+func NewDefaultConfig() *aws.Config {
+	return &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(os.Getenv("s3_accesskey"), os.Getenv("s3_secretkey"), ""),
+		Endpoint:         aws.String(os.Getenv("storage_endpoint")),
+		Region:           aws.String(os.Getenv("s3_region")),
 		DisableSSL:       aws.Bool(true),
 		S3ForcePathStyle: aws.Bool(true),
 	}
+}
+
+func New(s3Config *aws.Config) *Storage {
+
 	newSession, err := session.NewSession(s3Config)
+
 	if err != nil {
 		panic(err)
 	}
@@ -45,27 +54,45 @@ func New() *Storage {
 	}
 	return &Storage{
 		client:     client,
+		uploader:   s3manager.NewUploader(newSession),
+		downloader: s3manager.NewDownloader(newSession),
 		bucketName: "develop",
 	}
 
 }
 
-func (s *Storage) PutSingle(stream *bytes.Reader, path string, id uuid.UUID, filename string, mime string) (*s3.PutObjectOutput, error) {
-	input := &s3.PutObjectInput{
-		Bucket:      aws.String(s.bucketName),
-		Key:         aws.String(strings.Join([]string{path, id.String(), filename}, "/")),
-		ContentType: aws.String(mime),
-		Body:        stream,
+func (s *Storage) PutSingle(stream *bytes.Reader, path string, id uuid.UUID, filename string, fileIdentifier string, mime string) (*s3manager.UploadOutput, error) {
+	return s.uploader.Upload(&s3manager.UploadInput{
+		Bucket:             aws.String(s.bucketName),
+		Key:                aws.String(strings.Join([]string{path, id.String(), fileIdentifier}, "/")),
+		ContentType:        aws.String(mime),
+		Body:               stream,
+		ContentDisposition: aws.String(fmt.Sprintf("filename=%s", filename)),
+	})
+
+}
+
+func (s *Storage) Get(path string, id string, fileIdentifier string) ([]byte, error) {
+	buff := &aws.WriteAtBuffer{}
+	_, err := s.downloader.Download(buff, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucketName),
+		Key:    aws.String(strings.Join([]string{path, id, fileIdentifier}, "/")),
+	})
+
+	if err != nil {
+		return nil, err
 	}
-	return s.client.PutObject(input)
+	data := buff.Bytes()
+	return data, nil
 
 }
 
 func (s *Storage) CreateMultiPart(path string, id uuid.UUID, filename string, mime string) (*s3.CreateMultipartUploadOutput, error) {
 	input := &s3.CreateMultipartUploadInput{
-		Bucket:      aws.String(s.bucketName),
-		Key:         aws.String(strings.Join([]string{path, id.String(), filename}, "/")),
-		ContentType: aws.String(mime),
+		Bucket:             aws.String(s.bucketName),
+		Key:                aws.String(strings.Join([]string{path, id.String(), "original"}, "/")),
+		ContentType:        aws.String(mime),
+		ContentDisposition: aws.String(fmt.Sprintf("filename =%s", filename)),
 	}
 
 	return s.client.CreateMultipartUpload(input)

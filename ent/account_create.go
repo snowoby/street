@@ -24,16 +24,16 @@ type AccountCreate struct {
 	hooks    []Hook
 }
 
-// SetSID sets the "SID" field.
-func (ac *AccountCreate) SetSID(s schema.ID) *AccountCreate {
-	ac.mutation.SetSID(s)
+// SetSid sets the "sid" field.
+func (ac *AccountCreate) SetSid(s schema.ID) *AccountCreate {
+	ac.mutation.SetSid(s)
 	return ac
 }
 
-// SetNillableSID sets the "SID" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableSID(s *schema.ID) *AccountCreate {
+// SetNillableSid sets the "sid" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableSid(s *schema.ID) *AccountCreate {
 	if s != nil {
-		ac.SetSID(*s)
+		ac.SetSid(*s)
 	}
 	return ac
 }
@@ -185,9 +185,9 @@ func (ac *AccountCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ac *AccountCreate) defaults() {
-	if _, ok := ac.mutation.SID(); !ok {
-		v := account.DefaultSID()
-		ac.mutation.SetSID(v)
+	if _, ok := ac.mutation.Sid(); !ok {
+		v := account.DefaultSid()
+		ac.mutation.SetSid(v)
 	}
 	if _, ok := ac.mutation.CreateTime(); !ok {
 		v := account.DefaultCreateTime()
@@ -205,8 +205,8 @@ func (ac *AccountCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountCreate) check() error {
-	if _, ok := ac.mutation.SID(); !ok {
-		return &ValidationError{Name: "SID", err: errors.New(`ent: missing required field "SID"`)}
+	if _, ok := ac.mutation.Sid(); !ok {
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
 	}
 	if _, ok := ac.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
@@ -257,13 +257,13 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := ac.mutation.SID(); ok {
+	if value, ok := ac.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Value:  value,
-			Column: account.FieldSID,
+			Column: account.FieldSid,
 		})
-		_node.SID = value
+		_node.Sid = value
 	}
 	if value, ok := ac.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
