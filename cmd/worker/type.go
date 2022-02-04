@@ -9,7 +9,6 @@ import (
 	"gopkg.in/gographics/imagick.v3/imagick"
 	"street/ent"
 	"street/pkg/data"
-	"time"
 )
 
 func HandleImageCompressTask(_ context.Context, t *asynq.Task, store *data.Store) error {
@@ -45,7 +44,6 @@ func HandleImageCompressTask(_ context.Context, t *asynq.Task, store *data.Store
 	if err != nil {
 		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
 	}
-	time.Sleep(time.Second * 100)
 	return nil
 
 }

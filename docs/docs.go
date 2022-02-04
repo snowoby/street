@@ -76,7 +76,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.Token"
+                            "$ref": "#/definitions/account.ResponseToken"
                         }
                     },
                     "400": {
@@ -102,7 +102,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.Token"
+                            "$ref": "#/definitions/account.ResponseToken"
                         }
                     },
                     "400": {
@@ -168,7 +168,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ent.Episode"
+                                "$ref": "#/definitions/episode.ResponseEpisode"
                             }
                         }
                     },
@@ -206,7 +206,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.Episode"
+                            "$ref": "#/definitions/episode.ResponseEpisode"
                         }
                     },
                     "400": {
@@ -252,7 +252,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.Episode"
+                            "$ref": "#/definitions/episode.ResponseEpisode"
                         }
                     },
                     "400": {
@@ -305,7 +305,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.Episode"
+                            "$ref": "#/definitions/episode.ResponseEpisode"
                         }
                     },
                     "400": {
@@ -387,7 +387,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.File"
+                            "$ref": "#/definitions/file.ResponseFile"
                         }
                     },
                     "400": {
@@ -428,7 +428,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.File"
+                            "$ref": "#/definitions/file.ResponseFile"
                         }
                     },
                     "400": {
@@ -485,11 +485,8 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ent.File"
-                        }
+                    "201": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -534,7 +531,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.File"
+                            "$ref": "#/definitions/file.ResponseFile"
                         }
                     },
                     "400": {
@@ -587,7 +584,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.File"
+                            "$ref": "#/definitions/file.ResponseFile"
                         }
                     },
                     "400": {
@@ -600,32 +597,6 @@ var doc = `{
             }
         },
         "/profile": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "profile"
-                ],
-                "summary": "get all self profiles",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ent.Profile"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -652,7 +623,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.Profile"
+                            "$ref": "#/definitions/profile.ResponseProfile"
                         }
                     },
                     "400": {
@@ -686,7 +657,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.Profile"
+                            "$ref": "#/definitions/profile.ResponseProfile"
                         }
                     },
                     "400": {
@@ -730,7 +701,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.Profile"
+                            "$ref": "#/definitions/profile.ResponseProfile"
                         }
                     },
                     "400": {
@@ -764,7 +735,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.Series"
+                            "$ref": "#/definitions/series.ResponseSeries"
                         }
                     },
                     "400": {
@@ -810,7 +781,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ent.Series"
+                            "$ref": "#/definitions/series.ResponseSeries"
                         }
                     },
                     "400": {
@@ -863,7 +834,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.Series"
+                            "$ref": "#/definitions/series.ResponseSeries"
                         }
                     },
                     "400": {
@@ -899,11 +870,8 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ent.Series"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -935,12 +903,12 @@ var doc = `{
             "type": "object",
             "properties": {
                 "account": {
-                    "$ref": "#/definitions/ent.Account"
+                    "$ref": "#/definitions/account.ResponseAccount"
                 },
                 "profiles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ent.Profile"
+                        "$ref": "#/definitions/account.ResponseProfile"
                     }
                 }
             }
@@ -961,6 +929,110 @@ var doc = `{
                 },
                 "password": {
                     "type": "object"
+                }
+            }
+        },
+        "account.ResponseAccount": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "email": {
+                    "description": "Email holds the value of the \"email\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "account.ResponseProfile": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "Avatar holds the value of the \"avatar\" field.",
+                    "type": "string"
+                },
+                "call": {
+                    "description": "Call holds the value of the \"call\" field.",
+                    "type": "string"
+                },
+                "category": {
+                    "description": "Category holds the value of the \"category\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "account.ResponseToken": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "Body holds the value of the \"body\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "expire": {
+                    "description": "Expire holds the value of the \"expire\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type holds the value of the \"type\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
                 }
             }
         },
@@ -1300,6 +1372,38 @@ var doc = `{
                 }
             }
         },
+        "episode.ResponseEpisode": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Content holds the value of the \"content\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
         "errs.HTTPError": {
             "type": "object",
             "properties": {
@@ -1333,6 +1437,54 @@ var doc = `{
                 }
             }
         },
+        "file.ResponseFile": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "filename": {
+                    "description": "Filename holds the value of the \"filename\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "mime": {
+                    "description": "Mime holds the value of the \"mime\" field.",
+                    "type": "string"
+                },
+                "note": {
+                    "description": "Note holds the value of the \"note\" field.",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Path holds the value of the \"path\" field.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "size": {
+                    "description": "Size holds the value of the \"size\" field.",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "Status holds the value of the \"status\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
         "profile.Profile": {
             "type": "object",
             "required": [
@@ -1348,6 +1500,82 @@ var doc = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "profile.ResponseProfile": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "Avatar holds the value of the \"avatar\" field.",
+                    "type": "string"
+                },
+                "call": {
+                    "description": "Call holds the value of the \"call\" field.",
+                    "type": "string"
+                },
+                "category": {
+                    "description": "Category holds the value of the \"category\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "series.ResponseSeries": {
+            "type": "object",
+            "properties": {
+                "call": {
+                    "description": "Call holds the value of the \"call\" field.",
+                    "type": "string"
+                },
+                "content": {
+                    "description": "Content holds the value of the \"content\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
                     "type": "string"
                 }
             }

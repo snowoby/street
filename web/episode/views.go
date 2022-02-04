@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"street/ent"
 	"street/errs"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -15,6 +16,11 @@ type Episode struct {
 	Content string `json:"content"`
 }
 
+type ResponseEpisode struct {
+	*ent.Episode
+	value.NoEdges
+}
+
 // create godoc
 // @Summary create episode
 // @Tags episode
@@ -22,7 +28,7 @@ type Episode struct {
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param episode body Episode true "episode info"
-// @Success 201 {object} ent.Episode
+// @Success 201 {object} ResponseEpisode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode/{pid} [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
@@ -37,7 +43,9 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 	if err != nil {
 		return 0, nil, err
 	}
-	return http.StatusCreated, ep, nil
+	return http.StatusCreated, &ResponseEpisode{
+		Episode: ep,
+	}, nil
 
 }
 
@@ -49,7 +57,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 // @Param id path string true "episode id"
 // @Param pid path string true "profile id"
 // @Param episode body Episode true "episode info"
-// @Success 200 {object} ent.Episode
+// @Success 200 {object} ResponseEpisode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode/{pid}/{id} [put]
 func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
@@ -65,7 +73,9 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	if err != nil {
 		return 0, nil, err
 	}
-	return http.StatusOK, ep, nil
+	return http.StatusOK, &ResponseEpisode{
+		Episode: ep,
+	}, nil
 
 }
 
@@ -75,7 +85,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 // @Accept json
 // @Produce json
 // @Param id path string true "episode id"
-// @Success 200 {object} ent.Episode
+// @Success 200 {object} ResponseEpisode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode/{id} [get]
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
@@ -87,7 +97,9 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 	}
 
-	return http.StatusOK, ep, nil
+	return http.StatusOK, &ResponseEpisode{
+		Episode: ep,
+	}, nil
 
 }
 
@@ -95,18 +107,21 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 // @Summary get all episodes
 // @Tags episode
 // @Produce json
-// @Success 200 {object} []ent.Episode
+// @Success 200 {object} []ResponseEpisode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode [get]
 func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-
 	eps, err := store.DB.Episode.All(ctx)
+	reps := make([]*ResponseEpisode, len(eps))
+	for i, ep := range eps {
+		reps[i] = &ResponseEpisode{Episode: ep}
+	}
 	if err != nil {
 		return 0, nil, err
 
 	}
 
-	return http.StatusOK, eps, nil
+	return http.StatusOK, reps, nil
 
 }
 

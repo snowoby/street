@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"street/ent"
 	"street/errs"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -15,6 +16,11 @@ type TitleContent struct {
 	Content string `json:"content"`
 }
 
+type ResponseSeries struct {
+	*ent.Series
+	value.NoEdges
+}
+
 // create godoc
 // @Summary create a series
 // @Tags series
@@ -22,7 +28,7 @@ type TitleContent struct {
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param series body TitleContent true "series info"
-// @Success 201 {object} ent.Series
+// @Success 201 {object} ResponseSeries
 // @Failure 400 {object} errs.HTTPError
 // @Router /series/{pid} [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
@@ -34,12 +40,12 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, err
 	}
 
-	ep, err := store.DB.Series.Create(ctx, series.Title, series.Content, profile.ID)
+	s, err := store.DB.Series.Create(ctx, series.Title, series.Content, profile.ID)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	return http.StatusCreated, ep, nil
+	return http.StatusCreated, &ResponseSeries{Series: s}, nil
 }
 
 // update godoc
@@ -50,7 +56,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 // @Param series body TitleContent true "series info"
 // @Param pid path string true "profile id"
 // @Param id path string true "series id"
-// @Success 200 {object} ent.Series
+// @Success 200 {object} ResponseSeries
 // @Failure 400 {object} errs.HTTPError
 // @Router /series/{pid}/{id} [put]
 func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
@@ -62,11 +68,11 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	ep, err := store.DB.Series.Update(ctx, id, series.Title, series.Content)
+	s, err := store.DB.Series.Update(ctx, id, series.Title, series.Content)
 	if err != nil {
 		return 0, nil, err
 	}
-	return http.StatusOK, ep, nil
+	return http.StatusOK, &ResponseSeries{Series: s}, nil
 
 }
 
@@ -75,18 +81,18 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 // @Tags series
 // @Produce json
 // @Param id path string true "series id"
-// @Success 200 {object} ent.Series
+// @Success 200 {object} ResponseSeries
 // @Failure 400 {object} errs.HTTPError
 // @Router /series/{id} [get]
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	ep, err := store.DB.Series.FindByID(ctx, id)
+	s, err := store.DB.Series.FindByID(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	return http.StatusOK, ep, nil
+	return http.StatusOK, &ResponseSeries{Series: s}, nil
 
 }
 
@@ -96,7 +102,7 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param id path string true "series id"
-// @Success 200 {object} ent.Series
+// @Success 204
 // @Failure 400 {object} errs.HTTPError
 // @Router /series/{pid}/{id} [delete]
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {

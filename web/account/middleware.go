@@ -18,7 +18,7 @@ type Token struct {
 // @Summary refresh token
 // @Tags account,token
 // @Produce json
-// @Success 201 {object} ent.Token
+// @Success 201 {object} ResponseToken
 // @Failure 400 {object} errs.HTTPError
 // @Router /account/refresh [post]
 func MustRefresh(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
@@ -35,7 +35,7 @@ func MustRefresh(ctx *gin.Context, store *data.Store) (int, interface{}, error) 
 		return 0, nil, err
 	}
 
-	return http.StatusCreated, t, nil
+	return http.StatusCreated, ResponseToken{Token: t}, nil
 }
 
 func TryAccessToken(ctx *gin.Context, store *data.Store) {

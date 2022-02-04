@@ -16,6 +16,7 @@ import (
 	"street/web/middleware"
 	"street/web/profile"
 	"street/web/series"
+	"street/web/site"
 )
 
 func init() {
@@ -58,6 +59,9 @@ func setup() *gin.Engine {
 
 	g = r.Group("/file")
 	file.Routers(g, ctrl)
+
+	g = r.Group("/site")
+	site.Routers(g, ctrl)
 
 	return r
 }

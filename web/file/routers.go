@@ -17,7 +17,7 @@ func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
 
 	large := group.Group("large")
 	large.POST("/:pid", ctrl.General(createMulti))
-	large.PUT("/:pid/:id/:part_id", middleware.MustUriUUID, ctrl.Bare(upload))
-	large.POST("/:pid/:id", middleware.MustUriUUID, ctrl.Owned(owned), ctrl.Bare(done))
+	large.PUT("/:pid/:id/:part_id", middleware.MustUriUUID, ctrl.Bare(uploadMulti))
+	large.POST("/:pid/:id", middleware.MustUriUUID, ctrl.Owned(owned), ctrl.Bare(doneMulti))
 
 }

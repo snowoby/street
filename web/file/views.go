@@ -39,6 +39,11 @@ type CreateOutput struct {
 	UploadId string `json:"upload_id" binding:"required"`
 }
 
+type ResponseFile struct {
+	*ent.File
+	value.NoEdges
+}
+
 // createSingle godoc
 // @Summary create single file upload
 // @Tags file
@@ -46,7 +51,7 @@ type CreateOutput struct {
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param meta body Meta true "file meta"
-// @Success 201 {object} ent.File
+// @Success 201 {object} ResponseFile
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/single/{pid} [post]
 func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
@@ -61,7 +66,7 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 		return 0, nil, err
 	}
 
-	return http.StatusCreated, file, nil
+	return http.StatusCreated, &ResponseFile{File: file}, nil
 }
 
 // putSingle godoc
@@ -72,7 +77,7 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 // @Param pid path string true "profile id"
 // @Param id path string true "file id"
 // @Param data body array true "file content"
-// @Success 200 {object} ent.File
+// @Success 200 {object} ResponseFile
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/single/{pid}/{id} [put]
 func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
@@ -111,7 +116,7 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 		fmt.Println(info)
 	}
 
-	return http.StatusOK, file, nil
+	return http.StatusOK, &ResponseFile{File: file}, nil
 
 }
 
@@ -122,7 +127,7 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param meta body Meta true "file meta"
-// @Success 200 {object} ent.File
+// @Success 200 {object} ResponseFile
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/large/{pid} [post]
 func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
@@ -150,10 +155,10 @@ func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identi
 		return 0, nil, err
 	}
 
-	return http.StatusCreated, file, nil
+	return http.StatusCreated, &ResponseFile{File: file}, nil
 }
 
-// upload godoc
+// uploadMulti godoc
 // @Summary create multipart upload
 // @Tags file
 // @Accept application/octet-stream
@@ -162,10 +167,10 @@ func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identi
 // @Param id path string true "file id"
 // @Param part_id path int true "part id"
 // @Param data body array true "file content"
-// @Success 200 {object} ent.File
+// @Success 201
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/large/{pid}/{id}/{part_id} [put]
-func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+func uploadMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 	type FilePartUpload struct {
 		UploadID string `uri:"id" binding:"required"`
@@ -201,7 +206,7 @@ func upload(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		return 0, nil, err
 	}
 
-	return http.StatusOK, part, nil
+	return http.StatusCreated, nil, nil
 
 }
 
@@ -210,16 +215,16 @@ type Finish struct {
 	CreateOutput CreateOutput        `json:"createOutput" binding:"required"`
 }
 
-// done godoc
+// doneMulti godoc
 // @Summary finish multipart upload
 // @Tags file
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param id path string true "file id"
-// @Success 201 {object} ent.File
+// @Success 201 {object} ResponseFile
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/large/{pid}/{id} [post]
-func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+func doneMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 	var finish Finish
 	partStringArray, err := store.MultiPartRedis.GetParts(ctx, id.String())
@@ -281,7 +286,7 @@ func done(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 		fmt.Println(info)
 	}
 
-	return http.StatusCreated, file, nil
+	return http.StatusCreated, &ResponseFile{File: file}, nil
 }
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {

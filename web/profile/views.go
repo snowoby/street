@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"street/ent"
 	"street/errs"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -20,13 +21,18 @@ type Profile struct {
 	Category string `json:"category" binding:"required"`
 }
 
+type ResponseProfile struct {
+	*ent.Profile
+	value.NoEdges
+}
+
 // create godoc
 // @Summary create profile
 // @Tags profile
 // @Accept json
 // @Produce json
 // @Param profile body Profile true "profile info"
-// @Success 201 {object} ent.Profile
+// @Success 201 {object} ResponseProfile
 // @Failure 400 {object} errs.HTTPError
 // @Router /profile [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
@@ -50,7 +56,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, err
 	}
 
-	return http.StatusCreated, p, nil
+	return http.StatusCreated, &ResponseProfile{Profile: p}, nil
 }
 
 // create godoc
@@ -60,7 +66,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param profile body Profile true "profile info"
-// @Success 201 {object} ent.Profile
+// @Success 201 {object} ResponseProfile
 // @Failure 400 {object} errs.HTTPError
 // @Router /profile/{pid} [put]
 func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, interface{}, error) {
@@ -77,7 +83,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 		return 0, nil, err
 	}
 
-	return http.StatusOK, p, nil
+	return http.StatusOK, &ResponseProfile{Profile: p}, nil
 
 }
 
@@ -86,28 +92,17 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 // @Tags profile
 // @Produce json
 // @Param pid path string true "profile id"
-// @Success 200 {object} ent.Profile
+// @Success 200 {object} ResponseProfile
 // @Failure 400 {object} errs.HTTPError
 // @Router /profile/{pid} [get]
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ps, err := store.DB.Profile.FindByID(ctx, objectID)
+	p, err := store.DB.Profile.FindByID(ctx, objectID)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	return http.StatusOK, ps, nil
-}
-
-// accountProfiles godoc
-// @Summary get all self profiles
-// @Tags profile
-// @Produce json
-// @Success 200 {object} []ent.Profile
-// @Failure 400 {object} errs.HTTPError
-// @Router /profile [get]
-func accountProfiles(_ *gin.Context, _ *data.Store, identity *controller.Identity) (int, interface{}, error) {
-	return http.StatusOK, identity.AllProfiles(), nil
+	return http.StatusOK, &ResponseProfile{Profile: p}, nil
 }
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {

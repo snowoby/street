@@ -8,4 +8,4 @@
 
 generate openapi json
 
-```swag i -d ./cmd/street,./web,./errs,./ent```
+```swag i -d ./cmd/street,./```
