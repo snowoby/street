@@ -1493,6 +1493,9 @@ var doc = `{
                 "title"
             ],
             "properties": {
+                "avatar": {
+                    "type": "string"
+                },
                 "call": {
                     "type": "string"
                 },

@@ -30,8 +30,8 @@ func (profile *profile) FindByID(ctx context.Context, id uuid.UUID) (*ent.Profil
 	return p, err
 }
 
-func (profile *profile) Create(ctx context.Context, callSign, title, category string, accountID uuid.UUID) (*ent.Profile, error) {
-	p, err := profile.client.Create().SetTitle(title).SetCall(callSign).SetCategory(category).SetAccountID(accountID).Save(ctx)
+func (profile *profile) Create(ctx context.Context, callSign, title, category, avatar string, accountID uuid.UUID) (*ent.Profile, error) {
+	p, err := profile.client.Create().SetTitle(title).SetCall(callSign).SetCategory(category).SetAccountID(accountID).SetAvatar(avatar).Save(ctx)
 	return p, err
 }
 
@@ -39,8 +39,8 @@ func (profile *profile) CallExists(ctx context.Context, call string) (bool, erro
 	return profile.client.Query().Where(ep.Call(call)).Exist(ctx)
 }
 
-func (profile *profile) Update(ctx context.Context, profileID uuid.UUID, callSign, title, category string) (*ent.Profile, error) {
-	p, err := profile.client.UpdateOneID(profileID).SetTitle(title).SetCall(callSign).SetCategory(category).Save(ctx)
+func (profile *profile) Update(ctx context.Context, profileID uuid.UUID, callSign, title, category, avatar string) (*ent.Profile, error) {
+	p, err := profile.client.UpdateOneID(profileID).SetTitle(title).SetCall(callSign).SetCategory(category).SetAvatar(avatar).Save(ctx)
 	return p, err
 }
 

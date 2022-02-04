@@ -3,7 +3,6 @@ package file
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -109,11 +108,10 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 	}
 
 	if strings.HasPrefix(file.Mime, "image/") {
-		info, err := store.Task.ImageCompress(file)
+		_, err := store.Task.ImageCompress(file)
 		if err != nil {
 			return 0, nil, err
 		}
-		fmt.Println(info)
 	}
 
 	return http.StatusOK, &ResponseFile{File: file}, nil
@@ -262,8 +260,7 @@ func doneMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 	finish.CreateOutput = createOutput
 
-	completeOutput, err := store.Storage.CompleteMultiPart(finish.CreateOutput.Key, finish.CreateOutput.UploadId, finish.Parts)
-	fmt.Println(completeOutput)
+	_, err = store.Storage.CompleteMultiPart(finish.CreateOutput.Key, finish.CreateOutput.UploadId, finish.Parts)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -279,11 +276,10 @@ func doneMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 
 	if strings.HasPrefix(file.Mime, "image/") {
-		info, err := store.Task.ImageCompress(file)
+		_, err = store.Task.ImageCompress(file)
 		if err != nil {
 			return 0, nil, err
 		}
-		fmt.Println(info)
 	}
 
 	return http.StatusCreated, &ResponseFile{File: file}, nil

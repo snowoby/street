@@ -19,6 +19,7 @@ type Profile struct {
 	Title    string `json:"title" binding:"required"`
 	Call     string `json:"call" binding:"required"`
 	Category string `json:"category" binding:"required"`
+	Avatar   string `json:"avatar"`
 }
 
 type ResponseProfile struct {
@@ -51,7 +52,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, errs.CallDuplicateError
 	}
 
-	p, err := store.DB.Profile.Create(ctx, profile.Call, profile.Title, profile.Category, identity.Account().ID)
+	p, err := store.DB.Profile.Create(ctx, profile.Call, profile.Title, profile.Category, profile.Avatar, identity.Account().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -78,7 +79,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 		return 0, nil, errs.BindingError(err)
 	}
 
-	p, err := store.DB.Profile.Update(ctx, objectID, profile.Title, profile.Call, profile.Category)
+	p, err := store.DB.Profile.Update(ctx, objectID, profile.Title, profile.Call, profile.Category, profile.Avatar)
 	if err != nil {
 		return 0, nil, err
 	}

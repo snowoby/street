@@ -440,6 +440,8 @@ definitions:
     type: object
   profile.Profile:
     properties:
+      avatar:
+        type: string
       call:
         type: string
       category:
