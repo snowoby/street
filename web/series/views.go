@@ -32,7 +32,6 @@ type ResponseSeries struct {
 // @Failure 400 {object} errs.HTTPError
 // @Router /series/{pid} [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
-	profile := identity.Profile()
 
 	var series TitleContent
 	err := ctx.ShouldBindJSON(&series)
@@ -40,7 +39,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, err
 	}
 
-	s, err := store.DB.Series.Create(ctx, series.Title, series.Content, profile.ID)
+	s, err := store.DB.Series.Create(ctx, series.Title, series.Content, identity.Account().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -87,7 +86,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	s, err := store.DB.Series.FindByID(ctx, id)
+	s, err := store.DB.Series.FindByIDWithProfile(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -104,7 +103,7 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 // @Param id path string true "series id"
 // @Success 204
 // @Failure 400 {object} errs.HTTPError
-// @Router /series/{pid}/{id} [delete]
+// @Router /series/{id} [delete]
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -119,11 +118,11 @@ func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.DB.Series.IsOwner(ctx, operator.Profile().ID, objectID)
+	id, err := store.DB.Series.OwnerID(ctx, objectID)
 	if err != nil {
 		return err
 	}
-	if !ok {
+	if operator.HaveProfile(uuid.MustParse(id)) {
 		return errs.NotBelongsToOperator
 	}
 	return nil

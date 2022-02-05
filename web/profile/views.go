@@ -98,7 +98,7 @@ func update(ctx *gin.Context, store *data.Store, _ *controller.Identity) (int, i
 // @Router /profile/{pid} [get]
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	p, err := store.DB.Profile.FindByID(ctx, objectID)
+	p, err := store.DB.Profile.FindByIDWithAccount(ctx, objectID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -108,11 +108,11 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.DB.Profile.IsOwner(ctx, operator.Account().ID, objectID)
+	id, err := store.DB.Profile.OwnerID(ctx, objectID)
 	if err != nil {
 		return err
 	}
-	if !ok {
+	if id != operator.Account().ID.String() {
 		return errs.NotBelongsToOperator
 	}
 	return nil

@@ -53,25 +53,20 @@ func (controller *controller) Store() *data.Store {
 
 func extractOperator(ctx *gin.Context) *Identity {
 	a, _ := ctx.Get(value.StringAccount)
-	p, _ := ctx.Get(value.StringProfile)
 	ps, _ := ctx.Get(value.StringAllProfiles)
 	var account *ent.Account
 	if a != nil {
 		account = a.(*ent.Account)
 	}
-	var profile *ent.Profile
-	if p != nil {
-		profile = p.(*ent.Profile)
-	}
-	var allProfile []*ent.Profile
+
+	var allProfiles []*ent.Profile
 	if ps != nil {
-		allProfile = ps.([]*ent.Profile)
+		allProfiles = ps.([]*ent.Profile)
 	}
 
 	return &Identity{
-		account:    account,
-		profile:    profile,
-		allProfile: allProfile,
+		account:     account,
+		allProfiles: allProfiles,
 	}
 }
 
@@ -96,7 +91,6 @@ func (controller *controller) Task(f TaskFunc) TaskHandleFunc {
 func (controller *controller) General(nf Func) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := extractOperator(ctx)
-		id.profile, _ = controller.store.DB.Profile.Client().Query().First(ctx)
 		code, responseValue, err := nf(ctx, controller.store, id)
 		resultProcess(ctx, code, responseValue, err)
 	}

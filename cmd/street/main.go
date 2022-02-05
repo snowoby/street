@@ -43,7 +43,7 @@ func setup() *gin.Engine {
 
 	r.Use(cors.Default())
 
-	r.Use(ctrl.Original(account.TryAccessToken), ctrl.Original(profile.TryProfile), middleware.TryUriUUID)
+	r.Use(ctrl.Original(account.TryAccessToken), middleware.TryUriUUID, profile.TryProfile)
 
 	g := r.Group("/account")
 	account.Routers(g, ctrl)

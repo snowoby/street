@@ -25,7 +25,7 @@ func (profile *profile) FindByAccountID(ctx context.Context, id uuid.UUID) ([]*e
 	return ps, err
 }
 
-func (profile *profile) FindByID(ctx context.Context, id uuid.UUID) (*ent.Profile, error) {
+func (profile *profile) FindByIDWithAccount(ctx context.Context, id uuid.UUID) (*ent.Profile, error) {
 	p, err := profile.client.Query().Where(ep.ID(id)).WithAccount().Only(ctx)
 	return p, err
 }
@@ -48,4 +48,9 @@ func (profile *profile) IsOwner(ctx context.Context, ownerID uuid.UUID, objectID
 	ok, err := profile.client.Query().Where(ep.And(ep.ID(objectID), ep.HasAccountWith(ea.ID(ownerID)))).Exist(ctx)
 	return ok, err
 	//return ownerID == objectID, nil
+}
+
+func (profile *profile) OwnerID(ctx context.Context, id uuid.UUID) (string, error) {
+	pro, err := profile.FindByIDWithAccount(ctx, id)
+	return pro.Edges.Account.ID.String(), err
 }

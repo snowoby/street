@@ -179,46 +179,7 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/episode/{id}": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "episode"
-                ],
-                "summary": "get episode",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "episode id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/episode.ResponseEpisode"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/episode/{pid}": {
+            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -264,7 +225,42 @@ var doc = `{
                 }
             }
         },
-        "/episode/{pid}/{id}": {
+        "/episode/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "episode"
+                ],
+                "summary": "get episode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "episode id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/episode.ResponseEpisode"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            },
             "put": {
                 "consumes": [
                     "application/json"
@@ -745,6 +741,42 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "series"
+                ],
+                "summary": "del a series",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "series id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
             }
         },
         "/series/{pid}": {
@@ -836,42 +868,6 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/series.ResponseSeries"
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "series"
-                ],
-                "summary": "del a series",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "profile id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "series id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
@@ -1361,10 +1357,14 @@ var doc = `{
         "episode.Episode": {
             "type": "object",
             "required": [
+                "profileID",
                 "title"
             ],
             "properties": {
                 "content": {
+                    "type": "string"
+                },
+                "profileID": {
                     "type": "string"
                 },
                 "title": {

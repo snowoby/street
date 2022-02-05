@@ -12,8 +12,9 @@ import (
 )
 
 type Episode struct {
-	Title   string `json:"title" binding:"required"`
-	Content string `json:"content"`
+	ProfileID string `json:"profileID" binding:"uuid,required"`
+	Title     string `json:"title" binding:"required"`
+	Content   string `json:"content"`
 }
 
 type ResponseEpisode struct {
@@ -30,16 +31,21 @@ type ResponseEpisode struct {
 // @Param episode body Episode true "episode info"
 // @Success 201 {object} ResponseEpisode
 // @Failure 400 {object} errs.HTTPError
-// @Router /episode/{pid} [post]
+// @Router /episode [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
-	profile := identity.Profile()
 
 	var episode Episode
 	err := ctx.ShouldBindJSON(&episode)
 	if err != nil {
 		return 0, nil, err
 	}
-	ep, err := store.DB.Episode.Create(ctx, episode.Title, episode.Content, profile.ID)
+
+	profileID := uuid.MustParse(episode.ProfileID)
+	if !identity.HaveProfile(profileID) {
+		return 0, nil, errs.UnauthorizedError
+	}
+
+	ep, err := store.DB.Episode.Create(ctx, episode.Title, episode.Content, profileID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -59,7 +65,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 // @Param episode body Episode true "episode info"
 // @Success 200 {object} ResponseEpisode
 // @Failure 400 {object} errs.HTTPError
-// @Router /episode/{pid}/{id} [put]
+// @Router /episode/{id} [put]
 func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -73,6 +79,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	if err != nil {
 		return 0, nil, err
 	}
+
 	return http.StatusOK, &ResponseEpisode{
 		Episode: ep,
 	}, nil
@@ -91,7 +98,7 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	ep, err := store.DB.Episode.FindByID(ctx, id)
+	ep, err := store.DB.Episode.FindByIDWithProfile(ctx, id)
 	if err != nil {
 		return 0, nil, err
 
@@ -133,7 +140,7 @@ func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 // @Param id path string true "episode id"
 // @Success 204
 // @Failure 400 {object} errs.HTTPError
-// @Router /episode/{pid}/{id} [delete]
+// @Router /episode/{id} [delete]
 func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
@@ -147,12 +154,12 @@ func del(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.DB.Episode.IsOwner(ctx, operator.Profile().ID, objectID)
+
+	id, err := store.DB.Episode.OwnerID(ctx, objectID)
 	if err != nil {
 		return err
 	}
-	if !ok {
-		return errs.NotBelongsToOperator
-	}
-	return nil
+
+	err = operator.HaveProfileX(uuid.MustParse(id))
+	return err
 }

@@ -20,7 +20,7 @@ func (e *episode) Create(ctx context.Context, title, cleanContent string, profil
 	return e.client.Create().SetTitle(title).SetContent(cleanContent).SetProfileID(profileID).Save(ctx)
 }
 
-func (e *episode) FindByID(ctx context.Context, episodeID uuid.UUID) (*ent.Episode, error) {
+func (e *episode) FindByIDWithProfile(ctx context.Context, episodeID uuid.UUID) (*ent.Episode, error) {
 	return e.client.Query().Where(ee.ID(episodeID)).WithProfile().Only(ctx)
 }
 
@@ -39,4 +39,12 @@ func (e *episode) IsOwner(ctx context.Context, profileID uuid.UUID, episodeID uu
 				ee.ID(episodeID),
 				ee.HasProfileWith(ep.ID(profileID))),
 		).Exist(ctx)
+}
+
+func (e *episode) OwnerID(ctx context.Context, episodeID uuid.UUID) (string, error) {
+	episode, err := e.FindByIDWithProfile(ctx, episodeID)
+	if err != nil {
+		return "", err
+	}
+	return episode.Edges.Profile.ID.String(), nil
 }

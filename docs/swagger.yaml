@@ -353,9 +353,12 @@ definitions:
     properties:
       content:
         type: string
+      profileID:
+        type: string
       title:
         type: string
     required:
+    - profileID
     - title
     type: object
   episode.ResponseEpisode:
@@ -622,31 +625,6 @@ paths:
       summary: get all episodes
       tags:
       - episode
-  /episode/{id}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: episode id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/episode.ResponseEpisode'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errs.HTTPError'
-      summary: get episode
-      tags:
-      - episode
-  /episode/{pid}:
     post:
       consumes:
       - application/json
@@ -676,7 +654,7 @@ paths:
       summary: create episode
       tags:
       - episode
-  /episode/{pid}/{id}:
+  /episode/{id}:
     delete:
       parameters:
       - description: profile id
@@ -699,6 +677,29 @@ paths:
           schema:
             $ref: '#/definitions/errs.HTTPError'
       summary: delete one episode
+      tags:
+      - episode
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: episode id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/episode.ResponseEpisode'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: get episode
       tags:
       - episode
     put:
@@ -972,6 +973,30 @@ paths:
       tags:
       - profile
   /series/{id}:
+    delete:
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: series id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: del a series
+      tags:
+      - series
     get:
       parameters:
       - description: series id
@@ -1024,30 +1049,6 @@ paths:
       tags:
       - series
   /series/{pid}/{id}:
-    delete:
-      parameters:
-      - description: profile id
-        in: path
-        name: pid
-        required: true
-        type: string
-      - description: series id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errs.HTTPError'
-      summary: del a series
-      tags:
-      - series
     put:
       consumes:
       - application/json

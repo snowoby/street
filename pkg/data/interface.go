@@ -6,5 +6,5 @@ import (
 )
 
 type Owner interface {
-	IsOwner(ctx context.Context, ownerID uuid.UUID, objID uuid.UUID) (bool, error)
+	OwnerID(ctx context.Context, objID uuid.UUID) (string, error)
 }
