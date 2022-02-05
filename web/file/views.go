@@ -60,7 +60,7 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 		return 0, nil, err
 	}
 
-	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
+	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Account().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -78,16 +78,16 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 // @Param data body array true "file content"
 // @Success 200 {object} ResponseFile
 // @Failure 400 {object} errs.HTTPError
-// @Router /file/single/{pid}/{id} [put]
+// @Router /file/single/{id} [put]
 func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
 	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
 
-	file, err := store.DB.File.Get(ctx, id)
+	file, err := store.DB.File.GetWithAccount(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	if file.Edges.Profile.ID != visitor.Profile().ID {
+	if file.Edges.Account.ID != visitor.Account().ID {
 		return 0, nil, errs.NotFoundError
 	}
 
@@ -108,10 +108,15 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 	}
 
 	if strings.HasPrefix(file.Mime, "image/") {
-		_, err := store.Task.ImageCompress(file)
-		if err != nil {
-			return 0, nil, err
+		if file.Path == "avatar" {
+			_, err = store.Task.AvatarCompress(file)
+		} else {
+			_, err = store.Task.ImageCompress(file)
 		}
+
+	}
+	if err != nil {
+		return 0, nil, err
 	}
 
 	return http.StatusOK, &ResponseFile{File: file}, nil
@@ -135,7 +140,7 @@ func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identi
 		return 0, nil, err
 	}
 
-	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Profile().ID)
+	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Account().ID)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -287,7 +292,7 @@ func doneMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.DB.File.IsOwner(ctx, operator.Profile().ID, objectID)
+	ok, err := store.DB.File.IsOwner(ctx, operator.Account().ID, objectID)
 	if err != nil {
 		return err
 	}

@@ -33,6 +33,7 @@ func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("token", Token.Type),
 		edge.To("profile", Profile.Type),
+		edge.To("file", File.Type),
 	}
 }
 

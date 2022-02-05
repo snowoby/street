@@ -39,12 +39,13 @@ func (profile *profile) CallExists(ctx context.Context, call string) (bool, erro
 	return profile.client.Query().Where(ep.Call(call)).Exist(ctx)
 }
 
-func (profile *profile) Update(ctx context.Context, profileID uuid.UUID, callSign, title, category, avatar string) (*ent.Profile, error) {
-	p, err := profile.client.UpdateOneID(profileID).SetTitle(title).SetCall(callSign).SetCategory(category).SetAvatar(avatar).Save(ctx)
+func (profile *profile) Update(ctx context.Context, profileID uuid.UUID, title, call, category, avatar string) (*ent.Profile, error) {
+	p, err := profile.client.UpdateOneID(profileID).SetTitle(title).SetCall(call).SetCategory(category).SetAvatar(avatar).Save(ctx)
 	return p, err
 }
 
-func (profile *profile) IsOwner(_ context.Context, ownerID uuid.UUID, objectID uuid.UUID) (bool, error) {
-	//ok, err := profile.client.Query().Where(ep.And(ep.HasAccountWith(account.ID(ownerID)), ep.ID(objectID))).Exist(ctx)
-	return ownerID == objectID, nil
+func (profile *profile) IsOwner(ctx context.Context, ownerID uuid.UUID, objectID uuid.UUID) (bool, error) {
+	ok, err := profile.client.Query().Where(ep.And(ep.ID(objectID), ep.HasAccountWith(ea.ID(ownerID)))).Exist(ctx)
+	return ok, err
+	//return ownerID == objectID, nil
 }

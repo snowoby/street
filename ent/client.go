@@ -275,6 +275,22 @@ func (c *AccountClient) QueryProfile(a *Account) *ProfileQuery {
 	return query
 }
 
+// QueryFile queries the file edge of a Account.
+func (c *AccountClient) QueryFile(a *Account) *FileQuery {
+	query := &FileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.FileTable, account.FileColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AccountClient) Hooks() []Hook {
 	return c.hooks.Account
@@ -487,15 +503,15 @@ func (c *FileClient) GetX(ctx context.Context, id uuid.UUID) *File {
 	return obj
 }
 
-// QueryProfile queries the profile edge of a File.
-func (c *FileClient) QueryProfile(f *File) *ProfileQuery {
-	query := &ProfileQuery{config: c.config}
+// QueryAccount queries the account edge of a File.
+func (c *FileClient) QueryAccount(f *File) *AccountQuery {
+	query := &AccountQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(profile.Table, profile.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, file.ProfileTable, file.ProfileColumn),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.AccountTable, file.AccountColumn),
 		)
 		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
 		return fromV, nil
@@ -634,22 +650,6 @@ func (c *ProfileClient) QuerySeries(pr *Profile) *SeriesQuery {
 			sqlgraph.From(profile.Table, profile.FieldID, id),
 			sqlgraph.To(series.Table, series.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, profile.SeriesTable, profile.SeriesColumn),
-		)
-		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryFile queries the file edge of a Profile.
-func (c *ProfileClient) QueryFile(pr *Profile) *FileQuery {
-	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pr.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(profile.Table, profile.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profile.FileTable, profile.FileColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil

@@ -34,6 +34,6 @@ func (File) Mixin() []ent.Mixin {
 // Edges of the File.
 func (File) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("profile", Profile.Type).Ref("file").Required().Unique(),
+		edge.From("account", Account.Type).Ref("file").Required().Unique(),
 	}
 }

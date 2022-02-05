@@ -73,7 +73,7 @@ var (
 		{Name: "size", Type: field.TypeInt},
 		{Name: "status", Type: field.TypeString, Size: 16, Default: "created"},
 		{Name: "note", Type: field.TypeString, Nullable: true, Size: 128},
-		{Name: "profile_file", Type: field.TypeUUID, Nullable: true},
+		{Name: "account_file", Type: field.TypeUUID, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
@@ -82,9 +82,9 @@ var (
 		PrimaryKey: []*schema.Column{FilesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_profiles_file",
+				Symbol:     "files_accounts_file",
 				Columns:    []*schema.Column{FilesColumns[10]},
-				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -205,7 +205,7 @@ var (
 func init() {
 	EpisodesTable.ForeignKeys[0].RefTable = ProfilesTable
 	EpisodesTable.ForeignKeys[1].RefTable = SeriesTable
-	FilesTable.ForeignKeys[0].RefTable = ProfilesTable
+	FilesTable.ForeignKeys[0].RefTable = AccountsTable
 	ProfilesTable.ForeignKeys[0].RefTable = AccountsTable
 	SeriesTable.ForeignKeys[0].RefTable = ProfilesTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable

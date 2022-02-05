@@ -10,7 +10,7 @@ import (
 func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
 	group.GET("/", ctrl.Bare(getAll))
 	group.GET("/:id", middleware.MustUriUUID, ctrl.Bare(get))
-	group.Use(profile.MustProfile)
+	group.Use(profile.MustUseProfile)
 	group.POST("/:pid", ctrl.General(create))
 	group.Use(middleware.MustUriUUID, ctrl.Owned(owned))
 	group.PUT("/:pid/:id", ctrl.Bare(update))

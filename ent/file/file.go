@@ -32,17 +32,17 @@ const (
 	FieldStatus = "status"
 	// FieldNote holds the string denoting the note field in the database.
 	FieldNote = "note"
-	// EdgeProfile holds the string denoting the profile edge name in mutations.
-	EdgeProfile = "profile"
+	// EdgeAccount holds the string denoting the account edge name in mutations.
+	EdgeAccount = "account"
 	// Table holds the table name of the file in the database.
 	Table = "files"
-	// ProfileTable is the table that holds the profile relation/edge.
-	ProfileTable = "files"
-	// ProfileInverseTable is the table name for the Profile entity.
-	// It exists in this package in order to avoid circular dependency with the "profile" package.
-	ProfileInverseTable = "profiles"
-	// ProfileColumn is the table column denoting the profile relation/edge.
-	ProfileColumn = "profile_file"
+	// AccountTable is the table that holds the account relation/edge.
+	AccountTable = "files"
+	// AccountInverseTable is the table name for the Account entity.
+	// It exists in this package in order to avoid circular dependency with the "account" package.
+	AccountInverseTable = "accounts"
+	// AccountColumn is the table column denoting the account relation/edge.
+	AccountColumn = "account_file"
 )
 
 // Columns holds all SQL columns for file fields.
@@ -62,7 +62,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"profile_file",
+	"account_file",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

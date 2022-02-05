@@ -61,6 +61,14 @@ func New(s3Config *aws.Config) *Storage {
 
 }
 
+func (s *Storage) Delete(path string, id uuid.UUID, fileIdentifier string) error {
+	_, err := s.client.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucketName),
+		Key:    aws.String(strings.Join([]string{path, id.String(), fileIdentifier}, "/")),
+	})
+	return err
+}
+
 func (s *Storage) PutSingle(stream *bytes.Reader, path string, id uuid.UUID, filename string, fileIdentifier string, mime string) (*s3manager.UploadOutput, error) {
 	return s.uploader.Upload(&s3manager.UploadInput{
 		Bucket:             aws.String(s.bucketName),

@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"street/ent/account"
 	"street/ent/file"
 	"street/ent/predicate"
-	"street/ent/profile"
 	"street/ent/schema"
 
 	"entgo.io/ent/dialect/sql"
@@ -133,15 +133,15 @@ func (fu *FileUpdate) ClearNote() *FileUpdate {
 	return fu
 }
 
-// SetProfileID sets the "profile" edge to the Profile entity by ID.
-func (fu *FileUpdate) SetProfileID(id uuid.UUID) *FileUpdate {
-	fu.mutation.SetProfileID(id)
+// SetAccountID sets the "account" edge to the Account entity by ID.
+func (fu *FileUpdate) SetAccountID(id uuid.UUID) *FileUpdate {
+	fu.mutation.SetAccountID(id)
 	return fu
 }
 
-// SetProfile sets the "profile" edge to the Profile entity.
-func (fu *FileUpdate) SetProfile(p *Profile) *FileUpdate {
-	return fu.SetProfileID(p.ID)
+// SetAccount sets the "account" edge to the Account entity.
+func (fu *FileUpdate) SetAccount(a *Account) *FileUpdate {
+	return fu.SetAccountID(a.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -149,9 +149,9 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
 }
 
-// ClearProfile clears the "profile" edge to the Profile entity.
-func (fu *FileUpdate) ClearProfile() *FileUpdate {
-	fu.mutation.ClearProfile()
+// ClearAccount clears the "account" edge to the Account entity.
+func (fu *FileUpdate) ClearAccount() *FileUpdate {
+	fu.mutation.ClearAccount()
 	return fu
 }
 
@@ -251,8 +251,8 @@ func (fu *FileUpdate) check() error {
 			return &ValidationError{Name: "note", err: fmt.Errorf("ent: validator failed for field \"note\": %w", err)}
 		}
 	}
-	if _, ok := fu.mutation.ProfileID(); fu.mutation.ProfileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"profile\"")
+	if _, ok := fu.mutation.AccountID(); fu.mutation.AccountCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"account\"")
 	}
 	return nil
 }
@@ -344,33 +344,33 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: file.FieldNote,
 		})
 	}
-	if fu.mutation.ProfileCleared() {
+	if fu.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ProfileTable,
-			Columns: []string{file.ProfileColumn},
+			Table:   file.AccountTable,
+			Columns: []string{file.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: profile.FieldID,
+					Column: account.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.ProfileIDs(); len(nodes) > 0 {
+	if nodes := fu.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ProfileTable,
-			Columns: []string{file.ProfileColumn},
+			Table:   file.AccountTable,
+			Columns: []string{file.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: profile.FieldID,
+					Column: account.FieldID,
 				},
 			},
 		}
@@ -501,15 +501,15 @@ func (fuo *FileUpdateOne) ClearNote() *FileUpdateOne {
 	return fuo
 }
 
-// SetProfileID sets the "profile" edge to the Profile entity by ID.
-func (fuo *FileUpdateOne) SetProfileID(id uuid.UUID) *FileUpdateOne {
-	fuo.mutation.SetProfileID(id)
+// SetAccountID sets the "account" edge to the Account entity by ID.
+func (fuo *FileUpdateOne) SetAccountID(id uuid.UUID) *FileUpdateOne {
+	fuo.mutation.SetAccountID(id)
 	return fuo
 }
 
-// SetProfile sets the "profile" edge to the Profile entity.
-func (fuo *FileUpdateOne) SetProfile(p *Profile) *FileUpdateOne {
-	return fuo.SetProfileID(p.ID)
+// SetAccount sets the "account" edge to the Account entity.
+func (fuo *FileUpdateOne) SetAccount(a *Account) *FileUpdateOne {
+	return fuo.SetAccountID(a.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -517,9 +517,9 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
 }
 
-// ClearProfile clears the "profile" edge to the Profile entity.
-func (fuo *FileUpdateOne) ClearProfile() *FileUpdateOne {
-	fuo.mutation.ClearProfile()
+// ClearAccount clears the "account" edge to the Account entity.
+func (fuo *FileUpdateOne) ClearAccount() *FileUpdateOne {
+	fuo.mutation.ClearAccount()
 	return fuo
 }
 
@@ -626,8 +626,8 @@ func (fuo *FileUpdateOne) check() error {
 			return &ValidationError{Name: "note", err: fmt.Errorf("ent: validator failed for field \"note\": %w", err)}
 		}
 	}
-	if _, ok := fuo.mutation.ProfileID(); fuo.mutation.ProfileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"profile\"")
+	if _, ok := fuo.mutation.AccountID(); fuo.mutation.AccountCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"account\"")
 	}
 	return nil
 }
@@ -736,33 +736,33 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Column: file.FieldNote,
 		})
 	}
-	if fuo.mutation.ProfileCleared() {
+	if fuo.mutation.AccountCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ProfileTable,
-			Columns: []string{file.ProfileColumn},
+			Table:   file.AccountTable,
+			Columns: []string{file.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: profile.FieldID,
+					Column: account.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.ProfileIDs(); len(nodes) > 0 {
+	if nodes := fuo.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ProfileTable,
-			Columns: []string{file.ProfileColumn},
+			Table:   file.AccountTable,
+			Columns: []string{file.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: profile.FieldID,
+					Column: account.FieldID,
 				},
 			},
 		}

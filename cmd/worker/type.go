@@ -11,6 +11,58 @@ import (
 	"street/pkg/data"
 )
 
+func imageWebpCompress(b []byte, quality uint) ([]byte, error) {
+
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+	err := mw.ReadImageBlob(b)
+	if err != nil {
+		return nil, fmt.Errorf("read imagick failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	err = mw.SetImageCompressionQuality(quality)
+	if err != nil {
+		return nil, fmt.Errorf("set compress quality failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	err = mw.SetFormat("webp")
+	if err != nil {
+		return nil, fmt.Errorf("set format failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	nb := mw.GetImageBlob()
+	return nb, nil
+
+}
+
+func imageCrop(b []byte, max uint) ([]byte, error) {
+
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+	err := mw.ReadImageBlob(b)
+	if err != nil {
+		return nil, fmt.Errorf("read imagick failed: %v: %w", err, asynq.SkipRetry)
+	}
+	height := mw.GetImageHeight()
+	size := height
+	width := mw.GetImageWidth()
+	if width < size {
+		size = width
+	}
+	if size > max {
+		size = max
+	}
+
+	err = mw.ResizeImage(size, size, imagick.FILTER_UNDEFINED)
+	if err != nil {
+		return nil, fmt.Errorf("crop failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	nb := mw.GetImageBlob()
+	return nb, nil
+
+}
+
 func HandleImageCompressTask(_ context.Context, t *asynq.Task, store *data.Store) error {
 	var p ent.File
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
@@ -20,27 +72,45 @@ func HandleImageCompressTask(_ context.Context, t *asynq.Task, store *data.Store
 	if err != nil {
 		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
 	}
-
-	mw := imagick.NewMagickWand()
-	defer mw.Destroy()
-	err = mw.ReadImageBlob(b)
+	nb, err := imageWebpCompress(b, 90)
 	if err != nil {
-		return fmt.Errorf("read imagick failed: %v: %w", err, asynq.SkipRetry)
+		return fmt.Errorf("compress failed: %v: %w", err, asynq.SkipRetry)
 	}
-
-	err = mw.SetImageCompressionQuality(90)
-	if err != nil {
-		return fmt.Errorf("set compress quality failed: %v: %w", err, asynq.SkipRetry)
-	}
-
-	err = mw.SetFormat("webp")
-	if err != nil {
-		return fmt.Errorf("set format failed: %v: %w", err, asynq.SkipRetry)
-	}
-
-	nb := mw.GetImageBlob()
 	newFilename := p.Filename + ".webp"
 	_, err = store.Storage.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
+	if err != nil {
+		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
+	}
+	return nil
+
+}
+func HandleAvatarCompressTask(_ context.Context, t *asynq.Task, store *data.Store) error {
+	var p ent.File
+	if err := json.Unmarshal(t.Payload(), &p); err != nil {
+		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
+	}
+	b, err := store.Storage.Get(p.Path, p.ID.String(), "original")
+	if err != nil {
+		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	b, err = imageWebpCompress(b, 100)
+	if err != nil {
+		return err
+	}
+
+	nb, err := imageCrop(b, 512)
+	if err != nil {
+		return err
+	}
+
+	newFilename := p.Filename + ".webp"
+	_, err = store.Storage.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
+	if err != nil {
+		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	err = store.Storage.Delete(p.Path, p.ID, "original")
 	if err != nil {
 		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
 	}

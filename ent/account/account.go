@@ -28,6 +28,8 @@ const (
 	EdgeToken = "token"
 	// EdgeProfile holds the string denoting the profile edge name in mutations.
 	EdgeProfile = "profile"
+	// EdgeFile holds the string denoting the file edge name in mutations.
+	EdgeFile = "file"
 	// Table holds the table name of the account in the database.
 	Table = "accounts"
 	// TokenTable is the table that holds the token relation/edge.
@@ -44,6 +46,13 @@ const (
 	ProfileInverseTable = "profiles"
 	// ProfileColumn is the table column denoting the profile relation/edge.
 	ProfileColumn = "account_profile"
+	// FileTable is the table that holds the file relation/edge.
+	FileTable = "files"
+	// FileInverseTable is the table name for the File entity.
+	// It exists in this package in order to avoid circular dependency with the "file" package.
+	FileInverseTable = "files"
+	// FileColumn is the table column denoting the file relation/edge.
+	FileColumn = "account_file"
 )
 
 // Columns holds all SQL columns for account fields.

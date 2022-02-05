@@ -44,7 +44,26 @@ func TryProfile(ctx *gin.Context, store *data.Store) {
 	ctx.Next()
 }
 
-func MustProfile(ctx *gin.Context) {
+func MustHaveProfile(ctx *gin.Context) {
+	ps, ok := ctx.Get(value.StringAllProfiles)
+	if !ok {
+		ctx.AbortWithStatusJSON(errs.ProfileIdentityError.Code, errs.ProfileIdentityError)
+		return
+	}
+
+	profiles := ps.([]*ent.Profile)
+
+	if len(profiles) == 0 {
+		ctx.AbortWithStatusJSON(errs.NoProfiles.Code, errs.NoProfiles)
+		return
+	}
+
+	ctx.Next()
+	return
+
+}
+
+func MustUseProfile(ctx *gin.Context) {
 	_, ok := ctx.Get(value.StringProfile)
 	if !ok {
 		ctx.AbortWithStatusJSON(errs.ProfileIdentityError.Code, errs.ProfileIdentityError)

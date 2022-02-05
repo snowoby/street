@@ -56,6 +56,9 @@ type AccountMutation struct {
 	profile        map[uuid.UUID]struct{}
 	removedprofile map[uuid.UUID]struct{}
 	clearedprofile bool
+	file           map[uuid.UUID]struct{}
+	removedfile    map[uuid.UUID]struct{}
+	clearedfile    bool
 	done           bool
 	oldValue       func(context.Context) (*Account, error)
 	predicates     []predicate.Account
@@ -434,6 +437,60 @@ func (m *AccountMutation) ResetProfile() {
 	m.removedprofile = nil
 }
 
+// AddFileIDs adds the "file" edge to the File entity by ids.
+func (m *AccountMutation) AddFileIDs(ids ...uuid.UUID) {
+	if m.file == nil {
+		m.file = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.file[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFile clears the "file" edge to the File entity.
+func (m *AccountMutation) ClearFile() {
+	m.clearedfile = true
+}
+
+// FileCleared reports if the "file" edge to the File entity was cleared.
+func (m *AccountMutation) FileCleared() bool {
+	return m.clearedfile
+}
+
+// RemoveFileIDs removes the "file" edge to the File entity by IDs.
+func (m *AccountMutation) RemoveFileIDs(ids ...uuid.UUID) {
+	if m.removedfile == nil {
+		m.removedfile = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.file, ids[i])
+		m.removedfile[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFile returns the removed IDs of the "file" edge to the File entity.
+func (m *AccountMutation) RemovedFileIDs() (ids []uuid.UUID) {
+	for id := range m.removedfile {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FileIDs returns the "file" edge IDs in the mutation.
+func (m *AccountMutation) FileIDs() (ids []uuid.UUID) {
+	for id := range m.file {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFile resets all changes to the "file" edge.
+func (m *AccountMutation) ResetFile() {
+	m.file = nil
+	m.clearedfile = false
+	m.removedfile = nil
+}
+
 // Where appends a list predicates to the AccountMutation builder.
 func (m *AccountMutation) Where(ps ...predicate.Account) {
 	m.predicates = append(m.predicates, ps...)
@@ -623,12 +680,15 @@ func (m *AccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.token != nil {
 		edges = append(edges, account.EdgeToken)
 	}
 	if m.profile != nil {
 		edges = append(edges, account.EdgeProfile)
+	}
+	if m.file != nil {
+		edges = append(edges, account.EdgeFile)
 	}
 	return edges
 }
@@ -649,18 +709,27 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case account.EdgeFile:
+		ids := make([]ent.Value, 0, len(m.file))
+		for id := range m.file {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedtoken != nil {
 		edges = append(edges, account.EdgeToken)
 	}
 	if m.removedprofile != nil {
 		edges = append(edges, account.EdgeProfile)
+	}
+	if m.removedfile != nil {
+		edges = append(edges, account.EdgeFile)
 	}
 	return edges
 }
@@ -681,18 +750,27 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case account.EdgeFile:
+		ids := make([]ent.Value, 0, len(m.removedfile))
+		for id := range m.removedfile {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedtoken {
 		edges = append(edges, account.EdgeToken)
 	}
 	if m.clearedprofile {
 		edges = append(edges, account.EdgeProfile)
+	}
+	if m.clearedfile {
+		edges = append(edges, account.EdgeFile)
 	}
 	return edges
 }
@@ -705,6 +783,8 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 		return m.clearedtoken
 	case account.EdgeProfile:
 		return m.clearedprofile
+	case account.EdgeFile:
+		return m.clearedfile
 	}
 	return false
 }
@@ -726,6 +806,9 @@ func (m *AccountMutation) ResetEdge(name string) error {
 		return nil
 	case account.EdgeProfile:
 		m.ResetProfile()
+		return nil
+	case account.EdgeFile:
+		m.ResetFile()
 		return nil
 	}
 	return fmt.Errorf("unknown Account edge %s", name)
@@ -1393,8 +1476,8 @@ type FileMutation struct {
 	status         *string
 	note           *string
 	clearedFields  map[string]struct{}
-	profile        *uuid.UUID
-	clearedprofile bool
+	account        *uuid.UUID
+	clearedaccount bool
 	done           bool
 	oldValue       func(context.Context) (*File, error)
 	predicates     []predicate.File
@@ -1842,43 +1925,43 @@ func (m *FileMutation) ResetNote() {
 	delete(m.clearedFields, file.FieldNote)
 }
 
-// SetProfileID sets the "profile" edge to the Profile entity by id.
-func (m *FileMutation) SetProfileID(id uuid.UUID) {
-	m.profile = &id
+// SetAccountID sets the "account" edge to the Account entity by id.
+func (m *FileMutation) SetAccountID(id uuid.UUID) {
+	m.account = &id
 }
 
-// ClearProfile clears the "profile" edge to the Profile entity.
-func (m *FileMutation) ClearProfile() {
-	m.clearedprofile = true
+// ClearAccount clears the "account" edge to the Account entity.
+func (m *FileMutation) ClearAccount() {
+	m.clearedaccount = true
 }
 
-// ProfileCleared reports if the "profile" edge to the Profile entity was cleared.
-func (m *FileMutation) ProfileCleared() bool {
-	return m.clearedprofile
+// AccountCleared reports if the "account" edge to the Account entity was cleared.
+func (m *FileMutation) AccountCleared() bool {
+	return m.clearedaccount
 }
 
-// ProfileID returns the "profile" edge ID in the mutation.
-func (m *FileMutation) ProfileID() (id uuid.UUID, exists bool) {
-	if m.profile != nil {
-		return *m.profile, true
+// AccountID returns the "account" edge ID in the mutation.
+func (m *FileMutation) AccountID() (id uuid.UUID, exists bool) {
+	if m.account != nil {
+		return *m.account, true
 	}
 	return
 }
 
-// ProfileIDs returns the "profile" edge IDs in the mutation.
+// AccountIDs returns the "account" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ProfileID instead. It exists only for internal usage by the builders.
-func (m *FileMutation) ProfileIDs() (ids []uuid.UUID) {
-	if id := m.profile; id != nil {
+// AccountID instead. It exists only for internal usage by the builders.
+func (m *FileMutation) AccountIDs() (ids []uuid.UUID) {
+	if id := m.account; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetProfile resets all changes to the "profile" edge.
-func (m *FileMutation) ResetProfile() {
-	m.profile = nil
-	m.clearedprofile = false
+// ResetAccount resets all changes to the "account" edge.
+func (m *FileMutation) ResetAccount() {
+	m.account = nil
+	m.clearedaccount = false
 }
 
 // Where appends a list predicates to the FileMutation builder.
@@ -2160,8 +2243,8 @@ func (m *FileMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FileMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.profile != nil {
-		edges = append(edges, file.EdgeProfile)
+	if m.account != nil {
+		edges = append(edges, file.EdgeAccount)
 	}
 	return edges
 }
@@ -2170,8 +2253,8 @@ func (m *FileMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *FileMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case file.EdgeProfile:
-		if id := m.profile; id != nil {
+	case file.EdgeAccount:
+		if id := m.account; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -2195,8 +2278,8 @@ func (m *FileMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FileMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedprofile {
-		edges = append(edges, file.EdgeProfile)
+	if m.clearedaccount {
+		edges = append(edges, file.EdgeAccount)
 	}
 	return edges
 }
@@ -2205,8 +2288,8 @@ func (m *FileMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *FileMutation) EdgeCleared(name string) bool {
 	switch name {
-	case file.EdgeProfile:
-		return m.clearedprofile
+	case file.EdgeAccount:
+		return m.clearedaccount
 	}
 	return false
 }
@@ -2215,8 +2298,8 @@ func (m *FileMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *FileMutation) ClearEdge(name string) error {
 	switch name {
-	case file.EdgeProfile:
-		m.ClearProfile()
+	case file.EdgeAccount:
+		m.ClearAccount()
 		return nil
 	}
 	return fmt.Errorf("unknown File unique edge %s", name)
@@ -2226,8 +2309,8 @@ func (m *FileMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *FileMutation) ResetEdge(name string) error {
 	switch name {
-	case file.EdgeProfile:
-		m.ResetProfile()
+	case file.EdgeAccount:
+		m.ResetAccount()
 		return nil
 	}
 	return fmt.Errorf("unknown File edge %s", name)
@@ -2255,9 +2338,6 @@ type ProfileMutation struct {
 	series         map[uuid.UUID]struct{}
 	removedseries  map[uuid.UUID]struct{}
 	clearedseries  bool
-	file           map[uuid.UUID]struct{}
-	removedfile    map[uuid.UUID]struct{}
-	clearedfile    bool
 	done           bool
 	oldValue       func(context.Context) (*Profile, error)
 	predicates     []predicate.Profile
@@ -2760,60 +2840,6 @@ func (m *ProfileMutation) ResetSeries() {
 	m.removedseries = nil
 }
 
-// AddFileIDs adds the "file" edge to the File entity by ids.
-func (m *ProfileMutation) AddFileIDs(ids ...uuid.UUID) {
-	if m.file == nil {
-		m.file = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.file[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFile clears the "file" edge to the File entity.
-func (m *ProfileMutation) ClearFile() {
-	m.clearedfile = true
-}
-
-// FileCleared reports if the "file" edge to the File entity was cleared.
-func (m *ProfileMutation) FileCleared() bool {
-	return m.clearedfile
-}
-
-// RemoveFileIDs removes the "file" edge to the File entity by IDs.
-func (m *ProfileMutation) RemoveFileIDs(ids ...uuid.UUID) {
-	if m.removedfile == nil {
-		m.removedfile = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.file, ids[i])
-		m.removedfile[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFile returns the removed IDs of the "file" edge to the File entity.
-func (m *ProfileMutation) RemovedFileIDs() (ids []uuid.UUID) {
-	for id := range m.removedfile {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FileIDs returns the "file" edge IDs in the mutation.
-func (m *ProfileMutation) FileIDs() (ids []uuid.UUID) {
-	for id := range m.file {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFile resets all changes to the "file" edge.
-func (m *ProfileMutation) ResetFile() {
-	m.file = nil
-	m.clearedfile = false
-	m.removedfile = nil
-}
-
 // Where appends a list predicates to the ProfileMutation builder.
 func (m *ProfileMutation) Where(ps ...predicate.Profile) {
 	m.predicates = append(m.predicates, ps...)
@@ -3046,7 +3072,7 @@ func (m *ProfileMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ProfileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.account != nil {
 		edges = append(edges, profile.EdgeAccount)
 	}
@@ -3055,9 +3081,6 @@ func (m *ProfileMutation) AddedEdges() []string {
 	}
 	if m.series != nil {
 		edges = append(edges, profile.EdgeSeries)
-	}
-	if m.file != nil {
-		edges = append(edges, profile.EdgeFile)
 	}
 	return edges
 }
@@ -3082,27 +3105,18 @@ func (m *ProfileMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case profile.EdgeFile:
-		ids := make([]ent.Value, 0, len(m.file))
-		for id := range m.file {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ProfileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.removedepisode != nil {
 		edges = append(edges, profile.EdgeEpisode)
 	}
 	if m.removedseries != nil {
 		edges = append(edges, profile.EdgeSeries)
-	}
-	if m.removedfile != nil {
-		edges = append(edges, profile.EdgeFile)
 	}
 	return edges
 }
@@ -3123,19 +3137,13 @@ func (m *ProfileMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case profile.EdgeFile:
-		ids := make([]ent.Value, 0, len(m.removedfile))
-		for id := range m.removedfile {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ProfileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.clearedaccount {
 		edges = append(edges, profile.EdgeAccount)
 	}
@@ -3144,9 +3152,6 @@ func (m *ProfileMutation) ClearedEdges() []string {
 	}
 	if m.clearedseries {
 		edges = append(edges, profile.EdgeSeries)
-	}
-	if m.clearedfile {
-		edges = append(edges, profile.EdgeFile)
 	}
 	return edges
 }
@@ -3161,8 +3166,6 @@ func (m *ProfileMutation) EdgeCleared(name string) bool {
 		return m.clearedepisode
 	case profile.EdgeSeries:
 		return m.clearedseries
-	case profile.EdgeFile:
-		return m.clearedfile
 	}
 	return false
 }
@@ -3190,9 +3193,6 @@ func (m *ProfileMutation) ResetEdge(name string) error {
 		return nil
 	case profile.EdgeSeries:
 		m.ResetSeries()
-		return nil
-	case profile.EdgeFile:
-		m.ResetFile()
 		return nil
 	}
 	return fmt.Errorf("unknown Profile edge %s", name)

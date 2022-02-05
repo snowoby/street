@@ -10,7 +10,6 @@ import (
 	"math"
 	"street/ent/account"
 	"street/ent/episode"
-	"street/ent/file"
 	"street/ent/predicate"
 	"street/ent/profile"
 	"street/ent/series"
@@ -34,7 +33,6 @@ type ProfileQuery struct {
 	withAccount *AccountQuery
 	withEpisode *EpisodeQuery
 	withSeries  *SeriesQuery
-	withFile    *FileQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -131,28 +129,6 @@ func (pq *ProfileQuery) QuerySeries() *SeriesQuery {
 			sqlgraph.From(profile.Table, profile.FieldID, selector),
 			sqlgraph.To(series.Table, series.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, profile.SeriesTable, profile.SeriesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryFile chains the current query on the "file" edge.
-func (pq *ProfileQuery) QueryFile() *FileQuery {
-	query := &FileQuery{config: pq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(profile.Table, profile.FieldID, selector),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profile.FileTable, profile.FileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -344,7 +320,6 @@ func (pq *ProfileQuery) Clone() *ProfileQuery {
 		withAccount: pq.withAccount.Clone(),
 		withEpisode: pq.withEpisode.Clone(),
 		withSeries:  pq.withSeries.Clone(),
-		withFile:    pq.withFile.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -381,17 +356,6 @@ func (pq *ProfileQuery) WithSeries(opts ...func(*SeriesQuery)) *ProfileQuery {
 		opt(query)
 	}
 	pq.withSeries = query
-	return pq
-}
-
-// WithFile tells the query-builder to eager-load the nodes that are connected to
-// the "file" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ProfileQuery) WithFile(opts ...func(*FileQuery)) *ProfileQuery {
-	query := &FileQuery{config: pq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	pq.withFile = query
 	return pq
 }
 
@@ -461,11 +425,10 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 		nodes       = []*Profile{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [3]bool{
 			pq.withAccount != nil,
 			pq.withEpisode != nil,
 			pq.withSeries != nil,
-			pq.withFile != nil,
 		}
 	)
 	if pq.withAccount != nil {
@@ -578,35 +541,6 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "profile_series" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Series = append(node.Edges.Series, n)
-		}
-	}
-
-	if query := pq.withFile; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Profile)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.File = []*File{}
-		}
-		query.withFKs = true
-		query.Where(predicate.File(func(s *sql.Selector) {
-			s.Where(sql.InValues(profile.FileColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.profile_file
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "profile_file" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "profile_file" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.File = append(node.Edges.File, n)
 		}
 	}
 

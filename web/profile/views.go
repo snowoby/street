@@ -108,7 +108,7 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 
 func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
 	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.DB.Profile.IsOwner(ctx, operator.Profile().ID, objectID)
+	ok, err := store.DB.Profile.IsOwner(ctx, operator.Account().ID, objectID)
 	if err != nil {
 		return err
 	}

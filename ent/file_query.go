@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"street/ent/account"
 	"street/ent/file"
 	"street/ent/predicate"
-	"street/ent/profile"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,7 +27,7 @@ type FileQuery struct {
 	fields     []string
 	predicates []predicate.File
 	// eager-loading edges.
-	withProfile *ProfileQuery
+	withAccount *AccountQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -65,9 +65,9 @@ func (fq *FileQuery) Order(o ...OrderFunc) *FileQuery {
 	return fq
 }
 
-// QueryProfile chains the current query on the "profile" edge.
-func (fq *FileQuery) QueryProfile() *ProfileQuery {
-	query := &ProfileQuery{config: fq.config}
+// QueryAccount chains the current query on the "account" edge.
+func (fq *FileQuery) QueryAccount() *AccountQuery {
+	query := &AccountQuery{config: fq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,8 +78,8 @@ func (fq *FileQuery) QueryProfile() *ProfileQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, selector),
-			sqlgraph.To(profile.Table, profile.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, file.ProfileTable, file.ProfileColumn),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.AccountTable, file.AccountColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -268,21 +268,21 @@ func (fq *FileQuery) Clone() *FileQuery {
 		offset:      fq.offset,
 		order:       append([]OrderFunc{}, fq.order...),
 		predicates:  append([]predicate.File{}, fq.predicates...),
-		withProfile: fq.withProfile.Clone(),
+		withAccount: fq.withAccount.Clone(),
 		// clone intermediate query.
 		sql:  fq.sql.Clone(),
 		path: fq.path,
 	}
 }
 
-// WithProfile tells the query-builder to eager-load the nodes that are connected to
-// the "profile" edge. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithProfile(opts ...func(*ProfileQuery)) *FileQuery {
-	query := &ProfileQuery{config: fq.config}
+// WithAccount tells the query-builder to eager-load the nodes that are connected to
+// the "account" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithAccount(opts ...func(*AccountQuery)) *FileQuery {
+	query := &AccountQuery{config: fq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	fq.withProfile = query
+	fq.withAccount = query
 	return fq
 }
 
@@ -353,10 +353,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		withFKs     = fq.withFKs
 		_spec       = fq.querySpec()
 		loadedTypes = [1]bool{
-			fq.withProfile != nil,
+			fq.withAccount != nil,
 		}
 	)
-	if fq.withProfile != nil {
+	if fq.withAccount != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -382,20 +382,20 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		return nodes, nil
 	}
 
-	if query := fq.withProfile; query != nil {
+	if query := fq.withAccount; query != nil {
 		ids := make([]uuid.UUID, 0, len(nodes))
 		nodeids := make(map[uuid.UUID][]*File)
 		for i := range nodes {
-			if nodes[i].profile_file == nil {
+			if nodes[i].account_file == nil {
 				continue
 			}
-			fk := *nodes[i].profile_file
+			fk := *nodes[i].account_file
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
 			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.Where(profile.IDIn(ids...))
+		query.Where(account.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -403,10 +403,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "profile_file" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "account_file" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Profile = n
+				nodes[i].Edges.Account = n
 			}
 		}
 	}

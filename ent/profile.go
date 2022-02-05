@@ -47,11 +47,9 @@ type ProfileEdges struct {
 	Episode []*Episode `json:"episode,omitempty"`
 	// Series holds the value of the series edge.
 	Series []*Series `json:"series,omitempty"`
-	// File holds the value of the file edge.
-	File []*File `json:"file,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // AccountOrErr returns the Account value or an error if the edge
@@ -84,15 +82,6 @@ func (e ProfileEdges) SeriesOrErr() ([]*Series, error) {
 		return e.Series, nil
 	}
 	return nil, &NotLoadedError{edge: "series"}
-}
-
-// FileOrErr returns the File value or an error if the edge
-// was not loaded in eager-loading.
-func (e ProfileEdges) FileOrErr() ([]*File, error) {
-	if e.loadedTypes[3] {
-		return e.File, nil
-	}
-	return nil, &NotLoadedError{edge: "file"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -199,11 +188,6 @@ func (pr *Profile) QueryEpisode() *EpisodeQuery {
 // QuerySeries queries the "series" edge of the Profile entity.
 func (pr *Profile) QuerySeries() *SeriesQuery {
 	return (&ProfileClient{config: pr.config}).QuerySeries(pr)
-}
-
-// QueryFile queries the "file" edge of the Profile entity.
-func (pr *Profile) QueryFile() *FileQuery {
-	return (&ProfileClient{config: pr.config}).QueryFile(pr)
 }
 
 // Update returns a builder for updating this Profile.

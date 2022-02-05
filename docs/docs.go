@@ -497,53 +497,7 @@ var doc = `{
                 }
             }
         },
-        "/file/single/{pid}": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "file"
-                ],
-                "summary": "create single file upload",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "profile id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "file meta",
-                        "name": "meta",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/file.Meta"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/file.ResponseFile"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/file/single/{pid}/{id}": {
+        "/file/single/{id}": {
             "put": {
                 "consumes": [
                     "application/octet-stream"
@@ -583,6 +537,52 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/file.ResponseFile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/single/{pid}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "create single file upload",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "profile id",
+                        "name": "pid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "file meta",
+                        "name": "meta",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/file.Meta"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/file.ResponseFile"
                         }
@@ -1068,6 +1068,13 @@ var doc = `{
         "ent.AccountEdges": {
             "type": "object",
             "properties": {
+                "file": {
+                    "description": "File holds the value of the file edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.File"
+                    }
+                },
                 "profile": {
                     "description": "Profile holds the value of the profile edge.",
                     "type": "array",
@@ -1182,9 +1189,9 @@ var doc = `{
         "ent.FileEdges": {
             "type": "object",
             "properties": {
-                "profile": {
-                    "description": "Profile holds the value of the profile edge.",
-                    "$ref": "#/definitions/ent.Profile"
+                "account": {
+                    "description": "Account holds the value of the account edge.",
+                    "$ref": "#/definitions/ent.Account"
                 }
             }
         },
@@ -1241,13 +1248,6 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.Episode"
-                    }
-                },
-                "file": {
-                    "description": "File holds the value of the file edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.File"
                     }
                 },
                 "series": {

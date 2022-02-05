@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"street/ent/account"
 	"street/ent/file"
-	"street/ent/profile"
 	"street/ent/schema"
 	"time"
 
@@ -147,15 +147,15 @@ func (fc *FileCreate) SetID(u uuid.UUID) *FileCreate {
 	return fc
 }
 
-// SetProfileID sets the "profile" edge to the Profile entity by ID.
-func (fc *FileCreate) SetProfileID(id uuid.UUID) *FileCreate {
-	fc.mutation.SetProfileID(id)
+// SetAccountID sets the "account" edge to the Account entity by ID.
+func (fc *FileCreate) SetAccountID(id uuid.UUID) *FileCreate {
+	fc.mutation.SetAccountID(id)
 	return fc
 }
 
-// SetProfile sets the "profile" edge to the Profile entity.
-func (fc *FileCreate) SetProfile(p *Profile) *FileCreate {
-	return fc.SetProfileID(p.ID)
+// SetAccount sets the "account" edge to the Account entity.
+func (fc *FileCreate) SetAccount(a *Account) *FileCreate {
+	return fc.SetAccountID(a.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -314,8 +314,8 @@ func (fc *FileCreate) check() error {
 			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "note": %w`, err)}
 		}
 	}
-	if _, ok := fc.mutation.ProfileID(); !ok {
-		return &ValidationError{Name: "profile", err: errors.New("ent: missing required edge \"profile\"")}
+	if _, ok := fc.mutation.AccountID(); !ok {
+		return &ValidationError{Name: "account", err: errors.New("ent: missing required edge \"account\"")}
 	}
 	return nil
 }
@@ -421,24 +421,24 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		})
 		_node.Note = value
 	}
-	if nodes := fc.mutation.ProfileIDs(); len(nodes) > 0 {
+	if nodes := fc.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.ProfileTable,
-			Columns: []string{file.ProfileColumn},
+			Table:   file.AccountTable,
+			Columns: []string{file.AccountColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: profile.FieldID,
+					Column: account.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.profile_file = &nodes[0]
+		_node.account_file = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

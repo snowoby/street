@@ -39,9 +39,11 @@ type AccountEdges struct {
 	Token []*Token `json:"token,omitempty"`
 	// Profile holds the value of the profile edge.
 	Profile []*Profile `json:"profile,omitempty"`
+	// File holds the value of the file edge.
+	File []*File `json:"file,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // TokenOrErr returns the Token value or an error if the edge
@@ -60,6 +62,15 @@ func (e AccountEdges) ProfileOrErr() ([]*Profile, error) {
 		return e.Profile, nil
 	}
 	return nil, &NotLoadedError{edge: "profile"}
+}
+
+// FileOrErr returns the File value or an error if the edge
+// was not loaded in eager-loading.
+func (e AccountEdges) FileOrErr() ([]*File, error) {
+	if e.loadedTypes[2] {
+		return e.File, nil
+	}
+	return nil, &NotLoadedError{edge: "file"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -139,6 +150,11 @@ func (a *Account) QueryToken() *TokenQuery {
 // QueryProfile queries the "profile" edge of the Account entity.
 func (a *Account) QueryProfile() *ProfileQuery {
 	return (&AccountClient{config: a.config}).QueryProfile(a)
+}
+
+// QueryFile queries the "file" edge of the Account entity.
+func (a *Account) QueryFile() *FileQuery {
+	return (&AccountClient{config: a.config}).QueryFile(a)
 }
 
 // Update returns a builder for updating this Account.

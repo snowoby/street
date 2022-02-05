@@ -131,6 +131,11 @@ definitions:
     type: object
   ent.AccountEdges:
     properties:
+      file:
+        description: File holds the value of the file edge.
+        items:
+          $ref: '#/definitions/ent.File'
+        type: array
       profile:
         description: Profile holds the value of the profile edge.
         items:
@@ -217,9 +222,9 @@ definitions:
     type: object
   ent.FileEdges:
     properties:
-      profile:
-        $ref: '#/definitions/ent.Profile'
-        description: Profile holds the value of the profile edge.
+      account:
+        $ref: '#/definitions/ent.Account'
+        description: Account holds the value of the account edge.
     type: object
   ent.Profile:
     properties:
@@ -262,11 +267,6 @@ definitions:
         description: Episode holds the value of the episode edge.
         items:
           $ref: '#/definitions/ent.Episode'
-        type: array
-      file:
-        description: File holds the value of the file edge.
-        items:
-          $ref: '#/definitions/ent.File'
         type: array
       series:
         description: Series holds the value of the series edge.
@@ -830,37 +830,7 @@ paths:
       summary: create multipart upload
       tags:
       - file
-  /file/single/{pid}:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: profile id
-        in: path
-        name: pid
-        required: true
-        type: string
-      - description: file meta
-        in: body
-        name: meta
-        required: true
-        schema:
-          $ref: '#/definitions/file.Meta'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/file.ResponseFile'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errs.HTTPError'
-      summary: create single file upload
-      tags:
-      - file
-  /file/single/{pid}/{id}:
+  /file/single/{id}:
     put:
       consumes:
       - application/octet-stream
@@ -893,6 +863,36 @@ paths:
           schema:
             $ref: '#/definitions/errs.HTTPError'
       summary: single file content upload
+      tags:
+      - file
+  /file/single/{pid}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: profile id
+        in: path
+        name: pid
+        required: true
+        type: string
+      - description: file meta
+        in: body
+        name: meta
+        required: true
+        schema:
+          $ref: '#/definitions/file.Meta'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/file.ResponseFile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errs.HTTPError'
+      summary: create single file upload
       tags:
       - file
   /profile:

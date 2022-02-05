@@ -32,7 +32,8 @@ func worker(controller controller.Controller) {
 
 	mux := asynq.NewServeMux()
 	//mux.HandleFunc(task.TypeWelcomeEmail, task.HandleWelcomeEmailTask)
-	mux.HandleFunc(value.StringImageCompress, controller.Task(HandleImageCompressTask))
+	mux.HandleFunc(value.StringTaskImageCompress, controller.Task(HandleImageCompressTask))
+	mux.HandleFunc(value.StringTaskAvatar, controller.Task(HandleAvatarCompressTask))
 
 	if err := srv.Run(mux); err != nil {
 		log.Fatal(err)

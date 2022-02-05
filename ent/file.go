@@ -4,8 +4,8 @@ package ent
 
 import (
 	"fmt"
+	"street/ent/account"
 	"street/ent/file"
-	"street/ent/profile"
 	"street/ent/schema"
 	"strings"
 	"time"
@@ -40,30 +40,30 @@ type File struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges        FileEdges `json:"edges"`
-	profile_file *uuid.UUID
+	account_file *uuid.UUID
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
 type FileEdges struct {
-	// Profile holds the value of the profile edge.
-	Profile *Profile `json:"profile,omitempty"`
+	// Account holds the value of the account edge.
+	Account *Account `json:"account,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// ProfileOrErr returns the Profile value or an error if the edge
+// AccountOrErr returns the Account value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) ProfileOrErr() (*Profile, error) {
+func (e FileEdges) AccountOrErr() (*Account, error) {
 	if e.loadedTypes[0] {
-		if e.Profile == nil {
-			// The edge profile was loaded in eager-loading,
+		if e.Account == nil {
+			// The edge account was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: profile.Label}
+			return nil, &NotFoundError{label: account.Label}
 		}
-		return e.Profile, nil
+		return e.Account, nil
 	}
-	return nil, &NotLoadedError{edge: "profile"}
+	return nil, &NotLoadedError{edge: "account"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -81,7 +81,7 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case file.FieldID:
 			values[i] = new(uuid.UUID)
-		case file.ForeignKeys[0]: // profile_file
+		case file.ForeignKeys[0]: // account_file
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
@@ -160,19 +160,19 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 			}
 		case file.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field profile_file", values[i])
+				return fmt.Errorf("unexpected type %T for field account_file", values[i])
 			} else if value.Valid {
-				f.profile_file = new(uuid.UUID)
-				*f.profile_file = *value.S.(*uuid.UUID)
+				f.account_file = new(uuid.UUID)
+				*f.account_file = *value.S.(*uuid.UUID)
 			}
 		}
 	}
 	return nil
 }
 
-// QueryProfile queries the "profile" edge of the File entity.
-func (f *File) QueryProfile() *ProfileQuery {
-	return (&FileClient{config: f.config}).QueryProfile(f)
+// QueryAccount queries the "account" edge of the File entity.
+func (f *File) QueryAccount() *AccountQuery {
+	return (&FileClient{config: f.config}).QueryAccount(f)
 }
 
 // Update returns a builder for updating this File.
