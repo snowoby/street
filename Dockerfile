@@ -2,7 +2,6 @@
 
 FROM golang:1.17.6-alpine3.15
 WORKDIR /app
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk --update add imagemagick imagemagick-dev build-base
 
 ENV GO111MODULE=on
