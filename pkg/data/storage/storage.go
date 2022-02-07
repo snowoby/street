@@ -29,7 +29,7 @@ type Storage struct {
 func NewDefaultConfig() *aws.Config {
 	return &aws.Config{
 		Credentials:      credentials.NewStaticCredentials(os.Getenv("s3_accesskey"), os.Getenv("s3_secretkey"), ""),
-		Endpoint:         aws.String(os.Getenv("storage_endpoint")),
+		Endpoint:         aws.String(os.Getenv("storage_access_endpoint")),
 		Region:           aws.String(os.Getenv("s3_region")),
 		DisableSSL:       aws.Bool(true),
 		S3ForcePathStyle: aws.Bool(true),
