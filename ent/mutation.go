@@ -825,6 +825,7 @@ type EpisodeMutation struct {
 	update_time    *time.Time
 	title          *string
 	content        *string
+	extra          *schema.EpisodeExtra
 	clearedFields  map[string]struct{}
 	profile        *uuid.UUID
 	clearedprofile bool
@@ -1100,6 +1101,42 @@ func (m *EpisodeMutation) ResetContent() {
 	m.content = nil
 }
 
+// SetExtra sets the "extra" field.
+func (m *EpisodeMutation) SetExtra(se schema.EpisodeExtra) {
+	m.extra = &se
+}
+
+// Extra returns the value of the "extra" field in the mutation.
+func (m *EpisodeMutation) Extra() (r schema.EpisodeExtra, exists bool) {
+	v := m.extra
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtra returns the old "extra" field's value of the Episode entity.
+// If the Episode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeMutation) OldExtra(ctx context.Context) (v schema.EpisodeExtra, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldExtra is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldExtra requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtra: %w", err)
+	}
+	return oldValue.Extra, nil
+}
+
+// ResetExtra resets all changes to the "extra" field.
+func (m *EpisodeMutation) ResetExtra() {
+	m.extra = nil
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by id.
 func (m *EpisodeMutation) SetProfileID(id uuid.UUID) {
 	m.profile = &id
@@ -1197,7 +1234,7 @@ func (m *EpisodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EpisodeMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.sid != nil {
 		fields = append(fields, episode.FieldSid)
 	}
@@ -1212,6 +1249,9 @@ func (m *EpisodeMutation) Fields() []string {
 	}
 	if m.content != nil {
 		fields = append(fields, episode.FieldContent)
+	}
+	if m.extra != nil {
+		fields = append(fields, episode.FieldExtra)
 	}
 	return fields
 }
@@ -1231,6 +1271,8 @@ func (m *EpisodeMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case episode.FieldContent:
 		return m.Content()
+	case episode.FieldExtra:
+		return m.Extra()
 	}
 	return nil, false
 }
@@ -1250,6 +1292,8 @@ func (m *EpisodeMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldTitle(ctx)
 	case episode.FieldContent:
 		return m.OldContent(ctx)
+	case episode.FieldExtra:
+		return m.OldExtra(ctx)
 	}
 	return nil, fmt.Errorf("unknown Episode field %s", name)
 }
@@ -1293,6 +1337,13 @@ func (m *EpisodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetContent(v)
+		return nil
+	case episode.FieldExtra:
+		v, ok := value.(schema.EpisodeExtra)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtra(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)
@@ -1360,6 +1411,9 @@ func (m *EpisodeMutation) ResetField(name string) error {
 		return nil
 	case episode.FieldContent:
 		m.ResetContent()
+		return nil
+	case episode.FieldExtra:
+		m.ResetExtra()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)

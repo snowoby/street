@@ -160,6 +160,9 @@ definitions:
         description: |-
           Edges holds the relations/edges for other nodes in the graph.
           The values are being populated by the EpisodeQuery when eager-loading is set.
+      extra:
+        $ref: '#/definitions/schema.EpisodeExtra'
+        description: Extra holds the value of the "extra" field.
       id:
         description: ID of the ent.
         type: string
@@ -353,6 +356,8 @@ definitions:
     properties:
       content:
         type: string
+      navPicture:
+        type: string
       profileID:
         type: string
       title:
@@ -371,6 +376,9 @@ definitions:
         type: string
       edges:
         type: object
+      extra:
+        $ref: '#/definitions/schema.EpisodeExtra'
+        description: Extra holds the value of the "extra" field.
       id:
         description: ID of the ent.
         type: string
@@ -483,6 +491,11 @@ definitions:
         type: string
       update_time:
         description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  schema.EpisodeExtra:
+    properties:
+      navPicture:
         type: string
     type: object
   series.ResponseSeries:

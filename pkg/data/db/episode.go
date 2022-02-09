@@ -6,6 +6,7 @@ import (
 	"street/ent"
 	ee "street/ent/episode"
 	ep "street/ent/profile"
+	"street/ent/schema"
 )
 
 type episode struct {
@@ -16,8 +17,10 @@ func (e *episode) All(ctx context.Context) ([]*ent.Episode, error) {
 	return e.client.Query().WithProfile().WithSeries().All(ctx)
 }
 
-func (e *episode) Create(ctx context.Context, title, cleanContent string, profileID uuid.UUID) (*ent.Episode, error) {
-	return e.client.Create().SetTitle(title).SetContent(cleanContent).SetProfileID(profileID).Save(ctx)
+func (e *episode) Create(ctx context.Context, title, cleanContent string, profileID uuid.UUID, navPicture string) (*ent.Episode, error) {
+	return e.client.Create().SetTitle(title).SetContent(cleanContent).SetProfileID(profileID).SetExtra(schema.EpisodeExtra{
+		NavPicture: navPicture,
+	}).Save(ctx)
 }
 
 func (e *episode) FindByIDWithProfile(ctx context.Context, episodeID uuid.UUID) (*ent.Episode, error) {

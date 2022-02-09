@@ -78,6 +78,20 @@ func (ec *EpisodeCreate) SetContent(s string) *EpisodeCreate {
 	return ec
 }
 
+// SetExtra sets the "extra" field.
+func (ec *EpisodeCreate) SetExtra(se schema.EpisodeExtra) *EpisodeCreate {
+	ec.mutation.SetExtra(se)
+	return ec
+}
+
+// SetNillableExtra sets the "extra" field if the given value is not nil.
+func (ec *EpisodeCreate) SetNillableExtra(se *schema.EpisodeExtra) *EpisodeCreate {
+	if se != nil {
+		ec.SetExtra(*se)
+	}
+	return ec
+}
+
 // SetID sets the "id" field.
 func (ec *EpisodeCreate) SetID(u uuid.UUID) *EpisodeCreate {
 	ec.mutation.SetID(u)
@@ -197,6 +211,10 @@ func (ec *EpisodeCreate) defaults() {
 		v := episode.DefaultUpdateTime()
 		ec.mutation.SetUpdateTime(v)
 	}
+	if _, ok := ec.mutation.Extra(); !ok {
+		v := episode.DefaultExtra()
+		ec.mutation.SetExtra(v)
+	}
 	if _, ok := ec.mutation.ID(); !ok {
 		v := episode.DefaultID()
 		ec.mutation.SetID(v)
@@ -229,6 +247,9 @@ func (ec *EpisodeCreate) check() error {
 		if err := episode.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "content": %w`, err)}
 		}
+	}
+	if _, ok := ec.mutation.Extra(); !ok {
+		return &ValidationError{Name: "extra", err: errors.New(`ent: missing required field "extra"`)}
 	}
 	if _, ok := ec.mutation.ProfileID(); !ok {
 		return &ValidationError{Name: "profile", err: errors.New("ent: missing required edge \"profile\"")}
@@ -304,6 +325,14 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 			Column: episode.FieldContent,
 		})
 		_node.Content = value
+	}
+	if value, ok := ec.mutation.Extra(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: episode.FieldExtra,
+		})
+		_node.Extra = value
 	}
 	if nodes := ec.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

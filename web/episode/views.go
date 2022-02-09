@@ -12,9 +12,10 @@ import (
 )
 
 type Episode struct {
-	ProfileID string `json:"profileID" binding:"uuid,required"`
-	Title     string `json:"title" binding:"required"`
-	Content   string `json:"content"`
+	ProfileID  string `json:"profileID" binding:"uuid,required"`
+	Title      string `json:"title" binding:"required"`
+	Content    string `json:"content"`
+	NavPicture string `json:"navPicture"`
 }
 
 type ResponseEpisode struct {
@@ -45,7 +46,7 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, errs.UnauthorizedError
 	}
 
-	ep, err := store.DB.Episode.Create(ctx, episode.Title, episode.Content, profileID)
+	ep, err := store.DB.Episode.Create(ctx, episode.Title, episode.Content, profileID, episode.NavPicture)
 	if err != nil {
 		return 0, nil, err
 	}

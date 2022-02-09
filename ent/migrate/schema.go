@@ -38,6 +38,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
+		{Name: "extra", Type: field.TypeBytes},
 		{Name: "profile_episode", Type: field.TypeUUID, Nullable: true},
 		{Name: "series_episode", Type: field.TypeUUID, Nullable: true},
 	}
@@ -49,13 +50,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "episodes_profiles_episode",
-				Columns:    []*schema.Column{EpisodesColumns[6]},
+				Columns:    []*schema.Column{EpisodesColumns[7]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "episodes_series_episode",
-				Columns:    []*schema.Column{EpisodesColumns[7]},
+				Columns:    []*schema.Column{EpisodesColumns[8]},
 				RefColumns: []*schema.Column{SeriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

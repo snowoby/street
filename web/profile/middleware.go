@@ -8,8 +8,11 @@ import (
 )
 
 func TryProfile(ctx *gin.Context) {
-	a := ctx.MustGet(value.StringAccount)
-
+	a, ok := ctx.Get(value.StringAccount)
+	if !ok {
+		ctx.Next()
+		return
+	}
 	account := a.(*ent.Account)
 
 	ps, err := account.QueryProfile().All(ctx)

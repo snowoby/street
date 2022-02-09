@@ -130,6 +130,13 @@ func Content(v string) predicate.Episode {
 	})
 }
 
+// Extra applies equality check predicate on the "extra" field. It's identical to ExtraEQ.
+func Extra(v schema.EpisodeExtra) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldExtra), v))
+	})
+}
+
 // SidEQ applies the EQ predicate on the "sid" field.
 func SidEQ(v schema.ID) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
@@ -577,6 +584,82 @@ func ContentEqualFold(v string) predicate.Episode {
 func ContentContainsFold(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldContent), v))
+	})
+}
+
+// ExtraEQ applies the EQ predicate on the "extra" field.
+func ExtraEQ(v schema.EpisodeExtra) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldExtra), v))
+	})
+}
+
+// ExtraNEQ applies the NEQ predicate on the "extra" field.
+func ExtraNEQ(v schema.EpisodeExtra) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldExtra), v))
+	})
+}
+
+// ExtraIn applies the In predicate on the "extra" field.
+func ExtraIn(vs ...schema.EpisodeExtra) predicate.Episode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Episode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldExtra), v...))
+	})
+}
+
+// ExtraNotIn applies the NotIn predicate on the "extra" field.
+func ExtraNotIn(vs ...schema.EpisodeExtra) predicate.Episode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Episode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldExtra), v...))
+	})
+}
+
+// ExtraGT applies the GT predicate on the "extra" field.
+func ExtraGT(v schema.EpisodeExtra) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldExtra), v))
+	})
+}
+
+// ExtraGTE applies the GTE predicate on the "extra" field.
+func ExtraGTE(v schema.EpisodeExtra) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldExtra), v))
+	})
+}
+
+// ExtraLT applies the LT predicate on the "extra" field.
+func ExtraLT(v schema.EpisodeExtra) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldExtra), v))
+	})
+}
+
+// ExtraLTE applies the LTE predicate on the "extra" field.
+func ExtraLTE(v schema.EpisodeExtra) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldExtra), v))
 	})
 }
 

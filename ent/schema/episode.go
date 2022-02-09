@@ -17,6 +17,7 @@ func (Episode) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").MaxLen(64).NotEmpty(),
 		field.Text("content").NotEmpty(),
+		field.Bytes("extra").GoType(EpisodeExtra{}).DefaultFunc(NewEpisodeExtra),
 	}
 }
 

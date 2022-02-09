@@ -1102,6 +1102,10 @@ var doc = `{
                     "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EpisodeQuery when eager-loading is set.",
                     "$ref": "#/definitions/ent.EpisodeEdges"
                 },
+                "extra": {
+                    "description": "Extra holds the value of the \"extra\" field.",
+                    "$ref": "#/definitions/schema.EpisodeExtra"
+                },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "string"
@@ -1364,6 +1368,9 @@ var doc = `{
                 "content": {
                     "type": "string"
                 },
+                "navPicture": {
+                    "type": "string"
+                },
                 "profileID": {
                     "type": "string"
                 },
@@ -1385,6 +1392,10 @@ var doc = `{
                 },
                 "edges": {
                     "type": "object"
+                },
+                "extra": {
+                    "description": "Extra holds the value of the \"extra\" field.",
+                    "$ref": "#/definitions/schema.EpisodeExtra"
                 },
                 "id": {
                     "description": "ID of the ent.",
@@ -1543,6 +1554,14 @@ var doc = `{
                 },
                 "update_time": {
                     "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.EpisodeExtra": {
+            "type": "object",
+            "properties": {
+                "navPicture": {
                     "type": "string"
                 }
             }

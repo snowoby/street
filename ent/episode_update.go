@@ -57,6 +57,20 @@ func (eu *EpisodeUpdate) SetContent(s string) *EpisodeUpdate {
 	return eu
 }
 
+// SetExtra sets the "extra" field.
+func (eu *EpisodeUpdate) SetExtra(se schema.EpisodeExtra) *EpisodeUpdate {
+	eu.mutation.SetExtra(se)
+	return eu
+}
+
+// SetNillableExtra sets the "extra" field if the given value is not nil.
+func (eu *EpisodeUpdate) SetNillableExtra(se *schema.EpisodeExtra) *EpisodeUpdate {
+	if se != nil {
+		eu.SetExtra(*se)
+	}
+	return eu
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by ID.
 func (eu *EpisodeUpdate) SetProfileID(id uuid.UUID) *EpisodeUpdate {
 	eu.mutation.SetProfileID(id)
@@ -237,6 +251,13 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: episode.FieldContent,
 		})
 	}
+	if value, ok := eu.mutation.Extra(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: episode.FieldExtra,
+		})
+	}
 	if eu.mutation.ProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -349,6 +370,20 @@ func (euo *EpisodeUpdateOne) SetTitle(s string) *EpisodeUpdateOne {
 // SetContent sets the "content" field.
 func (euo *EpisodeUpdateOne) SetContent(s string) *EpisodeUpdateOne {
 	euo.mutation.SetContent(s)
+	return euo
+}
+
+// SetExtra sets the "extra" field.
+func (euo *EpisodeUpdateOne) SetExtra(se schema.EpisodeExtra) *EpisodeUpdateOne {
+	euo.mutation.SetExtra(se)
+	return euo
+}
+
+// SetNillableExtra sets the "extra" field if the given value is not nil.
+func (euo *EpisodeUpdateOne) SetNillableExtra(se *schema.EpisodeExtra) *EpisodeUpdateOne {
+	if se != nil {
+		euo.SetExtra(*se)
+	}
 	return euo
 }
 
@@ -554,6 +589,13 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: episode.FieldContent,
+		})
+	}
+	if value, ok := euo.mutation.Extra(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: episode.FieldExtra,
 		})
 	}
 	if euo.mutation.ProfileCleared() {

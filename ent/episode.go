@@ -30,6 +30,8 @@ type Episode struct {
 	Title string `json:"title,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
+	// Extra holds the value of the "extra" field.
+	Extra schema.EpisodeExtra `json:"extra,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EpisodeQuery when eager-loading is set.
 	Edges           EpisodeEdges `json:"edges"`
@@ -81,6 +83,8 @@ func (*Episode) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case episode.FieldExtra:
+			values[i] = new(schema.EpisodeExtra)
 		case episode.FieldSid:
 			values[i] = new(schema.ID)
 		case episode.FieldTitle, episode.FieldContent:
@@ -144,6 +148,12 @@ func (e *Episode) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				e.Content = value.String
 			}
+		case episode.FieldExtra:
+			if value, ok := values[i].(*schema.EpisodeExtra); !ok {
+				return fmt.Errorf("unexpected type %T for field extra", values[i])
+			} else if value != nil {
+				e.Extra = *value
+			}
 		case episode.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field profile_episode", values[i])
@@ -206,6 +216,8 @@ func (e *Episode) String() string {
 	builder.WriteString(e.Title)
 	builder.WriteString(", content=")
 	builder.WriteString(e.Content)
+	builder.WriteString(", extra=")
+	builder.WriteString(fmt.Sprintf("%v", e.Extra))
 	builder.WriteByte(')')
 	return builder.String()
 }
