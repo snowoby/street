@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"street/ent"
+	"street/ent/schema"
 	"street/errs"
 	"street/pkg/controller"
 	"street/pkg/data"
@@ -20,6 +21,8 @@ type Episode struct {
 
 type ResponseEpisode struct {
 	*ent.Episode
+	*schema.EpisodeExtra
+	Profile *ent.Profile `json:"profile"`
 	value.NoEdges
 }
 
@@ -51,7 +54,9 @@ func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) 
 		return 0, nil, err
 	}
 	return http.StatusCreated, &ResponseEpisode{
-		Episode: ep,
+		Episode:      ep,
+		Profile:      ep.Edges.Profile,
+		EpisodeExtra: &ep.Extra,
 	}, nil
 
 }
@@ -82,7 +87,9 @@ func update(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 
 	return http.StatusOK, &ResponseEpisode{
-		Episode: ep,
+		Episode:      ep,
+		Profile:      ep.Edges.Profile,
+		EpisodeExtra: &ep.Extra,
 	}, nil
 
 }
@@ -106,7 +113,9 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 
 	return http.StatusOK, &ResponseEpisode{
-		Episode: ep,
+		Episode:      ep,
+		Profile:      ep.Edges.Profile,
+		EpisodeExtra: &ep.Extra,
 	}, nil
 
 }
@@ -122,7 +131,11 @@ func getAll(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	eps, err := store.DB.Episode.All(ctx)
 	reps := make([]*ResponseEpisode, len(eps))
 	for i, ep := range eps {
-		reps[i] = &ResponseEpisode{Episode: ep}
+		reps[i] = &ResponseEpisode{
+			Episode:      ep,
+			Profile:      ep.Edges.Profile,
+			EpisodeExtra: &ep.Extra,
+		}
 	}
 	if err != nil {
 		return 0, nil, err

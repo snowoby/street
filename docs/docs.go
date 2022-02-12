@@ -1401,6 +1401,12 @@ var doc = `{
                     "description": "ID of the ent.",
                     "type": "string"
                 },
+                "navPicture": {
+                    "type": "string"
+                },
+                "profile": {
+                    "$ref": "#/definitions/ent.Profile"
+                },
                 "sid": {
                     "description": "Sid holds the value of the \"sid\" field.",
                     "type": "string"
