@@ -709,6 +709,43 @@ var doc = `{
                 }
             }
         },
+        "/series/": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "series"
+                ],
+                "summary": "get all series",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "series id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/series.ResponseSeries"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errs.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/series/{id}": {
             "get": {
                 "produces": [

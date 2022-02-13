@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"street/ent"
+	ea "street/ent/account"
 	ee "street/ent/episode"
 	ep "street/ent/profile"
 	es "street/ent/series"
@@ -20,6 +21,11 @@ func (s *series) Create(ctx context.Context, title, cleanContent string, profile
 func (s *series) FindByCallSign(ctx context.Context, callSign string) (*ent.Series, error) {
 	return s.client.Query().Where(es.Call(callSign)).WithProfile().Only(ctx)
 }
+
+func (s *series) FindSeriesByAccount(ctx context.Context, accountID uuid.UUID) ([]*ent.Series, error) {
+	return s.client.Query().Where(es.HasProfileWith(ep.HasAccountWith(ea.ID(accountID)))).All(ctx)
+}
+
 func (s *series) FindByIDWithProfile(ctx context.Context, id uuid.UUID) (*ent.Series, error) {
 	return s.client.Query().Where(es.ID(id)).WithProfile().Only(ctx)
 }

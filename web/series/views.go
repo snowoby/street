@@ -16,6 +16,11 @@ type TitleContent struct {
 	Content string `json:"content"`
 }
 
+type Series struct {
+	TitleContent
+	ProfileID string `json:"profileID" binding:"required,uuid"`
+}
+
 type ResponseSeries struct {
 	*ent.Series
 	value.NoEdges
@@ -33,13 +38,13 @@ type ResponseSeries struct {
 // @Router /series/{pid} [post]
 func create(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
 
-	var series TitleContent
+	var series Series
 	err := ctx.ShouldBindJSON(&series)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	s, err := store.DB.Series.Create(ctx, series.Title, series.Content, identity.Account().ID)
+	s, err := store.DB.Series.Create(ctx, series.Title, series.Content, uuid.MustParse(series.ProfileID))
 	if err != nil {
 		return 0, nil, err
 	}
@@ -92,6 +97,31 @@ func get(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	}
 
 	return http.StatusOK, &ResponseSeries{Series: s}, nil
+
+}
+
+// get godoc
+// @Summary get all series
+// @Tags series
+// @Produce json
+// @Param id path string true "series id"
+// @Success 200 {object} []ResponseSeries
+// @Failure 400 {object} errs.HTTPError
+// @Router /series/ [get]
+func getAll(ctx *gin.Context, store *data.Store, identity *controller.Identity) (int, interface{}, error) {
+
+	ss, err := store.DB.Series.FindSeriesByAccount(ctx, identity.Account().ID)
+	if err != nil {
+		return 0, nil, err
+	}
+	reps := make([]*ResponseSeries, len(ss))
+
+	for i, s := range ss {
+		reps[i] = &ResponseSeries{
+			Series: s,
+		}
+	}
+	return http.StatusOK, &reps, nil
 
 }
 

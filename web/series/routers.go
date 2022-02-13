@@ -3,13 +3,14 @@ package series
 import (
 	"github.com/gin-gonic/gin"
 	"street/pkg/controller"
+	"street/web/account"
 	"street/web/middleware"
 	"street/web/profile"
 )
 
 func Routers(group *gin.RouterGroup, ctrl controller.Controller) {
+	group.GET("/", account.MustLogin, ctrl.General(getAll))
 	group.GET("/:id", middleware.MustUriUUID, ctrl.Bare(get))
-
 	group.Use(profile.TryProfile)
 	group.POST("/", ctrl.General(create))
 	group.Use(middleware.MustUriUUID)
