@@ -1,4 +1,4 @@
-package main
+package factory
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"golang.org/x/net/context"
 	"gopkg.in/gographics/imagick.v3/imagick"
 	"street/ent"
-	"street/pkg/data"
 )
 
 func imageWebpCompress(b []byte, quality uint) ([]byte, error) {
@@ -63,12 +62,12 @@ func imageCrop(b []byte, max uint) ([]byte, error) {
 
 }
 
-func HandleImageCompressTask(_ context.Context, t *asynq.Task, store *data.Store) error {
+func (s *service) HandleImageCompressTask(_ context.Context, t *asynq.Task) error {
 	var p ent.File
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
-	b, err := store.Storage.Get(p.Path, p.ID.String(), "original")
+	b, err := s.storageService.Get(p.Path, p.ID.String(), "original")
 	if err != nil {
 		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
 	}
@@ -77,19 +76,19 @@ func HandleImageCompressTask(_ context.Context, t *asynq.Task, store *data.Store
 		return fmt.Errorf("compress failed: %v: %w", err, asynq.SkipRetry)
 	}
 	newFilename := p.Filename + ".webp"
-	_, err = store.Storage.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
+	_, err = s.storageService.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
 	if err != nil {
 		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
 	}
 	return nil
 
 }
-func HandleAvatarCompressTask(_ context.Context, t *asynq.Task, store *data.Store) error {
+func (s *service) HandleAvatarCompressTask(_ context.Context, t *asynq.Task) error {
 	var p ent.File
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
-	b, err := store.Storage.Get(p.Path, p.ID.String(), "original")
+	b, err := s.storageService.Get(p.Path, p.ID.String(), "original")
 	if err != nil {
 		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
 	}
@@ -105,12 +104,12 @@ func HandleAvatarCompressTask(_ context.Context, t *asynq.Task, store *data.Stor
 	}
 
 	newFilename := p.Filename + ".webp"
-	_, err = store.Storage.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
+	_, err = s.storageService.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
 	if err != nil {
 		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	err = store.Storage.Delete(p.Path, p.ID, "original")
+	err = s.storageService.Delete(p.Path, p.ID, "original")
 	if err != nil {
 		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
 	}

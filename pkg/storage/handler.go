@@ -1,46 +1,64 @@
-package file
+package storage
 
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
+	_ "github.com/lib/pq"
 	"io/ioutil"
 	"net/http"
 	"street/ent"
 	"street/errs"
-	"street/pkg/controller"
-	"street/pkg/data"
-	"street/pkg/data/value"
+	"street/pkg/auth"
+	"street/pkg/composer"
+	"street/pkg/d"
+	"street/pkg/operator"
 	"strings"
 )
 
-type Meta struct {
-	Filename string `json:"filename"`
-	Mime     string `json:"mime" binding:"required"`
-	Size     int    `json:"size" binding:"required"`
-	Category string `json:"category" binding:"required"`
+type service struct {
+	db             *ent.Client
+	auth           auth.Service
+	redisService   *redisService
+	router         *gin.RouterGroup
+	tasker         *taskService
+	storageService *storageService
 }
 
-type Part struct {
-	Part int `uri:"part" binding:"required"`
+func (s *service) registerRouters() {
+	single := s.router.Group("single")
+	single.POST("", composer.Authed(s.create))
+	single.PUT("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.put))
+
+	large := s.router.Group("large")
+	large.POST("/", composer.Authed(s.createMulti))
+	large.PUT("/:id/:part_id", composer.AuthedIDCheck(s.owned), composer.ID(s.putMulti))
+	large.POST("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.doneMulti))
+
 }
 
-type CreateResponse struct {
-	UploadCredential CreateOutput `json:"uploadCredential"`
-	File             ent.File     `json:"file"`
-	Path             string       `json:"path"`
-}
+func New(db *ent.Client,
+	auth auth.Service,
+	redisClient *redis.Client,
+	router *gin.RouterGroup,
+	asynqClient *asynq.Client,
+	s3Config *aws.Config) *service {
+	s := &service{
+		db:             db,
+		auth:           auth,
+		router:         router,
+		redisService:   newRedis(redisClient),
+		tasker:         newTasker(asynqClient),
+		storageService: newS3(s3Config),
+	}
 
-type CreateOutput struct {
-	Key      string `json:"key" binding:"required"`
-	UploadId string `json:"upload_id" binding:"required"`
-}
-
-type ResponseFile struct {
-	*ent.File
-	value.NoEdges
+	s.registerRouters()
+	return s
 }
 
 // createSingle godoc
@@ -49,23 +67,29 @@ type ResponseFile struct {
 // @Accept json
 // @Produce json
 // @Param pid path string true "profile id"
-// @Param meta body Meta true "file meta"
-// @Success 201 {object} ResponseFile
+// @Param meta body d.FileForm true "file meta"
+// @Success 201 {object} d.File
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/single/{pid} [post]
-func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
-	var meta Meta
+func (s *service) create(ctx *gin.Context, operator *operator.Identity) (int, interface{}, error) {
+	var meta d.FileForm
 	err := ctx.ShouldBindJSON(&meta)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Account().ID)
+	file, err := s.db.File.Create().
+		SetFilename(meta.Filename).
+		SetMime(meta.Mime).
+		SetSize(meta.Size).
+		SetAccountID(operator.Account().ID).
+		SetPath(meta.Category).
+		Save(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	return http.StatusCreated, &ResponseFile{File: file}, nil
+	return http.StatusCreated, d.FileFromEnt(file), nil
 }
 
 // putSingle godoc
@@ -76,19 +100,14 @@ func createSingle(ctx *gin.Context, store *data.Store, visitor *controller.Ident
 // @Param pid path string true "profile id"
 // @Param id path string true "file id"
 // @Param data body array true "file content"
-// @Success 200 {object} ResponseFile
+// @Success 200 {object} d.File
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/single/{id} [put]
-func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
-	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
+func (s *service) put(ctx *gin.Context, id string) (int, interface{}, error) {
 
-	file, err := store.DB.File.GetWithAccount(ctx, id)
+	file, err := s.db.File.Get(ctx, uuid.MustParse(id))
 	if err != nil {
 		return 0, nil, err
-	}
-
-	if file.Edges.Account.ID != visitor.Account().ID {
-		return 0, nil, errs.NotFoundError
 	}
 
 	if file.Status != "created" {
@@ -97,21 +116,21 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 
 	raw, _ := ioutil.ReadAll(ctx.Request.Body)
 	reader := bytes.NewReader(raw)
-	_, err = store.Storage.PutSingle(reader, file.Path, id, file.Filename, "original", file.Mime)
+	_, err = s.storageService.PutSingle(reader, file.Path, uuid.MustParse(id), file.Filename, "original", file.Mime)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	file, err = store.DB.File.UpdateStatus(ctx, id, "uploaded")
+	file, err = s.db.File.UpdateOneID(uuid.MustParse(id)).SetStatus("uploaded").Save(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
 
 	if strings.HasPrefix(file.Mime, "image/") {
 		if file.Path == "avatar" {
-			_, err = store.Task.AvatarCompress(file)
+			_, err = s.tasker.avatarCompress(file)
 		} else {
-			_, err = store.Task.ImageCompress(file)
+			_, err = s.tasker.imageCompress(file)
 		}
 
 	}
@@ -119,8 +138,13 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 		return 0, nil, err
 	}
 
-	return http.StatusOK, &ResponseFile{File: file}, nil
+	return http.StatusOK, d.FileFromEnt(file), nil
 
+}
+
+type CreateOutput struct {
+	Key      string `json:"key" binding:"required"`
+	UploadId string `json:"upload_id" binding:"required"`
 }
 
 // createMulti godoc
@@ -129,36 +153,37 @@ func putSingle(ctx *gin.Context, store *data.Store, visitor *controller.Identity
 // @Accept json
 // @Produce json
 // @Param pid path string true "profile id"
-// @Param meta body Meta true "file meta"
-// @Success 200 {object} ResponseFile
+// @Param meta body d.FileForm true "file meta"
+// @Success 200 {object} d.File
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/large/{pid} [post]
-func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identity) (int, interface{}, error) {
-	var meta Meta
+func (s *service) createMulti(ctx *gin.Context, operator *operator.Identity) (int, interface{}, error) {
+	var meta d.FileForm
 	err := ctx.ShouldBindJSON(&meta)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	file, err := store.DB.File.Create(ctx, meta.Filename, meta.Category, meta.Mime, meta.Size, visitor.Account().ID)
+	file, err := s.db.File.Create().SetFilename(meta.Filename).SetMime(meta.Mime).SetSize(meta.Size).SetAccountID(operator.Account().ID).SetPath(meta.Category).Save(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	createOutput, err := store.Storage.CreateMultiPart(meta.Category, file.ID, file.Filename, meta.Mime)
+	createOutput, err := s.storageService.CreateMultiPart(meta.Category, file.ID, file.Filename, meta.Mime)
 	if err != nil {
 		return 0, nil, err
 	}
+
 	output := CreateOutput{
 		Key:      *createOutput.Key,
 		UploadId: *createOutput.UploadId,
 	}
-	err = store.MultiPartRedis.Create(ctx, file.ID.String(), output)
+	err = s.redisService.Create(ctx, file.ID.String(), output)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	return http.StatusCreated, &ResponseFile{File: file}, nil
+	return http.StatusCreated, d.FileFromEnt(file), nil
 }
 
 // uploadMulti godoc
@@ -173,11 +198,10 @@ func createMulti(ctx *gin.Context, store *data.Store, visitor *controller.Identi
 // @Success 201
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/large/{pid}/{id}/{part_id} [put]
-func uploadMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
+func (s *service) putMulti(ctx *gin.Context, id string) (int, interface{}, error) {
 
 	type FilePartUpload struct {
-		UploadID string `uri:"id" binding:"required"`
-		PartID   int    `uri:"part_id" binding:"required"`
+		PartID int `uri:"part_id" binding:"required"`
 	}
 
 	var ids FilePartUpload
@@ -186,7 +210,7 @@ func uploadMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) 
 		return 0, nil, err
 	}
 
-	createObj, err := store.MultiPartRedis.Get(ctx, ids.UploadID)
+	createObj, err := s.redisService.Get(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -199,12 +223,12 @@ func uploadMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) 
 
 	raw, _ := ioutil.ReadAll(ctx.Request.Body)
 	reader := bytes.NewReader(raw)
-	part, err := store.Storage.PutMultiPart(reader, createOutput.Key, createOutput.UploadId, ids.PartID)
+	part, err := s.storageService.PutMultiPart(reader, createOutput.Key, createOutput.UploadId, ids.PartID)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	err = store.MultiPartRedis.Part(ctx, ids.UploadID, part)
+	err = s.redisService.Part(ctx, id, part)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -224,13 +248,12 @@ type Finish struct {
 // @Produce json
 // @Param pid path string true "profile id"
 // @Param id path string true "file id"
-// @Success 201 {object} ResponseFile
+// @Success 201 {object} d.File
 // @Failure 400 {object} errs.HTTPError
 // @Router /file/large/{pid}/{id} [post]
-func doneMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
-	id := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
+func (s *service) doneMulti(ctx *gin.Context, id string) (int, interface{}, error) {
 	var finish Finish
-	partStringArray, err := store.MultiPartRedis.GetParts(ctx, id.String())
+	partStringArray, err := s.redisService.GetParts(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -258,45 +281,45 @@ func doneMulti(ctx *gin.Context, store *data.Store) (int, interface{}, error) {
 	finish.Parts = parts[1 : max+1]
 
 	var createOutput CreateOutput
-	createObj, err := store.MultiPartRedis.Get(ctx, id.String())
+	createObj, err := s.redisService.Get(ctx, id)
 	err = json.Unmarshal([]byte(createObj), &createOutput)
 	if err != nil {
 		return 0, nil, err
 	}
 	finish.CreateOutput = createOutput
 
-	_, err = store.Storage.CompleteMultiPart(finish.CreateOutput.Key, finish.CreateOutput.UploadId, finish.Parts)
+	_, err = s.storageService.CompleteMultiPart(finish.CreateOutput.Key, finish.CreateOutput.UploadId, finish.Parts)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	file, err := store.DB.File.UpdateStatus(ctx, id, "uploaded")
+	file, err := s.db.File.UpdateOneID(uuid.MustParse(id)).SetStatus("uploaded").Save(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	err = store.MultiPartRedis.Finish(ctx, id.String())
+	err = s.redisService.Finish(ctx, id)
 	if err != nil {
 		return 0, nil, err
 	}
 
 	if strings.HasPrefix(file.Mime, "image/") {
-		_, err = store.Task.ImageCompress(file)
+		_, err = s.tasker.imageCompress(file)
 		if err != nil {
 			return 0, nil, err
 		}
 	}
 
-	return http.StatusCreated, &ResponseFile{File: file}, nil
+	return http.StatusCreated, d.FileFromEnt(file), nil
 }
 
-func owned(ctx *gin.Context, store *data.Store, operator *controller.Identity) error {
-	objectID := ctx.MustGet(value.StringObjectUUID).(uuid.UUID)
-	ok, err := store.DB.File.IsOwner(ctx, operator.Account().ID, objectID)
+func (s *service) owned(ctx *gin.Context, operator *operator.Identity, objID string) error {
+	file, err := s.db.File.Get(ctx, uuid.MustParse(objID))
 	if err != nil {
 		return err
 	}
-	if !ok {
+
+	if file.Edges.Account.ID != operator.Account().ID {
 		return errs.NotBelongsToOperator
 	}
 	return nil

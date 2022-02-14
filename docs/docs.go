@@ -37,7 +37,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/account.Identity"
+                            "$ref": "#/definitions/d.Identity"
                         }
                     },
                     "400": {
@@ -68,7 +68,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/account.EmailPassword"
+                            "$ref": "#/definitions/d.AccountForm"
                         }
                     }
                 ],
@@ -76,7 +76,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/account.ResponseToken"
+                            "$ref": "#/definitions/d.Token"
                         }
                     },
                     "400": {
@@ -102,7 +102,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/account.ResponseToken"
+                            "$ref": "#/definitions/d.Token"
                         }
                     },
                     "400": {
@@ -133,7 +133,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/account.EmailPassword"
+                            "$ref": "#/definitions/d.AccountForm"
                         }
                     }
                 ],
@@ -141,7 +141,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/account.PublicResponse"
+                            "$ref": "#/definitions/d.Account"
                         }
                     },
                     "400": {
@@ -168,7 +168,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/episode.ResponseEpisode"
+                                "$ref": "#/definitions/d.Episode"
                             }
                         }
                     },
@@ -205,7 +205,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/episode.Episode"
+                            "$ref": "#/definitions/d.EpisodeForm"
                         }
                     }
                 ],
@@ -213,7 +213,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/episode.ResponseEpisode"
+                            "$ref": "#/definitions/d.Episode"
                         }
                     },
                     "400": {
@@ -250,7 +250,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/episode.ResponseEpisode"
+                            "$ref": "#/definitions/d.Episode"
                         }
                     },
                     "400": {
@@ -293,7 +293,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/episode.Episode"
+                            "$ref": "#/definitions/d.EpisodeForm"
                         }
                     }
                 ],
@@ -301,7 +301,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/episode.ResponseEpisode"
+                            "$ref": "#/definitions/d.Episode"
                         }
                     },
                     "400": {
@@ -375,7 +375,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/file.Meta"
+                            "$ref": "#/definitions/d.FileForm"
                         }
                     }
                 ],
@@ -383,7 +383,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/file.ResponseFile"
+                            "$ref": "#/definitions/d.File"
                         }
                     },
                     "400": {
@@ -424,7 +424,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/file.ResponseFile"
+                            "$ref": "#/definitions/d.File"
                         }
                     },
                     "400": {
@@ -534,7 +534,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/file.ResponseFile"
+                            "$ref": "#/definitions/d.File"
                         }
                     },
                     "400": {
@@ -572,7 +572,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/file.Meta"
+                            "$ref": "#/definitions/d.FileForm"
                         }
                     }
                 ],
@@ -580,7 +580,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/file.ResponseFile"
+                            "$ref": "#/definitions/d.File"
                         }
                     },
                     "400": {
@@ -611,7 +611,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/profile.Profile"
+                            "$ref": "#/definitions/d.ProfileForm"
                         }
                     }
                 ],
@@ -619,7 +619,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/profile.ResponseProfile"
+                            "$ref": "#/definitions/d.Profile"
                         }
                     },
                     "400": {
@@ -653,7 +653,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/profile.ResponseProfile"
+                            "$ref": "#/definitions/d.Profile"
                         }
                     },
                     "400": {
@@ -689,7 +689,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/profile.Profile"
+                            "$ref": "#/definitions/d.ProfileForm"
                         }
                     }
                 ],
@@ -697,213 +697,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/profile.ResponseProfile"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/series/": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "series"
-                ],
-                "summary": "get all series",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "series id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/series.ResponseSeries"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/series/{id}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "series"
-                ],
-                "summary": "get a series",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "series id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/series.ResponseSeries"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "series"
-                ],
-                "summary": "del a series",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "profile id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "series id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/series/{pid}": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "series"
-                ],
-                "summary": "create a series",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "profile id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "series info",
-                        "name": "series",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/series.TitleContent"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/series.ResponseSeries"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errs.HTTPError"
-                        }
-                    }
-                }
-            }
-        },
-        "/series/{pid}/{id}": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "series"
-                ],
-                "summary": "update a series",
-                "parameters": [
-                    {
-                        "description": "series info",
-                        "name": "series",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/series.TitleContent"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "profile id",
-                        "name": "pid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "series id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/series.ResponseSeries"
+                            "$ref": "#/definitions/d.Profile"
                         }
                     },
                     "400": {
@@ -917,7 +711,21 @@ var doc = `{
         }
     },
     "definitions": {
-        "account.EmailPassword": {
+        "d.Account": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "d.AccountForm": {
             "type": "object",
             "required": [
                 "email",
@@ -932,80 +740,15 @@ var doc = `{
                 }
             }
         },
-        "account.Identity": {
+        "d.Episode": {
             "type": "object",
             "properties": {
-                "account": {
-                    "$ref": "#/definitions/account.ResponseAccount"
-                },
-                "profiles": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/account.ResponseProfile"
-                    }
-                }
-            }
-        },
-        "account.PublicResponse": {
-            "type": "object",
-            "required": [
-                "email",
-                "id",
-                "password"
-            ],
-            "properties": {
-                "email": {
+                "content": {
+                    "description": "Content holds the value of the \"content\" field.",
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "object"
-                }
-            }
-        },
-        "account.ResponseAccount": {
-            "type": "object",
-            "properties": {
-                "create_time": {
-                    "description": "CreateTime holds the value of the \"create_time\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "type": "object"
-                },
-                "email": {
-                    "description": "Email holds the value of the \"email\" field.",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "sid": {
-                    "description": "Sid holds the value of the \"sid\" field.",
-                    "type": "string"
-                },
-                "update_time": {
-                    "description": "UpdateTime holds the value of the \"update_time\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "account.ResponseProfile": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "description": "Avatar holds the value of the \"avatar\" field.",
-                    "type": "string"
-                },
-                "call": {
-                    "description": "Call holds the value of the \"call\" field.",
-                    "type": "string"
-                },
-                "category": {
-                    "description": "Category holds the value of the \"category\" field.",
+                "cover": {
+                    "description": "Cover holds the value of the \"cover\" field.",
                     "type": "string"
                 },
                 "create_time": {
@@ -1013,11 +756,15 @@ var doc = `{
                     "type": "string"
                 },
                 "edges": {
-                    "type": "object"
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EpisodeQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.EpisodeEdges"
                 },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "string"
+                },
+                "profile": {
+                    "$ref": "#/definitions/d.Profile"
                 },
                 "sid": {
                     "description": "Sid holds the value of the \"sid\" field.",
@@ -1033,34 +780,68 @@ var doc = `{
                 }
             }
         },
-        "account.ResponseToken": {
+        "d.EpisodeForm": {
             "type": "object",
+            "required": [
+                "profileID",
+                "title"
+            ],
             "properties": {
-                "body": {
-                    "description": "Body holds the value of the \"body\" field.",
+                "content": {
                     "type": "string"
                 },
+                "cover": {
+                    "type": "string"
+                },
+                "profileID": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "d.File": {
+            "type": "object",
+            "properties": {
                 "create_time": {
                     "description": "CreateTime holds the value of the \"create_time\" field.",
                     "type": "string"
                 },
                 "edges": {
-                    "type": "object"
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the FileQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.FileEdges"
                 },
-                "expire": {
-                    "description": "Expire holds the value of the \"expire\" field.",
+                "filename": {
+                    "description": "Filename holds the value of the \"filename\" field.",
                     "type": "string"
                 },
                 "id": {
                     "description": "ID of the ent.",
                     "type": "string"
                 },
+                "mime": {
+                    "description": "Mime holds the value of the \"mime\" field.",
+                    "type": "string"
+                },
+                "note": {
+                    "description": "Note holds the value of the \"note\" field.",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Path holds the value of the \"path\" field.",
+                    "type": "string"
+                },
                 "sid": {
                     "description": "Sid holds the value of the \"sid\" field.",
                     "type": "string"
                 },
-                "type": {
-                    "description": "Type holds the value of the \"type\" field.",
+                "size": {
+                    "description": "Size holds the value of the \"size\" field.",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "Status holds the value of the \"status\" field.",
                     "type": "string"
                 },
                 "update_time": {
@@ -1069,17 +850,25 @@ var doc = `{
                 }
             }
         },
-        "d.Account": {
+        "d.FileForm": {
             "type": "object",
+            "required": [
+                "category",
+                "mime",
+                "size"
+            ],
             "properties": {
-                "email": {
+                "category": {
                     "type": "string"
                 },
-                "id": {
+                "filename": {
                     "type": "string"
                 },
-                "password": {
+                "mime": {
                     "type": "string"
+                },
+                "size": {
+                    "type": "integer"
                 }
             }
         },
@@ -1134,6 +923,28 @@ var doc = `{
                 },
                 "update_time": {
                     "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "d.ProfileForm": {
+            "type": "object",
+            "required": [
+                "call",
+                "category",
+                "title"
+            ],
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "call": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -1237,6 +1048,10 @@ var doc = `{
                     "description": "Content holds the value of the \"content\" field.",
                     "type": "string"
                 },
+                "cover": {
+                    "description": "Cover holds the value of the \"cover\" field.",
+                    "type": "string"
+                },
                 "create_time": {
                     "description": "CreateTime holds the value of the \"create_time\" field.",
                     "type": "string"
@@ -1244,10 +1059,6 @@ var doc = `{
                 "edges": {
                     "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EpisodeQuery when eager-loading is set.",
                     "$ref": "#/definitions/ent.EpisodeEdges"
-                },
-                "extra": {
-                    "description": "Extra holds the value of the \"extra\" field.",
-                    "$ref": "#/definitions/schema.EpisodeExtra"
                 },
                 "id": {
                     "description": "ID of the ent.",
@@ -1501,69 +1312,6 @@ var doc = `{
                 }
             }
         },
-        "episode.Episode": {
-            "type": "object",
-            "required": [
-                "profileID",
-                "title"
-            ],
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "navPicture": {
-                    "type": "string"
-                },
-                "profileID": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "episode.ResponseEpisode": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "description": "Content holds the value of the \"content\" field.",
-                    "type": "string"
-                },
-                "create_time": {
-                    "description": "CreateTime holds the value of the \"create_time\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "type": "object"
-                },
-                "extra": {
-                    "description": "Extra holds the value of the \"extra\" field.",
-                    "$ref": "#/definitions/schema.EpisodeExtra"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "navPicture": {
-                    "type": "string"
-                },
-                "profile": {
-                    "$ref": "#/definitions/ent.Profile"
-                },
-                "sid": {
-                    "description": "Sid holds the value of the \"sid\" field.",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "Title holds the value of the \"title\" field.",
-                    "type": "string"
-                },
-                "update_time": {
-                    "description": "UpdateTime holds the value of the \"update_time\" field.",
-                    "type": "string"
-                }
-            }
-        },
         "errs.HTTPError": {
             "type": "object",
             "properties": {
@@ -1571,196 +1319,6 @@ var doc = `{
                     "type": "integer"
                 },
                 "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "file.Meta": {
-            "type": "object",
-            "required": [
-                "category",
-                "mime",
-                "size"
-            ],
-            "properties": {
-                "category": {
-                    "type": "string"
-                },
-                "filename": {
-                    "type": "string"
-                },
-                "mime": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "integer"
-                }
-            }
-        },
-        "file.ResponseFile": {
-            "type": "object",
-            "properties": {
-                "create_time": {
-                    "description": "CreateTime holds the value of the \"create_time\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "type": "object"
-                },
-                "filename": {
-                    "description": "Filename holds the value of the \"filename\" field.",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "mime": {
-                    "description": "Mime holds the value of the \"mime\" field.",
-                    "type": "string"
-                },
-                "note": {
-                    "description": "Note holds the value of the \"note\" field.",
-                    "type": "string"
-                },
-                "path": {
-                    "description": "Path holds the value of the \"path\" field.",
-                    "type": "string"
-                },
-                "sid": {
-                    "description": "Sid holds the value of the \"sid\" field.",
-                    "type": "string"
-                },
-                "size": {
-                    "description": "Size holds the value of the \"size\" field.",
-                    "type": "integer"
-                },
-                "status": {
-                    "description": "Status holds the value of the \"status\" field.",
-                    "type": "string"
-                },
-                "update_time": {
-                    "description": "UpdateTime holds the value of the \"update_time\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "profile.Profile": {
-            "type": "object",
-            "required": [
-                "call",
-                "category",
-                "title"
-            ],
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "call": {
-                    "type": "string"
-                },
-                "category": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "profile.ResponseProfile": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "description": "Avatar holds the value of the \"avatar\" field.",
-                    "type": "string"
-                },
-                "call": {
-                    "description": "Call holds the value of the \"call\" field.",
-                    "type": "string"
-                },
-                "category": {
-                    "description": "Category holds the value of the \"category\" field.",
-                    "type": "string"
-                },
-                "create_time": {
-                    "description": "CreateTime holds the value of the \"create_time\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "type": "object"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "sid": {
-                    "description": "Sid holds the value of the \"sid\" field.",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "Title holds the value of the \"title\" field.",
-                    "type": "string"
-                },
-                "update_time": {
-                    "description": "UpdateTime holds the value of the \"update_time\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "schema.EpisodeExtra": {
-            "type": "object",
-            "properties": {
-                "navPicture": {
-                    "type": "string"
-                }
-            }
-        },
-        "series.ResponseSeries": {
-            "type": "object",
-            "properties": {
-                "call": {
-                    "description": "Call holds the value of the \"call\" field.",
-                    "type": "string"
-                },
-                "content": {
-                    "description": "Content holds the value of the \"content\" field.",
-                    "type": "string"
-                },
-                "create_time": {
-                    "description": "CreateTime holds the value of the \"create_time\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "type": "object"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "sid": {
-                    "description": "Sid holds the value of the \"sid\" field.",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "Title holds the value of the \"title\" field.",
-                    "type": "string"
-                },
-                "update_time": {
-                    "description": "UpdateTime holds the value of the \"update_time\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "series.TitleContent": {
-            "type": "object",
-            "required": [
-                "title"
-            ],
-            "properties": {
-                "content": {
-                    "type": "string"
-                },
-                "title": {
                     "type": "string"
                 }
             }

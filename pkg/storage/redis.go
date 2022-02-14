@@ -1,27 +1,19 @@
-package redis
+package storage
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"os"
+	"golang.org/x/net/context"
 	"time"
 )
 
-type MultiPartRedis struct {
+type redisService struct {
 	client *redis.Client
 }
 
-func NewDefaultConfig() *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr: os.Getenv("redis"),
-		DB:   0,
-	})
-}
-
-func New(client *redis.Client) *MultiPartRedis {
-	return &MultiPartRedis{client: client}
+func newRedis(client *redis.Client) *redisService {
+	return &redisService{client: client}
 }
 
 const StringCreate = "create"
@@ -41,7 +33,7 @@ func filePartKey(fileID string) string {
 	return fmt.Sprintf("%s:%s", fileID, StringPart)
 }
 
-func (r *MultiPartRedis) Create(ctx context.Context, fileID string, fileCreateObj interface{}) error {
+func (r *redisService) Create(ctx context.Context, fileID string, fileCreateObj interface{}) error {
 	data, err := json.Marshal(fileCreateObj)
 	if err != nil {
 		return err
@@ -49,11 +41,11 @@ func (r *MultiPartRedis) Create(ctx context.Context, fileID string, fileCreateOb
 	return r.client.Set(ctx, fileCreateKey(fileID), data, FilePartAge).Err()
 }
 
-func (r *MultiPartRedis) Get(ctx context.Context, fileID string) (string, error) {
+func (r *redisService) Get(ctx context.Context, fileID string) (string, error) {
 	return r.client.Get(ctx, fileCreateKey(fileID)).Result()
 }
 
-func (r *MultiPartRedis) Part(ctx context.Context, fileID string, partUploadObj interface{}) error {
+func (r *redisService) Part(ctx context.Context, fileID string, partUploadObj interface{}) error {
 	data, err := json.Marshal(partUploadObj)
 	if err != nil {
 		return err
@@ -62,7 +54,7 @@ func (r *MultiPartRedis) Part(ctx context.Context, fileID string, partUploadObj 
 	return r.client.RPush(ctx, filePartKey(fileID), data).Err()
 }
 
-func (r *MultiPartRedis) GetParts(ctx context.Context, fileID string) ([]string, error) {
+func (r *redisService) GetParts(ctx context.Context, fileID string) ([]string, error) {
 	parts, err := r.client.LRange(ctx, filePartKey(fileID), 0, -1).Result()
 	if err != nil {
 		return nil, err
@@ -70,7 +62,7 @@ func (r *MultiPartRedis) GetParts(ctx context.Context, fileID string) ([]string,
 	return parts, err
 }
 
-func (r *MultiPartRedis) Finish(ctx context.Context, fileID string) error {
+func (r *redisService) Finish(ctx context.Context, fileID string) error {
 	err := r.client.Del(ctx, fileCreateKey(fileID)).Err()
 	if err != nil {
 		fmt.Println(err)

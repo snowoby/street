@@ -2,20 +2,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-contrib/cors"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 	"github.com/mvrilo/go-redoc"
 	"github.com/mvrilo/go-redoc/gin"
+	"golang.org/x/net/context"
 	"os"
+	"street/ent"
 	"street/pkg/account"
-	"street/pkg/controller"
-	"street/pkg/data"
-	"street/web/episode"
-	"street/web/file"
-	"street/web/profile"
-	"street/web/series"
-	"street/web/site"
+	"street/pkg/auth"
+	"street/pkg/episode"
+	"street/pkg/profile"
+	"street/pkg/storage"
 )
 
 func init() {
@@ -38,33 +40,17 @@ func setup() *gin.Engine {
 
 	r := gin.Default()
 	r.Use(ginredoc.New(doc))
-	ctrl := controller.New(data.NewDefaultEnv())
 
-	r.Use(cors.Default())
+	entClient := NewDefaultEnt()
+	redisClient := NewDefaultRedis()
+	asynqClient := NewDefaultAsynq()
+	s3 := NewDefaultS3()
+	authSrv := auth.New(entClient)
 
-	//r.Use(ctrl.Original(account.TryAccessToken), middleware.TryUriUUID, profile.TryProfile)
-
-	//g := r.Group("/account")
-	//account.Routers(g, ctrl)
-
-	g := r.Group("/account")
-	accountService := account.New()
-	accountService.Routers(g)
-
-	g = r.Group("/profile")
-	profile.Routers(g, ctrl)
-
-	g = r.Group("/series")
-	series.Routers(g, ctrl)
-
-	g = r.Group("/episode")
-	episode.Routers(g, ctrl)
-
-	g = r.Group("/file")
-	file.Routers(g, ctrl)
-
-	g = r.Group("/site")
-	site.Routers(g, ctrl)
+	account.New(entClient, authSrv, r.Group("/account"))
+	profile.New(entClient, authSrv, r.Group("/profile"))
+	episode.New(entClient, authSrv, r.Group("/episode"))
+	storage.New(entClient, authSrv, redisClient, r.Group("/file"), asynqClient, s3)
 
 	return r
 }
@@ -75,4 +61,37 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func NewDefaultEnt() *ent.Client {
+	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(err)
+	}
+	err = client.Schema.Create(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	return client
+}
+
+func NewDefaultRedis() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr: os.Getenv("redis"),
+		DB:   0,
+	})
+}
+
+func NewDefaultS3() *aws.Config {
+	return &aws.Config{
+		Credentials:      credentials.NewStaticCredentials(os.Getenv("s3_accesskey"), os.Getenv("s3_secretkey"), ""),
+		Endpoint:         aws.String(os.Getenv("storage_access_endpoint")),
+		Region:           aws.String(os.Getenv("s3_region")),
+		DisableSSL:       aws.Bool(true),
+		S3ForcePathStyle: aws.Bool(true),
+	}
+}
+
+func NewDefaultAsynq() *asynq.Client {
+	return asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("redis"), DB: 1})
 }

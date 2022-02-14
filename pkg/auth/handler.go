@@ -7,7 +7,6 @@ import (
 	"street/ent/token"
 	"street/errs"
 	"street/pkg/d"
-	"street/pkg/data/value"
 	"street/pkg/utils"
 	"time"
 )
@@ -20,8 +19,8 @@ type service struct {
 	db *ent.Client
 }
 
-func New() *service {
-	return &service{}
+func New(db *ent.Client) *service {
+	return &service{db: db}
 }
 
 func (s *service) tryToken(ctx *gin.Context, tokenType string) *ent.Token {
@@ -55,11 +54,11 @@ func tokenIsValid(token *ent.Token) bool {
 // @Summary refresh token
 // @Tags account,token
 // @Produce json
-// @Success 201 {object} ResponseToken
+// @Success 201 {object} d.Token
 // @Failure 400 {object} errs.HTTPError
 // @Router /account/refresh [post]
 func (s *service) Refresh(ctx *gin.Context) {
-	tokenType := value.StringRefreshToken
+	tokenType := d.StringRefreshToken
 	t := s.tryToken(ctx, tokenType)
 	if t == nil {
 		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, errs.UnauthorizedError)
@@ -84,13 +83,13 @@ func (s *service) Refresh(ctx *gin.Context) {
 }
 
 func (s *service) MustLogin(ctx *gin.Context) {
-	t := s.tryToken(ctx, value.StringAccessToken)
+	t := s.tryToken(ctx, d.StringAccessToken)
 	if t == nil {
 		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, &errs.UnauthorizedError)
 		return
 	}
-	ctx.Set(value.StringAccount, t.Edges.Account)
-	ctx.Set(value.StringAccessToken, t)
+	ctx.Set(d.StringAccount, t.Edges.Account)
+	ctx.Set(d.StringAccessToken, t)
 	ctx.Next()
 	return
 }

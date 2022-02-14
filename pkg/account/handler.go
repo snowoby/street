@@ -10,7 +10,6 @@ import (
 	"street/pkg/auth"
 	"street/pkg/composer"
 	"street/pkg/d"
-	"street/pkg/data/value"
 	"street/pkg/operator"
 	"street/pkg/utils"
 	"time"
@@ -44,7 +43,7 @@ func New(db *ent.Client, auth auth.Service, router *gin.RouterGroup) *service {
 // @Tags account
 // @Accept json
 // @Produce json
-// @Param accountInfo body EmailPassword true "account info"
+// @Param accountInfo body d.AccountForm true "account info"
 // @Success 201 {object} d.Account
 // @Failure 400 {object} errs.HTTPError
 // @Router /account/register [post]
@@ -86,7 +85,7 @@ func (s *service) register(ctx *gin.Context) (int, interface{}, error) {
 // @Tags account
 // @Accept json
 // @Produce json
-// @Param accountInfo body EmailPassword true "account info"
+// @Param accountInfo body d.AccountForm true "account info"
 // @Success 201 {object} d.Token
 // @Failure 400 {object} errs.HTTPError
 // @Router /account/login [post]
@@ -110,7 +109,7 @@ func (s *service) login(ctx *gin.Context) (int, interface{}, error) {
 	t, err := s.db.Token.Create().
 		SetAccountID(accountRecord.ID).
 		SetBody(tokenBody).
-		SetType(value.StringRefreshToken).
+		SetType(d.StringRefreshToken).
 		SetExpire(time.Now().Add(time.Hour * 24 * 7 * 4)).
 		Save(ctx)
 	if err != nil {
@@ -168,11 +167,11 @@ func tokenIsValid(token *ent.Token) bool {
 // @Summary refresh token
 // @Tags account,token
 // @Produce json
-// @Success 201 {object} ResponseToken
+// @Success 201 {object} d.Token
 // @Failure 400 {object} errs.HTTPError
 // @Router /account/refresh [post]
 func (s *service) refresh(ctx *gin.Context) {
-	tokenType := value.StringRefreshToken
+	tokenType := d.StringRefreshToken
 	t := s.tryToken(ctx, tokenType)
 	if t == nil {
 		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, errs.UnauthorizedError)

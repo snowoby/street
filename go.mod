@@ -6,7 +6,6 @@ require (
 	entgo.io/ent v0.9.1
 	github.com/alexedwards/argon2id v0.0.0-20211130144151-3585854a6387
 	github.com/aws/aws-sdk-go v1.42.39
-	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/go-redis/redis/v8 v8.11.4
@@ -14,9 +13,8 @@ require (
 	github.com/hibiken/asynq v0.21.0
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.2
+	github.com/mvrilo/go-redoc v0.0.0-20211227142936-46bc9a9054d1
 	github.com/stretchr/testify v1.7.0
-	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
-	github.com/swaggo/gin-swagger v1.4.0
 	github.com/swaggo/swag v1.7.8
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 	gopkg.in/gographics/imagick.v3 v3.4.0
@@ -45,7 +43,6 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/mvrilo/go-redoc v0.0.0-20211227142936-46bc9a9054d1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/cast v1.4.1 // indirect

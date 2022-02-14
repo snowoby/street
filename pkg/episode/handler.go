@@ -44,7 +44,7 @@ func New(db *ent.Client, auth auth.Service, router *gin.RouterGroup) *service {
 // @Accept json
 // @Produce json
 // @Param pid path string true "profile id"
-// @Param episode body Episode true "episode info"
+// @Param episode body d.EpisodeForm true "episode info"
 // @Success 201 {object} d.Episode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode [post]
@@ -81,8 +81,8 @@ func (s *service) create(ctx *gin.Context, identity *operator.Identity) (int, in
 // @Produce json
 // @Param id path string true "episode id"
 // @Param pid path string true "profile id"
-// @Param episode body Episode true "episode info"
-// @Success 200 {object} ResponseEpisode
+// @Param episode body d.EpisodeForm true "episode info"
+// @Success 200 {object} d.Episode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode/{id} [put]
 func (s *service) update(ctx *gin.Context, id string) (int, interface{}, error) {
@@ -109,7 +109,7 @@ func (s *service) update(ctx *gin.Context, id string) (int, interface{}, error) 
 // @Accept json
 // @Produce json
 // @Param id path string true "episode id"
-// @Success 200 {object} ResponseEpisode
+// @Success 200 {object} d.Episode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode/{id} [get]
 func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
@@ -128,7 +128,7 @@ func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
 // @Summary get all episodes
 // @Tags episode
 // @Produce json
-// @Success 200 {object} []ResponseEpisode
+// @Success 200 {object} []d.Episode
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode [get]
 func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {

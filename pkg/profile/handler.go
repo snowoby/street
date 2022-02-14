@@ -81,7 +81,7 @@ func (s *service) create(ctx *gin.Context, operator *operator.Identity) (int, in
 // @Accept json
 // @Produce json
 // @Param pid path string true "profile id"
-// @Param profile body d.Profile true "profile info"
+// @Param profile body d.ProfileForm true "profile info"
 // @Success 201 {object} d.Profile
 // @Failure 400 {object} errs.HTTPError
 // @Router /profile/{pid} [put]
