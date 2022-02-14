@@ -11,3 +11,7 @@ func TokenFromEnt(token *ent.Token) *Token {
 		Token: token,
 	}
 }
+
+type TokenForm struct {
+	Token string `header:"Authorization" binding:"required"`
+}

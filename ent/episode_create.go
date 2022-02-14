@@ -78,16 +78,16 @@ func (ec *EpisodeCreate) SetContent(s string) *EpisodeCreate {
 	return ec
 }
 
-// SetExtra sets the "extra" field.
-func (ec *EpisodeCreate) SetExtra(se schema.EpisodeExtra) *EpisodeCreate {
-	ec.mutation.SetExtra(se)
+// SetCover sets the "cover" field.
+func (ec *EpisodeCreate) SetCover(s string) *EpisodeCreate {
+	ec.mutation.SetCover(s)
 	return ec
 }
 
-// SetNillableExtra sets the "extra" field if the given value is not nil.
-func (ec *EpisodeCreate) SetNillableExtra(se *schema.EpisodeExtra) *EpisodeCreate {
-	if se != nil {
-		ec.SetExtra(*se)
+// SetNillableCover sets the "cover" field if the given value is not nil.
+func (ec *EpisodeCreate) SetNillableCover(s *string) *EpisodeCreate {
+	if s != nil {
+		ec.SetCover(*s)
 	}
 	return ec
 }
@@ -211,10 +211,6 @@ func (ec *EpisodeCreate) defaults() {
 		v := episode.DefaultUpdateTime()
 		ec.mutation.SetUpdateTime(v)
 	}
-	if _, ok := ec.mutation.Extra(); !ok {
-		v := episode.DefaultExtra()
-		ec.mutation.SetExtra(v)
-	}
 	if _, ok := ec.mutation.ID(); !ok {
 		v := episode.DefaultID()
 		ec.mutation.SetID(v)
@@ -248,8 +244,10 @@ func (ec *EpisodeCreate) check() error {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "content": %w`, err)}
 		}
 	}
-	if _, ok := ec.mutation.Extra(); !ok {
-		return &ValidationError{Name: "extra", err: errors.New(`ent: missing required field "extra"`)}
+	if v, ok := ec.mutation.Cover(); ok {
+		if err := episode.CoverValidator(v); err != nil {
+			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "cover": %w`, err)}
+		}
 	}
 	if _, ok := ec.mutation.ProfileID(); !ok {
 		return &ValidationError{Name: "profile", err: errors.New("ent: missing required edge \"profile\"")}
@@ -326,13 +324,13 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 		})
 		_node.Content = value
 	}
-	if value, ok := ec.mutation.Extra(); ok {
+	if value, ok := ec.mutation.Cover(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeString,
 			Value:  value,
-			Column: episode.FieldExtra,
+			Column: episode.FieldCover,
 		})
-		_node.Extra = value
+		_node.Cover = &value
 	}
 	if nodes := ec.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -57,17 +57,23 @@ func (eu *EpisodeUpdate) SetContent(s string) *EpisodeUpdate {
 	return eu
 }
 
-// SetExtra sets the "extra" field.
-func (eu *EpisodeUpdate) SetExtra(se schema.EpisodeExtra) *EpisodeUpdate {
-	eu.mutation.SetExtra(se)
+// SetCover sets the "cover" field.
+func (eu *EpisodeUpdate) SetCover(s string) *EpisodeUpdate {
+	eu.mutation.SetCover(s)
 	return eu
 }
 
-// SetNillableExtra sets the "extra" field if the given value is not nil.
-func (eu *EpisodeUpdate) SetNillableExtra(se *schema.EpisodeExtra) *EpisodeUpdate {
-	if se != nil {
-		eu.SetExtra(*se)
+// SetNillableCover sets the "cover" field if the given value is not nil.
+func (eu *EpisodeUpdate) SetNillableCover(s *string) *EpisodeUpdate {
+	if s != nil {
+		eu.SetCover(*s)
 	}
+	return eu
+}
+
+// ClearCover clears the value of the "cover" field.
+func (eu *EpisodeUpdate) ClearCover() *EpisodeUpdate {
+	eu.mutation.ClearCover()
 	return eu
 }
 
@@ -199,6 +205,11 @@ func (eu *EpisodeUpdate) check() error {
 			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
 		}
 	}
+	if v, ok := eu.mutation.Cover(); ok {
+		if err := episode.CoverValidator(v); err != nil {
+			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
+		}
+	}
 	if _, ok := eu.mutation.ProfileID(); eu.mutation.ProfileCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"profile\"")
 	}
@@ -251,11 +262,17 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: episode.FieldContent,
 		})
 	}
-	if value, ok := eu.mutation.Extra(); ok {
+	if value, ok := eu.mutation.Cover(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeString,
 			Value:  value,
-			Column: episode.FieldExtra,
+			Column: episode.FieldCover,
+		})
+	}
+	if eu.mutation.CoverCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: episode.FieldCover,
 		})
 	}
 	if eu.mutation.ProfileCleared() {
@@ -373,17 +390,23 @@ func (euo *EpisodeUpdateOne) SetContent(s string) *EpisodeUpdateOne {
 	return euo
 }
 
-// SetExtra sets the "extra" field.
-func (euo *EpisodeUpdateOne) SetExtra(se schema.EpisodeExtra) *EpisodeUpdateOne {
-	euo.mutation.SetExtra(se)
+// SetCover sets the "cover" field.
+func (euo *EpisodeUpdateOne) SetCover(s string) *EpisodeUpdateOne {
+	euo.mutation.SetCover(s)
 	return euo
 }
 
-// SetNillableExtra sets the "extra" field if the given value is not nil.
-func (euo *EpisodeUpdateOne) SetNillableExtra(se *schema.EpisodeExtra) *EpisodeUpdateOne {
-	if se != nil {
-		euo.SetExtra(*se)
+// SetNillableCover sets the "cover" field if the given value is not nil.
+func (euo *EpisodeUpdateOne) SetNillableCover(s *string) *EpisodeUpdateOne {
+	if s != nil {
+		euo.SetCover(*s)
 	}
+	return euo
+}
+
+// ClearCover clears the value of the "cover" field.
+func (euo *EpisodeUpdateOne) ClearCover() *EpisodeUpdateOne {
+	euo.mutation.ClearCover()
 	return euo
 }
 
@@ -522,6 +545,11 @@ func (euo *EpisodeUpdateOne) check() error {
 			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
 		}
 	}
+	if v, ok := euo.mutation.Cover(); ok {
+		if err := episode.CoverValidator(v); err != nil {
+			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
+		}
+	}
 	if _, ok := euo.mutation.ProfileID(); euo.mutation.ProfileCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"profile\"")
 	}
@@ -591,11 +619,17 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 			Column: episode.FieldContent,
 		})
 	}
-	if value, ok := euo.mutation.Extra(); ok {
+	if value, ok := euo.mutation.Cover(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBytes,
+			Type:   field.TypeString,
 			Value:  value,
-			Column: episode.FieldExtra,
+			Column: episode.FieldCover,
+		})
+	}
+	if euo.mutation.CoverCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: episode.FieldCover,
 		})
 	}
 	if euo.mutation.ProfileCleared() {

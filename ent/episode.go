@@ -30,8 +30,8 @@ type Episode struct {
 	Title string `json:"title,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
-	// Extra holds the value of the "extra" field.
-	Extra schema.EpisodeExtra `json:"extra,omitempty"`
+	// Cover holds the value of the "cover" field.
+	Cover *string `json:"cover,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EpisodeQuery when eager-loading is set.
 	Edges           EpisodeEdges `json:"edges"`
@@ -83,11 +83,9 @@ func (*Episode) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case episode.FieldExtra:
-			values[i] = new(schema.EpisodeExtra)
 		case episode.FieldSid:
 			values[i] = new(schema.ID)
-		case episode.FieldTitle, episode.FieldContent:
+		case episode.FieldTitle, episode.FieldContent, episode.FieldCover:
 			values[i] = new(sql.NullString)
 		case episode.FieldCreateTime, episode.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -148,11 +146,12 @@ func (e *Episode) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				e.Content = value.String
 			}
-		case episode.FieldExtra:
-			if value, ok := values[i].(*schema.EpisodeExtra); !ok {
-				return fmt.Errorf("unexpected type %T for field extra", values[i])
-			} else if value != nil {
-				e.Extra = *value
+		case episode.FieldCover:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cover", values[i])
+			} else if value.Valid {
+				e.Cover = new(string)
+				*e.Cover = value.String
 			}
 		case episode.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -216,8 +215,10 @@ func (e *Episode) String() string {
 	builder.WriteString(e.Title)
 	builder.WriteString(", content=")
 	builder.WriteString(e.Content)
-	builder.WriteString(", extra=")
-	builder.WriteString(fmt.Sprintf("%v", e.Extra))
+	if v := e.Cover; v != nil {
+		builder.WriteString(", cover=")
+		builder.WriteString(*v)
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

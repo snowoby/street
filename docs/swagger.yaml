@@ -106,6 +106,85 @@ definitions:
         description: UpdateTime holds the value of the "update_time" field.
         type: string
     type: object
+  d.Account:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+    type: object
+  d.Identity:
+    properties:
+      account:
+        $ref: '#/definitions/d.Account'
+      profiles:
+        items:
+          $ref: '#/definitions/d.Profile'
+        type: array
+    type: object
+  d.Profile:
+    properties:
+      avatar:
+        description: Avatar holds the value of the "avatar" field.
+        type: string
+      call:
+        description: Call holds the value of the "call" field.
+        type: string
+      category:
+        description: Category holds the value of the "category" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.ProfileEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the ProfileQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      title:
+        description: Title holds the value of the "title" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  d.Token:
+    properties:
+      body:
+        description: Body holds the value of the "body" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.TokenEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the TokenQuery when eager-loading is set.
+      expire:
+        description: Expire holds the value of the "expire" field.
+        type: string
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      type:
+        description: Type holds the value of the "type" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
   ent.Account:
     properties:
       create_time:

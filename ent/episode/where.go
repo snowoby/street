@@ -130,10 +130,10 @@ func Content(v string) predicate.Episode {
 	})
 }
 
-// Extra applies equality check predicate on the "extra" field. It's identical to ExtraEQ.
-func Extra(v schema.EpisodeExtra) predicate.Episode {
+// Cover applies equality check predicate on the "cover" field. It's identical to CoverEQ.
+func Cover(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExtra), v))
+		s.Where(sql.EQ(s.C(FieldCover), v))
 	})
 }
 
@@ -587,22 +587,22 @@ func ContentContainsFold(v string) predicate.Episode {
 	})
 }
 
-// ExtraEQ applies the EQ predicate on the "extra" field.
-func ExtraEQ(v schema.EpisodeExtra) predicate.Episode {
+// CoverEQ applies the EQ predicate on the "cover" field.
+func CoverEQ(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExtra), v))
+		s.Where(sql.EQ(s.C(FieldCover), v))
 	})
 }
 
-// ExtraNEQ applies the NEQ predicate on the "extra" field.
-func ExtraNEQ(v schema.EpisodeExtra) predicate.Episode {
+// CoverNEQ applies the NEQ predicate on the "cover" field.
+func CoverNEQ(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldExtra), v))
+		s.Where(sql.NEQ(s.C(FieldCover), v))
 	})
 }
 
-// ExtraIn applies the In predicate on the "extra" field.
-func ExtraIn(vs ...schema.EpisodeExtra) predicate.Episode {
+// CoverIn applies the In predicate on the "cover" field.
+func CoverIn(vs ...string) predicate.Episode {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -614,12 +614,12 @@ func ExtraIn(vs ...schema.EpisodeExtra) predicate.Episode {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldExtra), v...))
+		s.Where(sql.In(s.C(FieldCover), v...))
 	})
 }
 
-// ExtraNotIn applies the NotIn predicate on the "extra" field.
-func ExtraNotIn(vs ...schema.EpisodeExtra) predicate.Episode {
+// CoverNotIn applies the NotIn predicate on the "cover" field.
+func CoverNotIn(vs ...string) predicate.Episode {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -631,35 +631,84 @@ func ExtraNotIn(vs ...schema.EpisodeExtra) predicate.Episode {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldExtra), v...))
+		s.Where(sql.NotIn(s.C(FieldCover), v...))
 	})
 }
 
-// ExtraGT applies the GT predicate on the "extra" field.
-func ExtraGT(v schema.EpisodeExtra) predicate.Episode {
+// CoverGT applies the GT predicate on the "cover" field.
+func CoverGT(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldExtra), v))
+		s.Where(sql.GT(s.C(FieldCover), v))
 	})
 }
 
-// ExtraGTE applies the GTE predicate on the "extra" field.
-func ExtraGTE(v schema.EpisodeExtra) predicate.Episode {
+// CoverGTE applies the GTE predicate on the "cover" field.
+func CoverGTE(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldExtra), v))
+		s.Where(sql.GTE(s.C(FieldCover), v))
 	})
 }
 
-// ExtraLT applies the LT predicate on the "extra" field.
-func ExtraLT(v schema.EpisodeExtra) predicate.Episode {
+// CoverLT applies the LT predicate on the "cover" field.
+func CoverLT(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldExtra), v))
+		s.Where(sql.LT(s.C(FieldCover), v))
 	})
 }
 
-// ExtraLTE applies the LTE predicate on the "extra" field.
-func ExtraLTE(v schema.EpisodeExtra) predicate.Episode {
+// CoverLTE applies the LTE predicate on the "cover" field.
+func CoverLTE(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldExtra), v))
+		s.Where(sql.LTE(s.C(FieldCover), v))
+	})
+}
+
+// CoverContains applies the Contains predicate on the "cover" field.
+func CoverContains(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldCover), v))
+	})
+}
+
+// CoverHasPrefix applies the HasPrefix predicate on the "cover" field.
+func CoverHasPrefix(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldCover), v))
+	})
+}
+
+// CoverHasSuffix applies the HasSuffix predicate on the "cover" field.
+func CoverHasSuffix(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldCover), v))
+	})
+}
+
+// CoverIsNil applies the IsNil predicate on the "cover" field.
+func CoverIsNil() predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCover)))
+	})
+}
+
+// CoverNotNil applies the NotNil predicate on the "cover" field.
+func CoverNotNil() predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCover)))
+	})
+}
+
+// CoverEqualFold applies the EqualFold predicate on the "cover" field.
+func CoverEqualFold(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldCover), v))
+	})
+}
+
+// CoverContainsFold applies the ContainsFold predicate on the "cover" field.
+func CoverContainsFold(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldCover), v))
 	})
 }
 

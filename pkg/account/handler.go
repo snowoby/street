@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"street/ent"
 	"street/ent/account"
+	"street/ent/token"
 	"street/errs"
+	"street/pkg/auth"
+	"street/pkg/composer"
 	"street/pkg/d"
 	"street/pkg/data/value"
 	"street/pkg/operator"
@@ -13,18 +16,39 @@ import (
 	"time"
 )
 
-type Service interface {
-}
-
 type service struct {
-	db *ent.Client
+	db     *ent.Client
+	auth   auth.Service
+	router *gin.RouterGroup
 }
 
-func New() *service {
-	return &service{}
+func (s *service) registerRouters() {
+	s.router.POST("/refresh", s.refresh)
+	s.router.POST("/login", composer.Bare(s.login))
+	s.router.POST("/register", composer.Bare(s.register))
+	s.router.GET("/", s.auth.MustLogin, composer.Authed(s.info))
 }
 
-func (s *service) Create(ctx *gin.Context, operator *operator.Identity) (int, interface{}, error) {
+func New(db *ent.Client, auth auth.Service, router *gin.RouterGroup) *service {
+	s := &service{
+		db:     db,
+		auth:   auth,
+		router: router,
+	}
+	s.registerRouters()
+	return s
+}
+
+// Register godoc
+// @Summary register an account
+// @Tags account
+// @Accept json
+// @Produce json
+// @Param accountInfo body EmailPassword true "account info"
+// @Success 201 {object} d.Account
+// @Failure 400 {object} errs.HTTPError
+// @Router /account/register [post]
+func (s *service) register(ctx *gin.Context) (int, interface{}, error) {
 
 	var accountForm d.AccountForm
 	err := ctx.ShouldBindJSON(&accountForm)
@@ -55,10 +79,18 @@ func (s *service) Create(ctx *gin.Context, operator *operator.Identity) (int, in
 	}
 
 	return http.StatusCreated, d.AccountFromEnt(user), nil
-
 }
 
-func (s *service) Login(ctx *gin.Context, operator *operator.Identity) (int, interface{}, error) {
+// Login godoc
+// @Summary login an account
+// @Tags account
+// @Accept json
+// @Produce json
+// @Param accountInfo body EmailPassword true "account info"
+// @Success 201 {object} d.Token
+// @Failure 400 {object} errs.HTTPError
+// @Router /account/login [post]
+func (s *service) login(ctx *gin.Context) (int, interface{}, error) {
 	var accountForm d.AccountForm
 	err := ctx.ShouldBindJSON(&accountForm)
 	if err != nil {
@@ -86,4 +118,80 @@ func (s *service) Login(ctx *gin.Context, operator *operator.Identity) (int, int
 	}
 
 	return http.StatusOK, d.TokenFromEnt(t), nil
+}
+
+// Info godoc
+// @Summary info an account
+// @Tags account,profile
+// @Produce json
+// @Success 201 {object} d.Identity
+// @Failure 400 {object} errs.HTTPError
+// @Router /account [get]
+func (s *service) info(_ *gin.Context, operator *operator.Identity) (int, interface{}, error) {
+
+	profiles := d.ProfilesFromEnt(operator.AllProfiles())
+
+	return http.StatusOK, &d.Identity{
+		Account:  d.AccountFromEnt(operator.Account()),
+		Profiles: profiles,
+	}, nil
+}
+
+func (s *service) tryToken(ctx *gin.Context, tokenType string) *ent.Token {
+	var tokenData d.TokenForm
+	err := ctx.ShouldBindHeader(&tokenData)
+	if err == nil {
+		if len(tokenData.Token) > 7 {
+			tokenBody := tokenData.Token[7:]
+			tokenRecord, err := s.db.Token.Query().Where(token.Body(tokenBody)).Where(token.Type(tokenType)).WithAccount().Only(ctx)
+			if err == nil {
+				if tokenIsValid(tokenRecord) {
+					return tokenRecord
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func tokenIsValid(token *ent.Token) bool {
+	if token == nil {
+		return false
+	}
+	if token.Expire.Before(time.Now()) {
+		return false
+	}
+	return true
+}
+
+// Refresh godoc
+// @Summary refresh token
+// @Tags account,token
+// @Produce json
+// @Success 201 {object} ResponseToken
+// @Failure 400 {object} errs.HTTPError
+// @Router /account/refresh [post]
+func (s *service) refresh(ctx *gin.Context) {
+	tokenType := value.StringRefreshToken
+	t := s.tryToken(ctx, tokenType)
+	if t == nil {
+		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, errs.UnauthorizedError)
+		return
+	}
+
+	tokenBody := utils.RandomString(128)
+	// Create access token
+	t, err := s.db.Token.Create().
+		SetAccountID(t.Edges.Account.ID).
+		SetBody(tokenBody).
+		SetType(tokenType).
+		SetExpire(time.Now().Add(time.Hour * 24 * 7)).
+		Save(ctx)
+	if t == nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, d.TokenFromEnt(t))
+	return
 }

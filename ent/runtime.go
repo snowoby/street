@@ -105,10 +105,10 @@ func init() {
 	episodeDescContent := episodeFields[1].Descriptor()
 	// episode.ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	episode.ContentValidator = episodeDescContent.Validators[0].(func(string) error)
-	// episodeDescExtra is the schema descriptor for extra field.
-	episodeDescExtra := episodeFields[2].Descriptor()
-	// episode.DefaultExtra holds the default value on creation for the extra field.
-	episode.DefaultExtra = episodeDescExtra.Default.(func() schema.EpisodeExtra)
+	// episodeDescCover is the schema descriptor for cover field.
+	episodeDescCover := episodeFields[2].Descriptor()
+	// episode.CoverValidator is a validator for the "cover" field. It is called by the builders before save.
+	episode.CoverValidator = episodeDescCover.Validators[0].(func(string) error)
 	// episodeDescID is the schema descriptor for id field.
 	episodeDescID := episodeMixinFields0[1].Descriptor()
 	// episode.DefaultID holds the default value on creation for the id field.

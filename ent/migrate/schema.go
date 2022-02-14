@@ -38,7 +38,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 64},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
-		{Name: "extra", Type: field.TypeBytes},
+		{Name: "cover", Type: field.TypeString, Nullable: true, Size: 320},
 		{Name: "profile_episode", Type: field.TypeUUID, Nullable: true},
 		{Name: "series_episode", Type: field.TypeUUID, Nullable: true},
 	}

@@ -1050,6 +1050,112 @@
                 }
             }
         },
+        "d.Account": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "d.Identity": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "$ref": "#/definitions/d.Account"
+                },
+                "profiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/d.Profile"
+                    }
+                }
+            }
+        },
+        "d.Profile": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "Avatar holds the value of the \"avatar\" field.",
+                    "type": "string"
+                },
+                "call": {
+                    "description": "Call holds the value of the \"call\" field.",
+                    "type": "string"
+                },
+                "category": {
+                    "description": "Category holds the value of the \"category\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the ProfileQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.ProfileEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "d.Token": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "Body holds the value of the \"body\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the TokenQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.TokenEdges"
+                },
+                "expire": {
+                    "description": "Expire holds the value of the \"expire\" field.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type holds the value of the \"type\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
         "ent.Account": {
             "type": "object",
             "properties": {

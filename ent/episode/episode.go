@@ -24,8 +24,8 @@ const (
 	FieldTitle = "title"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
-	// FieldExtra holds the string denoting the extra field in the database.
-	FieldExtra = "extra"
+	// FieldCover holds the string denoting the cover field in the database.
+	FieldCover = "cover"
 	// EdgeProfile holds the string denoting the profile edge name in mutations.
 	EdgeProfile = "profile"
 	// EdgeSeries holds the string denoting the series edge name in mutations.
@@ -56,7 +56,7 @@ var Columns = []string{
 	FieldUpdateTime,
 	FieldTitle,
 	FieldContent,
-	FieldExtra,
+	FieldCover,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "episodes"
@@ -94,8 +94,8 @@ var (
 	TitleValidator func(string) error
 	// ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	ContentValidator func(string) error
-	// DefaultExtra holds the default value on creation for the "extra" field.
-	DefaultExtra func() schema.EpisodeExtra
+	// CoverValidator is a validator for the "cover" field. It is called by the builders before save.
+	CoverValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

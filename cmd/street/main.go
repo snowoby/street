@@ -8,12 +8,11 @@ import (
 	"github.com/mvrilo/go-redoc"
 	"github.com/mvrilo/go-redoc/gin"
 	"os"
+	"street/pkg/account"
 	"street/pkg/controller"
 	"street/pkg/data"
-	"street/web/account"
 	"street/web/episode"
 	"street/web/file"
-	"street/web/middleware"
 	"street/web/profile"
 	"street/web/series"
 	"street/web/site"
@@ -43,10 +42,14 @@ func setup() *gin.Engine {
 
 	r.Use(cors.Default())
 
-	r.Use(ctrl.Original(account.TryAccessToken), middleware.TryUriUUID, profile.TryProfile)
+	//r.Use(ctrl.Original(account.TryAccessToken), middleware.TryUriUUID, profile.TryProfile)
+
+	//g := r.Group("/account")
+	//account.Routers(g, ctrl)
 
 	g := r.Group("/account")
-	account.Routers(g, ctrl)
+	accountService := account.New()
+	accountService.Routers(g)
 
 	g = r.Group("/profile")
 	profile.Routers(g, ctrl)

@@ -825,7 +825,7 @@ type EpisodeMutation struct {
 	update_time    *time.Time
 	title          *string
 	content        *string
-	extra          *schema.EpisodeExtra
+	cover          *string
 	clearedFields  map[string]struct{}
 	profile        *uuid.UUID
 	clearedprofile bool
@@ -1101,40 +1101,53 @@ func (m *EpisodeMutation) ResetContent() {
 	m.content = nil
 }
 
-// SetExtra sets the "extra" field.
-func (m *EpisodeMutation) SetExtra(se schema.EpisodeExtra) {
-	m.extra = &se
+// SetCover sets the "cover" field.
+func (m *EpisodeMutation) SetCover(s string) {
+	m.cover = &s
 }
 
-// Extra returns the value of the "extra" field in the mutation.
-func (m *EpisodeMutation) Extra() (r schema.EpisodeExtra, exists bool) {
-	v := m.extra
+// Cover returns the value of the "cover" field in the mutation.
+func (m *EpisodeMutation) Cover() (r string, exists bool) {
+	v := m.cover
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldExtra returns the old "extra" field's value of the Episode entity.
+// OldCover returns the old "cover" field's value of the Episode entity.
 // If the Episode object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EpisodeMutation) OldExtra(ctx context.Context) (v schema.EpisodeExtra, err error) {
+func (m *EpisodeMutation) OldCover(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldExtra is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldCover is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldExtra requires an ID field in the mutation")
+		return v, fmt.Errorf("OldCover requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldExtra: %w", err)
+		return v, fmt.Errorf("querying old value for OldCover: %w", err)
 	}
-	return oldValue.Extra, nil
+	return oldValue.Cover, nil
 }
 
-// ResetExtra resets all changes to the "extra" field.
-func (m *EpisodeMutation) ResetExtra() {
-	m.extra = nil
+// ClearCover clears the value of the "cover" field.
+func (m *EpisodeMutation) ClearCover() {
+	m.cover = nil
+	m.clearedFields[episode.FieldCover] = struct{}{}
+}
+
+// CoverCleared returns if the "cover" field was cleared in this mutation.
+func (m *EpisodeMutation) CoverCleared() bool {
+	_, ok := m.clearedFields[episode.FieldCover]
+	return ok
+}
+
+// ResetCover resets all changes to the "cover" field.
+func (m *EpisodeMutation) ResetCover() {
+	m.cover = nil
+	delete(m.clearedFields, episode.FieldCover)
 }
 
 // SetProfileID sets the "profile" edge to the Profile entity by id.
@@ -1250,8 +1263,8 @@ func (m *EpisodeMutation) Fields() []string {
 	if m.content != nil {
 		fields = append(fields, episode.FieldContent)
 	}
-	if m.extra != nil {
-		fields = append(fields, episode.FieldExtra)
+	if m.cover != nil {
+		fields = append(fields, episode.FieldCover)
 	}
 	return fields
 }
@@ -1271,8 +1284,8 @@ func (m *EpisodeMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case episode.FieldContent:
 		return m.Content()
-	case episode.FieldExtra:
-		return m.Extra()
+	case episode.FieldCover:
+		return m.Cover()
 	}
 	return nil, false
 }
@@ -1292,8 +1305,8 @@ func (m *EpisodeMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldTitle(ctx)
 	case episode.FieldContent:
 		return m.OldContent(ctx)
-	case episode.FieldExtra:
-		return m.OldExtra(ctx)
+	case episode.FieldCover:
+		return m.OldCover(ctx)
 	}
 	return nil, fmt.Errorf("unknown Episode field %s", name)
 }
@@ -1338,12 +1351,12 @@ func (m *EpisodeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetContent(v)
 		return nil
-	case episode.FieldExtra:
-		v, ok := value.(schema.EpisodeExtra)
+	case episode.FieldCover:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetExtra(v)
+		m.SetCover(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)
@@ -1377,7 +1390,11 @@ func (m *EpisodeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *EpisodeMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(episode.FieldCover) {
+		fields = append(fields, episode.FieldCover)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1390,6 +1407,11 @@ func (m *EpisodeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *EpisodeMutation) ClearField(name string) error {
+	switch name {
+	case episode.FieldCover:
+		m.ClearCover()
+		return nil
+	}
 	return fmt.Errorf("unknown Episode nullable field %s", name)
 }
 
@@ -1412,8 +1434,8 @@ func (m *EpisodeMutation) ResetField(name string) error {
 	case episode.FieldContent:
 		m.ResetContent()
 		return nil
-	case episode.FieldExtra:
-		m.ResetExtra()
+	case episode.FieldCover:
+		m.ResetCover()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)
