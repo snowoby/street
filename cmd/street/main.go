@@ -8,6 +8,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/mvrilo/go-redoc"
 	"github.com/mvrilo/go-redoc/gin"
 	"golang.org/x/net/context"

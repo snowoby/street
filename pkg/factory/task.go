@@ -1,13 +1,13 @@
 package factory
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/hibiken/asynq"
 	"gopkg.in/gographics/imagick.v3/imagick"
 	"log"
 	"os"
 	"street/ent"
-	"street/pkg/auth"
+	"street/pkg/base3"
 	"street/pkg/d"
 )
 
@@ -17,8 +17,6 @@ func init() {
 
 type service struct {
 	db             *ent.Client
-	auth           auth.Service
-	router         *gin.RouterGroup
 	storageService *storageService
 	server         *asynq.Server
 }
@@ -40,15 +38,10 @@ func DefaultServer() *asynq.Server {
 	)
 }
 
-func New(server *asynq.Server, db *ent.Client,
-	auth auth.Service,
-	router *gin.RouterGroup,
-	storageService *storageService) *service {
+func New(server *asynq.Server, db *ent.Client, s3Config *aws.Config) *service {
 	return &service{
 		db:             db,
-		auth:           auth,
-		router:         router,
-		storageService: storageService,
+		storageService: &storageService{base3.New(s3Config)},
 		server:         server,
 	}
 }

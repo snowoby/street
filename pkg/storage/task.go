@@ -31,8 +31,7 @@ func (t *taskService) imageCompress(file *ent.File) (*asynq.TaskInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return t.client.Enqueue(task)
-
+	return t.client.Enqueue(task, asynq.Queue("image"))
 }
 
 func (t *taskService) avatarCompress(file *ent.File) (*asynq.TaskInfo, error) {
@@ -44,6 +43,6 @@ func (t *taskService) avatarCompress(file *ent.File) (*asynq.TaskInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return t.client.Enqueue(task)
+	return t.client.Enqueue(task, asynq.Queue("avatar"))
 
 }
