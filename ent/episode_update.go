@@ -6,11 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
 	"street/ent/schema"
-	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -45,18 +45,6 @@ func (eu *EpisodeUpdate) SetNillableSid(s *schema.ID) *EpisodeUpdate {
 	return eu
 }
 
-// SetTitle sets the "title" field.
-func (eu *EpisodeUpdate) SetTitle(s string) *EpisodeUpdate {
-	eu.mutation.SetTitle(s)
-	return eu
-}
-
-// SetContent sets the "content" field.
-func (eu *EpisodeUpdate) SetContent(s string) *EpisodeUpdate {
-	eu.mutation.SetContent(s)
-	return eu
-}
-
 // SetCover sets the "cover" field.
 func (eu *EpisodeUpdate) SetCover(s string) *EpisodeUpdate {
 	eu.mutation.SetCover(s)
@@ -77,6 +65,18 @@ func (eu *EpisodeUpdate) ClearCover() *EpisodeUpdate {
 	return eu
 }
 
+// SetTitle sets the "title" field.
+func (eu *EpisodeUpdate) SetTitle(s string) *EpisodeUpdate {
+	eu.mutation.SetTitle(s)
+	return eu
+}
+
+// SetContent sets the "content" field.
+func (eu *EpisodeUpdate) SetContent(s string) *EpisodeUpdate {
+	eu.mutation.SetContent(s)
+	return eu
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by ID.
 func (eu *EpisodeUpdate) SetProfileID(id uuid.UUID) *EpisodeUpdate {
 	eu.mutation.SetProfileID(id)
@@ -88,23 +88,19 @@ func (eu *EpisodeUpdate) SetProfile(p *Profile) *EpisodeUpdate {
 	return eu.SetProfileID(p.ID)
 }
 
-// SetSeriesID sets the "series" edge to the Series entity by ID.
-func (eu *EpisodeUpdate) SetSeriesID(id uuid.UUID) *EpisodeUpdate {
-	eu.mutation.SetSeriesID(id)
+// AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
+func (eu *EpisodeUpdate) AddCommentIDs(ids ...uuid.UUID) *EpisodeUpdate {
+	eu.mutation.AddCommentIDs(ids...)
 	return eu
 }
 
-// SetNillableSeriesID sets the "series" edge to the Series entity by ID if the given value is not nil.
-func (eu *EpisodeUpdate) SetNillableSeriesID(id *uuid.UUID) *EpisodeUpdate {
-	if id != nil {
-		eu = eu.SetSeriesID(*id)
+// AddComments adds the "comments" edges to the Comment entity.
+func (eu *EpisodeUpdate) AddComments(c ...*Comment) *EpisodeUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return eu
-}
-
-// SetSeries sets the "series" edge to the Series entity.
-func (eu *EpisodeUpdate) SetSeries(s *Series) *EpisodeUpdate {
-	return eu.SetSeriesID(s.ID)
+	return eu.AddCommentIDs(ids...)
 }
 
 // Mutation returns the EpisodeMutation object of the builder.
@@ -118,10 +114,25 @@ func (eu *EpisodeUpdate) ClearProfile() *EpisodeUpdate {
 	return eu
 }
 
-// ClearSeries clears the "series" edge to the Series entity.
-func (eu *EpisodeUpdate) ClearSeries() *EpisodeUpdate {
-	eu.mutation.ClearSeries()
+// ClearComments clears all "comments" edges to the Comment entity.
+func (eu *EpisodeUpdate) ClearComments() *EpisodeUpdate {
+	eu.mutation.ClearComments()
 	return eu
+}
+
+// RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
+func (eu *EpisodeUpdate) RemoveCommentIDs(ids ...uuid.UUID) *EpisodeUpdate {
+	eu.mutation.RemoveCommentIDs(ids...)
+	return eu
+}
+
+// RemoveComments removes "comments" edges to Comment entities.
+func (eu *EpisodeUpdate) RemoveComments(c ...*Comment) *EpisodeUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return eu.RemoveCommentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -195,6 +206,11 @@ func (eu *EpisodeUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (eu *EpisodeUpdate) check() error {
+	if v, ok := eu.mutation.Cover(); ok {
+		if err := episode.CoverValidator(v); err != nil {
+			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
+		}
+	}
 	if v, ok := eu.mutation.Title(); ok {
 		if err := episode.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
@@ -203,11 +219,6 @@ func (eu *EpisodeUpdate) check() error {
 	if v, ok := eu.mutation.Content(); ok {
 		if err := episode.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
-		}
-	}
-	if v, ok := eu.mutation.Cover(); ok {
-		if err := episode.CoverValidator(v); err != nil {
-			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
 		}
 	}
 	if _, ok := eu.mutation.ProfileID(); eu.mutation.ProfileCleared() && !ok {
@@ -248,6 +259,19 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: episode.FieldUpdateTime,
 		})
 	}
+	if value, ok := eu.mutation.Cover(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: episode.FieldCover,
+		})
+	}
+	if eu.mutation.CoverCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: episode.FieldCover,
+		})
+	}
 	if value, ok := eu.mutation.Title(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -260,19 +284,6 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: episode.FieldContent,
-		})
-	}
-	if value, ok := eu.mutation.Cover(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: episode.FieldCover,
-		})
-	}
-	if eu.mutation.CoverCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: episode.FieldCover,
 		})
 	}
 	if eu.mutation.ProfileCleared() {
@@ -310,33 +321,52 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if eu.mutation.SeriesCleared() {
+	if eu.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   episode.SeriesTable,
-			Columns: []string{episode.SeriesColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   episode.CommentsTable,
+			Columns: []string{episode.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := eu.mutation.SeriesIDs(); len(nodes) > 0 {
+	if nodes := eu.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !eu.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   episode.SeriesTable,
-			Columns: []string{episode.SeriesColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   episode.CommentsTable,
+			Columns: []string{episode.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := eu.mutation.CommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   episode.CommentsTable,
+			Columns: []string{episode.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
 				},
 			},
 		}
@@ -378,18 +408,6 @@ func (euo *EpisodeUpdateOne) SetNillableSid(s *schema.ID) *EpisodeUpdateOne {
 	return euo
 }
 
-// SetTitle sets the "title" field.
-func (euo *EpisodeUpdateOne) SetTitle(s string) *EpisodeUpdateOne {
-	euo.mutation.SetTitle(s)
-	return euo
-}
-
-// SetContent sets the "content" field.
-func (euo *EpisodeUpdateOne) SetContent(s string) *EpisodeUpdateOne {
-	euo.mutation.SetContent(s)
-	return euo
-}
-
 // SetCover sets the "cover" field.
 func (euo *EpisodeUpdateOne) SetCover(s string) *EpisodeUpdateOne {
 	euo.mutation.SetCover(s)
@@ -410,6 +428,18 @@ func (euo *EpisodeUpdateOne) ClearCover() *EpisodeUpdateOne {
 	return euo
 }
 
+// SetTitle sets the "title" field.
+func (euo *EpisodeUpdateOne) SetTitle(s string) *EpisodeUpdateOne {
+	euo.mutation.SetTitle(s)
+	return euo
+}
+
+// SetContent sets the "content" field.
+func (euo *EpisodeUpdateOne) SetContent(s string) *EpisodeUpdateOne {
+	euo.mutation.SetContent(s)
+	return euo
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by ID.
 func (euo *EpisodeUpdateOne) SetProfileID(id uuid.UUID) *EpisodeUpdateOne {
 	euo.mutation.SetProfileID(id)
@@ -421,23 +451,19 @@ func (euo *EpisodeUpdateOne) SetProfile(p *Profile) *EpisodeUpdateOne {
 	return euo.SetProfileID(p.ID)
 }
 
-// SetSeriesID sets the "series" edge to the Series entity by ID.
-func (euo *EpisodeUpdateOne) SetSeriesID(id uuid.UUID) *EpisodeUpdateOne {
-	euo.mutation.SetSeriesID(id)
+// AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
+func (euo *EpisodeUpdateOne) AddCommentIDs(ids ...uuid.UUID) *EpisodeUpdateOne {
+	euo.mutation.AddCommentIDs(ids...)
 	return euo
 }
 
-// SetNillableSeriesID sets the "series" edge to the Series entity by ID if the given value is not nil.
-func (euo *EpisodeUpdateOne) SetNillableSeriesID(id *uuid.UUID) *EpisodeUpdateOne {
-	if id != nil {
-		euo = euo.SetSeriesID(*id)
+// AddComments adds the "comments" edges to the Comment entity.
+func (euo *EpisodeUpdateOne) AddComments(c ...*Comment) *EpisodeUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return euo
-}
-
-// SetSeries sets the "series" edge to the Series entity.
-func (euo *EpisodeUpdateOne) SetSeries(s *Series) *EpisodeUpdateOne {
-	return euo.SetSeriesID(s.ID)
+	return euo.AddCommentIDs(ids...)
 }
 
 // Mutation returns the EpisodeMutation object of the builder.
@@ -451,10 +477,25 @@ func (euo *EpisodeUpdateOne) ClearProfile() *EpisodeUpdateOne {
 	return euo
 }
 
-// ClearSeries clears the "series" edge to the Series entity.
-func (euo *EpisodeUpdateOne) ClearSeries() *EpisodeUpdateOne {
-	euo.mutation.ClearSeries()
+// ClearComments clears all "comments" edges to the Comment entity.
+func (euo *EpisodeUpdateOne) ClearComments() *EpisodeUpdateOne {
+	euo.mutation.ClearComments()
 	return euo
+}
+
+// RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
+func (euo *EpisodeUpdateOne) RemoveCommentIDs(ids ...uuid.UUID) *EpisodeUpdateOne {
+	euo.mutation.RemoveCommentIDs(ids...)
+	return euo
+}
+
+// RemoveComments removes "comments" edges to Comment entities.
+func (euo *EpisodeUpdateOne) RemoveComments(c ...*Comment) *EpisodeUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return euo.RemoveCommentIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -535,6 +576,11 @@ func (euo *EpisodeUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (euo *EpisodeUpdateOne) check() error {
+	if v, ok := euo.mutation.Cover(); ok {
+		if err := episode.CoverValidator(v); err != nil {
+			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
+		}
+	}
 	if v, ok := euo.mutation.Title(); ok {
 		if err := episode.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
@@ -543,11 +589,6 @@ func (euo *EpisodeUpdateOne) check() error {
 	if v, ok := euo.mutation.Content(); ok {
 		if err := episode.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
-		}
-	}
-	if v, ok := euo.mutation.Cover(); ok {
-		if err := episode.CoverValidator(v); err != nil {
-			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
 		}
 	}
 	if _, ok := euo.mutation.ProfileID(); euo.mutation.ProfileCleared() && !ok {
@@ -605,6 +646,19 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 			Column: episode.FieldUpdateTime,
 		})
 	}
+	if value, ok := euo.mutation.Cover(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: episode.FieldCover,
+		})
+	}
+	if euo.mutation.CoverCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: episode.FieldCover,
+		})
+	}
 	if value, ok := euo.mutation.Title(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -617,19 +671,6 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: episode.FieldContent,
-		})
-	}
-	if value, ok := euo.mutation.Cover(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: episode.FieldCover,
-		})
-	}
-	if euo.mutation.CoverCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: episode.FieldCover,
 		})
 	}
 	if euo.mutation.ProfileCleared() {
@@ -667,33 +708,52 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if euo.mutation.SeriesCleared() {
+	if euo.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   episode.SeriesTable,
-			Columns: []string{episode.SeriesColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   episode.CommentsTable,
+			Columns: []string{episode.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := euo.mutation.SeriesIDs(); len(nodes) > 0 {
+	if nodes := euo.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !euo.mutation.CommentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   episode.SeriesTable,
-			Columns: []string{episode.SeriesColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   episode.CommentsTable,
+			Columns: []string{episode.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := euo.mutation.CommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   episode.CommentsTable,
+			Columns: []string{episode.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
 				},
 			},
 		}

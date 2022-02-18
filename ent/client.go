@@ -10,10 +10,10 @@ import (
 	"street/ent/migrate"
 
 	"street/ent/account"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/ent/file"
 	"street/ent/profile"
-	"street/ent/series"
 	"street/ent/token"
 
 	"entgo.io/ent/dialect"
@@ -29,14 +29,14 @@ type Client struct {
 	Schema *migrate.Schema
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// Comment is the client for interacting with the Comment builders.
+	Comment *CommentClient
 	// Episode is the client for interacting with the Episode builders.
 	Episode *EpisodeClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
-	// Series is the client for interacting with the Series builders.
-	Series *SeriesClient
 	// Token is the client for interacting with the Token builders.
 	Token *TokenClient
 }
@@ -53,10 +53,10 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
+	c.Comment = NewCommentClient(c.config)
 	c.Episode = NewEpisodeClient(c.config)
 	c.File = NewFileClient(c.config)
 	c.Profile = NewProfileClient(c.config)
-	c.Series = NewSeriesClient(c.config)
 	c.Token = NewTokenClient(c.config)
 }
 
@@ -92,10 +92,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:     ctx,
 		config:  cfg,
 		Account: NewAccountClient(cfg),
+		Comment: NewCommentClient(cfg),
 		Episode: NewEpisodeClient(cfg),
 		File:    NewFileClient(cfg),
 		Profile: NewProfileClient(cfg),
-		Series:  NewSeriesClient(cfg),
 		Token:   NewTokenClient(cfg),
 	}, nil
 }
@@ -116,10 +116,10 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		config:  cfg,
 		Account: NewAccountClient(cfg),
+		Comment: NewCommentClient(cfg),
 		Episode: NewEpisodeClient(cfg),
 		File:    NewFileClient(cfg),
 		Profile: NewProfileClient(cfg),
-		Series:  NewSeriesClient(cfg),
 		Token:   NewTokenClient(cfg),
 	}, nil
 }
@@ -151,10 +151,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
+	c.Comment.Use(hooks...)
 	c.Episode.Use(hooks...)
 	c.File.Use(hooks...)
 	c.Profile.Use(hooks...)
-	c.Series.Use(hooks...)
 	c.Token.Use(hooks...)
 }
 
@@ -296,6 +296,128 @@ func (c *AccountClient) Hooks() []Hook {
 	return c.hooks.Account
 }
 
+// CommentClient is a client for the Comment schema.
+type CommentClient struct {
+	config
+}
+
+// NewCommentClient returns a client for the Comment from the given config.
+func NewCommentClient(c config) *CommentClient {
+	return &CommentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `comment.Hooks(f(g(h())))`.
+func (c *CommentClient) Use(hooks ...Hook) {
+	c.hooks.Comment = append(c.hooks.Comment, hooks...)
+}
+
+// Create returns a create builder for Comment.
+func (c *CommentClient) Create() *CommentCreate {
+	mutation := newCommentMutation(c.config, OpCreate)
+	return &CommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Comment entities.
+func (c *CommentClient) CreateBulk(builders ...*CommentCreate) *CommentCreateBulk {
+	return &CommentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Comment.
+func (c *CommentClient) Update() *CommentUpdate {
+	mutation := newCommentMutation(c.config, OpUpdate)
+	return &CommentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CommentClient) UpdateOne(co *Comment) *CommentUpdateOne {
+	mutation := newCommentMutation(c.config, OpUpdateOne, withComment(co))
+	return &CommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CommentClient) UpdateOneID(id uuid.UUID) *CommentUpdateOne {
+	mutation := newCommentMutation(c.config, OpUpdateOne, withCommentID(id))
+	return &CommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Comment.
+func (c *CommentClient) Delete() *CommentDelete {
+	mutation := newCommentMutation(c.config, OpDelete)
+	return &CommentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CommentClient) DeleteOne(co *Comment) *CommentDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CommentClient) DeleteOneID(id uuid.UUID) *CommentDeleteOne {
+	builder := c.Delete().Where(comment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CommentDeleteOne{builder}
+}
+
+// Query returns a query builder for Comment.
+func (c *CommentClient) Query() *CommentQuery {
+	return &CommentQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Comment entity by its id.
+func (c *CommentClient) Get(ctx context.Context, id uuid.UUID) (*Comment, error) {
+	return c.Query().Where(comment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CommentClient) GetX(ctx context.Context, id uuid.UUID) *Comment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEpisode queries the episode edge of a Comment.
+func (c *CommentClient) QueryEpisode(co *Comment) *EpisodeQuery {
+	query := &EpisodeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(episode.Table, episode.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.EpisodeTable, comment.EpisodeColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAuthor queries the author edge of a Comment.
+func (c *CommentClient) QueryAuthor(co *Comment) *ProfileQuery {
+	query := &ProfileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.AuthorTable, comment.AuthorColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CommentClient) Hooks() []Hook {
+	return c.hooks.Comment
+}
+
 // EpisodeClient is a client for the Episode schema.
 type EpisodeClient struct {
 	config
@@ -397,15 +519,15 @@ func (c *EpisodeClient) QueryProfile(e *Episode) *ProfileQuery {
 	return query
 }
 
-// QuerySeries queries the series edge of a Episode.
-func (c *EpisodeClient) QuerySeries(e *Episode) *SeriesQuery {
-	query := &SeriesQuery{config: c.config}
+// QueryComments queries the comments edge of a Episode.
+func (c *EpisodeClient) QueryComments(e *Episode) *CommentQuery {
+	query := &CommentQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := e.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(episode.Table, episode.FieldID, id),
-			sqlgraph.To(series.Table, series.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, episode.SeriesTable, episode.SeriesColumn),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, episode.CommentsTable, episode.CommentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
@@ -641,15 +763,15 @@ func (c *ProfileClient) QueryEpisode(pr *Profile) *EpisodeQuery {
 	return query
 }
 
-// QuerySeries queries the series edge of a Profile.
-func (c *ProfileClient) QuerySeries(pr *Profile) *SeriesQuery {
-	query := &SeriesQuery{config: c.config}
+// QueryCommenter queries the commenter edge of a Profile.
+func (c *ProfileClient) QueryCommenter(pr *Profile) *CommentQuery {
+	query := &CommentQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := pr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profile.Table, profile.FieldID, id),
-			sqlgraph.To(series.Table, series.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profile.SeriesTable, profile.SeriesColumn),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.CommenterTable, profile.CommenterColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -660,128 +782,6 @@ func (c *ProfileClient) QuerySeries(pr *Profile) *SeriesQuery {
 // Hooks returns the client hooks.
 func (c *ProfileClient) Hooks() []Hook {
 	return c.hooks.Profile
-}
-
-// SeriesClient is a client for the Series schema.
-type SeriesClient struct {
-	config
-}
-
-// NewSeriesClient returns a client for the Series from the given config.
-func NewSeriesClient(c config) *SeriesClient {
-	return &SeriesClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `series.Hooks(f(g(h())))`.
-func (c *SeriesClient) Use(hooks ...Hook) {
-	c.hooks.Series = append(c.hooks.Series, hooks...)
-}
-
-// Create returns a create builder for Series.
-func (c *SeriesClient) Create() *SeriesCreate {
-	mutation := newSeriesMutation(c.config, OpCreate)
-	return &SeriesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Series entities.
-func (c *SeriesClient) CreateBulk(builders ...*SeriesCreate) *SeriesCreateBulk {
-	return &SeriesCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Series.
-func (c *SeriesClient) Update() *SeriesUpdate {
-	mutation := newSeriesMutation(c.config, OpUpdate)
-	return &SeriesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *SeriesClient) UpdateOne(s *Series) *SeriesUpdateOne {
-	mutation := newSeriesMutation(c.config, OpUpdateOne, withSeries(s))
-	return &SeriesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *SeriesClient) UpdateOneID(id uuid.UUID) *SeriesUpdateOne {
-	mutation := newSeriesMutation(c.config, OpUpdateOne, withSeriesID(id))
-	return &SeriesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Series.
-func (c *SeriesClient) Delete() *SeriesDelete {
-	mutation := newSeriesMutation(c.config, OpDelete)
-	return &SeriesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *SeriesClient) DeleteOne(s *Series) *SeriesDeleteOne {
-	return c.DeleteOneID(s.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *SeriesClient) DeleteOneID(id uuid.UUID) *SeriesDeleteOne {
-	builder := c.Delete().Where(series.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &SeriesDeleteOne{builder}
-}
-
-// Query returns a query builder for Series.
-func (c *SeriesClient) Query() *SeriesQuery {
-	return &SeriesQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a Series entity by its id.
-func (c *SeriesClient) Get(ctx context.Context, id uuid.UUID) (*Series, error) {
-	return c.Query().Where(series.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *SeriesClient) GetX(ctx context.Context, id uuid.UUID) *Series {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryProfile queries the profile edge of a Series.
-func (c *SeriesClient) QueryProfile(s *Series) *ProfileQuery {
-	query := &ProfileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(series.Table, series.FieldID, id),
-			sqlgraph.To(profile.Table, profile.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, series.ProfileTable, series.ProfileColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryEpisode queries the episode edge of a Series.
-func (c *SeriesClient) QueryEpisode(s *Series) *EpisodeQuery {
-	query := &EpisodeQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(series.Table, series.FieldID, id),
-			sqlgraph.To(episode.Table, episode.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, series.EpisodeTable, series.EpisodeColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *SeriesClient) Hooks() []Hook {
-	return c.hooks.Series
 }
 
 // TokenClient is a client for the Token schema.

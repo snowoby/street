@@ -7,7 +7,6 @@ import (
 	"street/ent/episode"
 	"street/ent/profile"
 	"street/ent/schema"
-	"street/ent/series"
 	"strings"
 	"time"
 
@@ -26,25 +25,24 @@ type Episode struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// Cover holds the value of the "cover" field.
+	Cover *string `json:"cover,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
-	// Cover holds the value of the "cover" field.
-	Cover *string `json:"cover,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EpisodeQuery when eager-loading is set.
 	Edges           EpisodeEdges `json:"edges"`
 	profile_episode *uuid.UUID
-	series_episode  *uuid.UUID
 }
 
 // EpisodeEdges holds the relations/edges for other nodes in the graph.
 type EpisodeEdges struct {
 	// Profile holds the value of the profile edge.
 	Profile *Profile `json:"profile,omitempty"`
-	// Series holds the value of the series edge.
-	Series *Series `json:"series,omitempty"`
+	// Comments holds the value of the comments edge.
+	Comments []*Comment `json:"comments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -64,18 +62,13 @@ func (e EpisodeEdges) ProfileOrErr() (*Profile, error) {
 	return nil, &NotLoadedError{edge: "profile"}
 }
 
-// SeriesOrErr returns the Series value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e EpisodeEdges) SeriesOrErr() (*Series, error) {
+// CommentsOrErr returns the Comments value or an error if the edge
+// was not loaded in eager-loading.
+func (e EpisodeEdges) CommentsOrErr() ([]*Comment, error) {
 	if e.loadedTypes[1] {
-		if e.Series == nil {
-			// The edge series was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: series.Label}
-		}
-		return e.Series, nil
+		return e.Comments, nil
 	}
-	return nil, &NotLoadedError{edge: "series"}
+	return nil, &NotLoadedError{edge: "comments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -85,15 +78,13 @@ func (*Episode) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case episode.FieldSid:
 			values[i] = new(schema.ID)
-		case episode.FieldTitle, episode.FieldContent, episode.FieldCover:
+		case episode.FieldCover, episode.FieldTitle, episode.FieldContent:
 			values[i] = new(sql.NullString)
 		case episode.FieldCreateTime, episode.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case episode.FieldID:
 			values[i] = new(uuid.UUID)
 		case episode.ForeignKeys[0]: // profile_episode
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case episode.ForeignKeys[1]: // series_episode
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Episode", columns[i])
@@ -134,6 +125,13 @@ func (e *Episode) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				e.UpdateTime = value.Time
 			}
+		case episode.FieldCover:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cover", values[i])
+			} else if value.Valid {
+				e.Cover = new(string)
+				*e.Cover = value.String
+			}
 		case episode.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
@@ -146,26 +144,12 @@ func (e *Episode) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				e.Content = value.String
 			}
-		case episode.FieldCover:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field cover", values[i])
-			} else if value.Valid {
-				e.Cover = new(string)
-				*e.Cover = value.String
-			}
 		case episode.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field profile_episode", values[i])
 			} else if value.Valid {
 				e.profile_episode = new(uuid.UUID)
 				*e.profile_episode = *value.S.(*uuid.UUID)
-			}
-		case episode.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field series_episode", values[i])
-			} else if value.Valid {
-				e.series_episode = new(uuid.UUID)
-				*e.series_episode = *value.S.(*uuid.UUID)
 			}
 		}
 	}
@@ -177,9 +161,9 @@ func (e *Episode) QueryProfile() *ProfileQuery {
 	return (&EpisodeClient{config: e.config}).QueryProfile(e)
 }
 
-// QuerySeries queries the "series" edge of the Episode entity.
-func (e *Episode) QuerySeries() *SeriesQuery {
-	return (&EpisodeClient{config: e.config}).QuerySeries(e)
+// QueryComments queries the "comments" edge of the Episode entity.
+func (e *Episode) QueryComments() *CommentQuery {
+	return (&EpisodeClient{config: e.config}).QueryComments(e)
 }
 
 // Update returns a builder for updating this Episode.
@@ -211,14 +195,14 @@ func (e *Episode) String() string {
 	builder.WriteString(e.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(e.UpdateTime.Format(time.ANSIC))
-	builder.WriteString(", title=")
-	builder.WriteString(e.Title)
-	builder.WriteString(", content=")
-	builder.WriteString(e.Content)
 	if v := e.Cover; v != nil {
 		builder.WriteString(", cover=")
 		builder.WriteString(*v)
 	}
+	builder.WriteString(", title=")
+	builder.WriteString(e.Title)
+	builder.WriteString(", content=")
+	builder.WriteString(e.Content)
 	builder.WriteByte(')')
 	return builder.String()
 }

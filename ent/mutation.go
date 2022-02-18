@@ -6,12 +6,12 @@ import (
 	"context"
 	"fmt"
 	"street/ent/account"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/ent/file"
 	"street/ent/predicate"
 	"street/ent/profile"
 	"street/ent/schema"
-	"street/ent/series"
 	"street/ent/token"
 	"sync"
 	"time"
@@ -31,10 +31,10 @@ const (
 
 	// Node types.
 	TypeAccount = "Account"
+	TypeComment = "Comment"
 	TypeEpisode = "Episode"
 	TypeFile    = "File"
 	TypeProfile = "Profile"
-	TypeSeries  = "Series"
 	TypeToken   = "Token"
 )
 
@@ -814,8 +814,8 @@ func (m *AccountMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Account edge %s", name)
 }
 
-// EpisodeMutation represents an operation that mutates the Episode nodes in the graph.
-type EpisodeMutation struct {
+// CommentMutation represents an operation that mutates the Comment nodes in the graph.
+type CommentMutation struct {
 	config
 	op             Op
 	typ            string
@@ -823,17 +823,609 @@ type EpisodeMutation struct {
 	sid            *schema.ID
 	create_time    *time.Time
 	update_time    *time.Time
-	title          *string
 	content        *string
-	cover          *string
 	clearedFields  map[string]struct{}
-	profile        *uuid.UUID
-	clearedprofile bool
-	series         *uuid.UUID
-	clearedseries  bool
+	episode        *uuid.UUID
+	clearedepisode bool
+	author         *uuid.UUID
+	clearedauthor  bool
 	done           bool
-	oldValue       func(context.Context) (*Episode, error)
-	predicates     []predicate.Episode
+	oldValue       func(context.Context) (*Comment, error)
+	predicates     []predicate.Comment
+}
+
+var _ ent.Mutation = (*CommentMutation)(nil)
+
+// commentOption allows management of the mutation configuration using functional options.
+type commentOption func(*CommentMutation)
+
+// newCommentMutation creates new mutation for the Comment entity.
+func newCommentMutation(c config, op Op, opts ...commentOption) *CommentMutation {
+	m := &CommentMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeComment,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCommentID sets the ID field of the mutation.
+func withCommentID(id uuid.UUID) commentOption {
+	return func(m *CommentMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Comment
+		)
+		m.oldValue = func(ctx context.Context) (*Comment, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Comment.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withComment sets the old Comment of the mutation.
+func withComment(node *Comment) commentOption {
+	return func(m *CommentMutation) {
+		m.oldValue = func(context.Context) (*Comment, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CommentMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CommentMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Comment entities.
+func (m *CommentMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CommentMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetSid sets the "sid" field.
+func (m *CommentMutation) SetSid(s schema.ID) {
+	m.sid = &s
+}
+
+// Sid returns the value of the "sid" field in the mutation.
+func (m *CommentMutation) Sid() (r schema.ID, exists bool) {
+	v := m.sid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSid returns the old "sid" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldSid(ctx context.Context) (v schema.ID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSid: %w", err)
+	}
+	return oldValue.Sid, nil
+}
+
+// ResetSid resets all changes to the "sid" field.
+func (m *CommentMutation) ResetSid() {
+	m.sid = nil
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *CommentMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *CommentMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *CommentMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *CommentMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *CommentMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *CommentMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetContent sets the "content" field.
+func (m *CommentMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *CommentMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *CommentMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetEpisodeID sets the "episode" edge to the Episode entity by id.
+func (m *CommentMutation) SetEpisodeID(id uuid.UUID) {
+	m.episode = &id
+}
+
+// ClearEpisode clears the "episode" edge to the Episode entity.
+func (m *CommentMutation) ClearEpisode() {
+	m.clearedepisode = true
+}
+
+// EpisodeCleared reports if the "episode" edge to the Episode entity was cleared.
+func (m *CommentMutation) EpisodeCleared() bool {
+	return m.clearedepisode
+}
+
+// EpisodeID returns the "episode" edge ID in the mutation.
+func (m *CommentMutation) EpisodeID() (id uuid.UUID, exists bool) {
+	if m.episode != nil {
+		return *m.episode, true
+	}
+	return
+}
+
+// EpisodeIDs returns the "episode" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// EpisodeID instead. It exists only for internal usage by the builders.
+func (m *CommentMutation) EpisodeIDs() (ids []uuid.UUID) {
+	if id := m.episode; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetEpisode resets all changes to the "episode" edge.
+func (m *CommentMutation) ResetEpisode() {
+	m.episode = nil
+	m.clearedepisode = false
+}
+
+// SetAuthorID sets the "author" edge to the Profile entity by id.
+func (m *CommentMutation) SetAuthorID(id uuid.UUID) {
+	m.author = &id
+}
+
+// ClearAuthor clears the "author" edge to the Profile entity.
+func (m *CommentMutation) ClearAuthor() {
+	m.clearedauthor = true
+}
+
+// AuthorCleared reports if the "author" edge to the Profile entity was cleared.
+func (m *CommentMutation) AuthorCleared() bool {
+	return m.clearedauthor
+}
+
+// AuthorID returns the "author" edge ID in the mutation.
+func (m *CommentMutation) AuthorID() (id uuid.UUID, exists bool) {
+	if m.author != nil {
+		return *m.author, true
+	}
+	return
+}
+
+// AuthorIDs returns the "author" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AuthorID instead. It exists only for internal usage by the builders.
+func (m *CommentMutation) AuthorIDs() (ids []uuid.UUID) {
+	if id := m.author; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAuthor resets all changes to the "author" edge.
+func (m *CommentMutation) ResetAuthor() {
+	m.author = nil
+	m.clearedauthor = false
+}
+
+// Where appends a list predicates to the CommentMutation builder.
+func (m *CommentMutation) Where(ps ...predicate.Comment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *CommentMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Comment).
+func (m *CommentMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CommentMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.sid != nil {
+		fields = append(fields, comment.FieldSid)
+	}
+	if m.create_time != nil {
+		fields = append(fields, comment.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, comment.FieldUpdateTime)
+	}
+	if m.content != nil {
+		fields = append(fields, comment.FieldContent)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CommentMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case comment.FieldSid:
+		return m.Sid()
+	case comment.FieldCreateTime:
+		return m.CreateTime()
+	case comment.FieldUpdateTime:
+		return m.UpdateTime()
+	case comment.FieldContent:
+		return m.Content()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case comment.FieldSid:
+		return m.OldSid(ctx)
+	case comment.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case comment.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case comment.FieldContent:
+		return m.OldContent(ctx)
+	}
+	return nil, fmt.Errorf("unknown Comment field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CommentMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case comment.FieldSid:
+		v, ok := value.(schema.ID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSid(v)
+		return nil
+	case comment.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case comment.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case comment.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Comment field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CommentMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CommentMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CommentMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Comment numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CommentMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CommentMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CommentMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Comment nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CommentMutation) ResetField(name string) error {
+	switch name {
+	case comment.FieldSid:
+		m.ResetSid()
+		return nil
+	case comment.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case comment.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case comment.FieldContent:
+		m.ResetContent()
+		return nil
+	}
+	return fmt.Errorf("unknown Comment field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CommentMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.episode != nil {
+		edges = append(edges, comment.EdgeEpisode)
+	}
+	if m.author != nil {
+		edges = append(edges, comment.EdgeAuthor)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CommentMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case comment.EdgeEpisode:
+		if id := m.episode; id != nil {
+			return []ent.Value{*id}
+		}
+	case comment.EdgeAuthor:
+		if id := m.author; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CommentMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CommentMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CommentMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedepisode {
+		edges = append(edges, comment.EdgeEpisode)
+	}
+	if m.clearedauthor {
+		edges = append(edges, comment.EdgeAuthor)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CommentMutation) EdgeCleared(name string) bool {
+	switch name {
+	case comment.EdgeEpisode:
+		return m.clearedepisode
+	case comment.EdgeAuthor:
+		return m.clearedauthor
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CommentMutation) ClearEdge(name string) error {
+	switch name {
+	case comment.EdgeEpisode:
+		m.ClearEpisode()
+		return nil
+	case comment.EdgeAuthor:
+		m.ClearAuthor()
+		return nil
+	}
+	return fmt.Errorf("unknown Comment unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CommentMutation) ResetEdge(name string) error {
+	switch name {
+	case comment.EdgeEpisode:
+		m.ResetEpisode()
+		return nil
+	case comment.EdgeAuthor:
+		m.ResetAuthor()
+		return nil
+	}
+	return fmt.Errorf("unknown Comment edge %s", name)
+}
+
+// EpisodeMutation represents an operation that mutates the Episode nodes in the graph.
+type EpisodeMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	sid             *schema.ID
+	create_time     *time.Time
+	update_time     *time.Time
+	cover           *string
+	title           *string
+	content         *string
+	clearedFields   map[string]struct{}
+	profile         *uuid.UUID
+	clearedprofile  bool
+	comments        map[uuid.UUID]struct{}
+	removedcomments map[uuid.UUID]struct{}
+	clearedcomments bool
+	done            bool
+	oldValue        func(context.Context) (*Episode, error)
+	predicates      []predicate.Episode
 }
 
 var _ ent.Mutation = (*EpisodeMutation)(nil)
@@ -1029,6 +1621,55 @@ func (m *EpisodeMutation) ResetUpdateTime() {
 	m.update_time = nil
 }
 
+// SetCover sets the "cover" field.
+func (m *EpisodeMutation) SetCover(s string) {
+	m.cover = &s
+}
+
+// Cover returns the value of the "cover" field in the mutation.
+func (m *EpisodeMutation) Cover() (r string, exists bool) {
+	v := m.cover
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCover returns the old "cover" field's value of the Episode entity.
+// If the Episode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeMutation) OldCover(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCover is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCover requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCover: %w", err)
+	}
+	return oldValue.Cover, nil
+}
+
+// ClearCover clears the value of the "cover" field.
+func (m *EpisodeMutation) ClearCover() {
+	m.cover = nil
+	m.clearedFields[episode.FieldCover] = struct{}{}
+}
+
+// CoverCleared returns if the "cover" field was cleared in this mutation.
+func (m *EpisodeMutation) CoverCleared() bool {
+	_, ok := m.clearedFields[episode.FieldCover]
+	return ok
+}
+
+// ResetCover resets all changes to the "cover" field.
+func (m *EpisodeMutation) ResetCover() {
+	m.cover = nil
+	delete(m.clearedFields, episode.FieldCover)
+}
+
 // SetTitle sets the "title" field.
 func (m *EpisodeMutation) SetTitle(s string) {
 	m.title = &s
@@ -1101,55 +1742,6 @@ func (m *EpisodeMutation) ResetContent() {
 	m.content = nil
 }
 
-// SetCover sets the "cover" field.
-func (m *EpisodeMutation) SetCover(s string) {
-	m.cover = &s
-}
-
-// Cover returns the value of the "cover" field in the mutation.
-func (m *EpisodeMutation) Cover() (r string, exists bool) {
-	v := m.cover
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCover returns the old "cover" field's value of the Episode entity.
-// If the Episode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EpisodeMutation) OldCover(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCover is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCover requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCover: %w", err)
-	}
-	return oldValue.Cover, nil
-}
-
-// ClearCover clears the value of the "cover" field.
-func (m *EpisodeMutation) ClearCover() {
-	m.cover = nil
-	m.clearedFields[episode.FieldCover] = struct{}{}
-}
-
-// CoverCleared returns if the "cover" field was cleared in this mutation.
-func (m *EpisodeMutation) CoverCleared() bool {
-	_, ok := m.clearedFields[episode.FieldCover]
-	return ok
-}
-
-// ResetCover resets all changes to the "cover" field.
-func (m *EpisodeMutation) ResetCover() {
-	m.cover = nil
-	delete(m.clearedFields, episode.FieldCover)
-}
-
 // SetProfileID sets the "profile" edge to the Profile entity by id.
 func (m *EpisodeMutation) SetProfileID(id uuid.UUID) {
 	m.profile = &id
@@ -1189,43 +1781,58 @@ func (m *EpisodeMutation) ResetProfile() {
 	m.clearedprofile = false
 }
 
-// SetSeriesID sets the "series" edge to the Series entity by id.
-func (m *EpisodeMutation) SetSeriesID(id uuid.UUID) {
-	m.series = &id
+// AddCommentIDs adds the "comments" edge to the Comment entity by ids.
+func (m *EpisodeMutation) AddCommentIDs(ids ...uuid.UUID) {
+	if m.comments == nil {
+		m.comments = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.comments[ids[i]] = struct{}{}
+	}
 }
 
-// ClearSeries clears the "series" edge to the Series entity.
-func (m *EpisodeMutation) ClearSeries() {
-	m.clearedseries = true
+// ClearComments clears the "comments" edge to the Comment entity.
+func (m *EpisodeMutation) ClearComments() {
+	m.clearedcomments = true
 }
 
-// SeriesCleared reports if the "series" edge to the Series entity was cleared.
-func (m *EpisodeMutation) SeriesCleared() bool {
-	return m.clearedseries
+// CommentsCleared reports if the "comments" edge to the Comment entity was cleared.
+func (m *EpisodeMutation) CommentsCleared() bool {
+	return m.clearedcomments
 }
 
-// SeriesID returns the "series" edge ID in the mutation.
-func (m *EpisodeMutation) SeriesID() (id uuid.UUID, exists bool) {
-	if m.series != nil {
-		return *m.series, true
+// RemoveCommentIDs removes the "comments" edge to the Comment entity by IDs.
+func (m *EpisodeMutation) RemoveCommentIDs(ids ...uuid.UUID) {
+	if m.removedcomments == nil {
+		m.removedcomments = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.comments, ids[i])
+		m.removedcomments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedComments returns the removed IDs of the "comments" edge to the Comment entity.
+func (m *EpisodeMutation) RemovedCommentsIDs() (ids []uuid.UUID) {
+	for id := range m.removedcomments {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// SeriesIDs returns the "series" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// SeriesID instead. It exists only for internal usage by the builders.
-func (m *EpisodeMutation) SeriesIDs() (ids []uuid.UUID) {
-	if id := m.series; id != nil {
-		ids = append(ids, *id)
+// CommentsIDs returns the "comments" edge IDs in the mutation.
+func (m *EpisodeMutation) CommentsIDs() (ids []uuid.UUID) {
+	for id := range m.comments {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetSeries resets all changes to the "series" edge.
-func (m *EpisodeMutation) ResetSeries() {
-	m.series = nil
-	m.clearedseries = false
+// ResetComments resets all changes to the "comments" edge.
+func (m *EpisodeMutation) ResetComments() {
+	m.comments = nil
+	m.clearedcomments = false
+	m.removedcomments = nil
 }
 
 // Where appends a list predicates to the EpisodeMutation builder.
@@ -1257,14 +1864,14 @@ func (m *EpisodeMutation) Fields() []string {
 	if m.update_time != nil {
 		fields = append(fields, episode.FieldUpdateTime)
 	}
+	if m.cover != nil {
+		fields = append(fields, episode.FieldCover)
+	}
 	if m.title != nil {
 		fields = append(fields, episode.FieldTitle)
 	}
 	if m.content != nil {
 		fields = append(fields, episode.FieldContent)
-	}
-	if m.cover != nil {
-		fields = append(fields, episode.FieldCover)
 	}
 	return fields
 }
@@ -1280,12 +1887,12 @@ func (m *EpisodeMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case episode.FieldUpdateTime:
 		return m.UpdateTime()
+	case episode.FieldCover:
+		return m.Cover()
 	case episode.FieldTitle:
 		return m.Title()
 	case episode.FieldContent:
 		return m.Content()
-	case episode.FieldCover:
-		return m.Cover()
 	}
 	return nil, false
 }
@@ -1301,12 +1908,12 @@ func (m *EpisodeMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCreateTime(ctx)
 	case episode.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case episode.FieldCover:
+		return m.OldCover(ctx)
 	case episode.FieldTitle:
 		return m.OldTitle(ctx)
 	case episode.FieldContent:
 		return m.OldContent(ctx)
-	case episode.FieldCover:
-		return m.OldCover(ctx)
 	}
 	return nil, fmt.Errorf("unknown Episode field %s", name)
 }
@@ -1337,6 +1944,13 @@ func (m *EpisodeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdateTime(v)
 		return nil
+	case episode.FieldCover:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCover(v)
+		return nil
 	case episode.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -1350,13 +1964,6 @@ func (m *EpisodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetContent(v)
-		return nil
-	case episode.FieldCover:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCover(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)
@@ -1428,14 +2035,14 @@ func (m *EpisodeMutation) ResetField(name string) error {
 	case episode.FieldUpdateTime:
 		m.ResetUpdateTime()
 		return nil
+	case episode.FieldCover:
+		m.ResetCover()
+		return nil
 	case episode.FieldTitle:
 		m.ResetTitle()
 		return nil
 	case episode.FieldContent:
 		m.ResetContent()
-		return nil
-	case episode.FieldCover:
-		m.ResetCover()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)
@@ -1447,8 +2054,8 @@ func (m *EpisodeMutation) AddedEdges() []string {
 	if m.profile != nil {
 		edges = append(edges, episode.EdgeProfile)
 	}
-	if m.series != nil {
-		edges = append(edges, episode.EdgeSeries)
+	if m.comments != nil {
+		edges = append(edges, episode.EdgeComments)
 	}
 	return edges
 }
@@ -1461,10 +2068,12 @@ func (m *EpisodeMutation) AddedIDs(name string) []ent.Value {
 		if id := m.profile; id != nil {
 			return []ent.Value{*id}
 		}
-	case episode.EdgeSeries:
-		if id := m.series; id != nil {
-			return []ent.Value{*id}
+	case episode.EdgeComments:
+		ids := make([]ent.Value, 0, len(m.comments))
+		for id := range m.comments {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -1472,6 +2081,9 @@ func (m *EpisodeMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EpisodeMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
+	if m.removedcomments != nil {
+		edges = append(edges, episode.EdgeComments)
+	}
 	return edges
 }
 
@@ -1479,6 +2091,12 @@ func (m *EpisodeMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *EpisodeMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case episode.EdgeComments:
+		ids := make([]ent.Value, 0, len(m.removedcomments))
+		for id := range m.removedcomments {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -1489,8 +2107,8 @@ func (m *EpisodeMutation) ClearedEdges() []string {
 	if m.clearedprofile {
 		edges = append(edges, episode.EdgeProfile)
 	}
-	if m.clearedseries {
-		edges = append(edges, episode.EdgeSeries)
+	if m.clearedcomments {
+		edges = append(edges, episode.EdgeComments)
 	}
 	return edges
 }
@@ -1501,8 +2119,8 @@ func (m *EpisodeMutation) EdgeCleared(name string) bool {
 	switch name {
 	case episode.EdgeProfile:
 		return m.clearedprofile
-	case episode.EdgeSeries:
-		return m.clearedseries
+	case episode.EdgeComments:
+		return m.clearedcomments
 	}
 	return false
 }
@@ -1513,9 +2131,6 @@ func (m *EpisodeMutation) ClearEdge(name string) error {
 	switch name {
 	case episode.EdgeProfile:
 		m.ClearProfile()
-		return nil
-	case episode.EdgeSeries:
-		m.ClearSeries()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode unique edge %s", name)
@@ -1528,8 +2143,8 @@ func (m *EpisodeMutation) ResetEdge(name string) error {
 	case episode.EdgeProfile:
 		m.ResetProfile()
 		return nil
-	case episode.EdgeSeries:
-		m.ResetSeries()
+	case episode.EdgeComments:
+		m.ResetComments()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode edge %s", name)
@@ -2395,28 +3010,28 @@ func (m *FileMutation) ResetEdge(name string) error {
 // ProfileMutation represents an operation that mutates the Profile nodes in the graph.
 type ProfileMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	sid            *schema.ID
-	create_time    *time.Time
-	update_time    *time.Time
-	title          *string
-	call           *string
-	category       *string
-	avatar         *string
-	clearedFields  map[string]struct{}
-	account        *uuid.UUID
-	clearedaccount bool
-	episode        map[uuid.UUID]struct{}
-	removedepisode map[uuid.UUID]struct{}
-	clearedepisode bool
-	series         map[uuid.UUID]struct{}
-	removedseries  map[uuid.UUID]struct{}
-	clearedseries  bool
-	done           bool
-	oldValue       func(context.Context) (*Profile, error)
-	predicates     []predicate.Profile
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	sid              *schema.ID
+	create_time      *time.Time
+	update_time      *time.Time
+	title            *string
+	call             *string
+	category         *string
+	avatar           *string
+	clearedFields    map[string]struct{}
+	account          *uuid.UUID
+	clearedaccount   bool
+	episode          map[uuid.UUID]struct{}
+	removedepisode   map[uuid.UUID]struct{}
+	clearedepisode   bool
+	commenter        map[uuid.UUID]struct{}
+	removedcommenter map[uuid.UUID]struct{}
+	clearedcommenter bool
+	done             bool
+	oldValue         func(context.Context) (*Profile, error)
+	predicates       []predicate.Profile
 }
 
 var _ ent.Mutation = (*ProfileMutation)(nil)
@@ -2862,58 +3477,58 @@ func (m *ProfileMutation) ResetEpisode() {
 	m.removedepisode = nil
 }
 
-// AddSeriesIDs adds the "series" edge to the Series entity by ids.
-func (m *ProfileMutation) AddSeriesIDs(ids ...uuid.UUID) {
-	if m.series == nil {
-		m.series = make(map[uuid.UUID]struct{})
+// AddCommenterIDs adds the "commenter" edge to the Comment entity by ids.
+func (m *ProfileMutation) AddCommenterIDs(ids ...uuid.UUID) {
+	if m.commenter == nil {
+		m.commenter = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.series[ids[i]] = struct{}{}
+		m.commenter[ids[i]] = struct{}{}
 	}
 }
 
-// ClearSeries clears the "series" edge to the Series entity.
-func (m *ProfileMutation) ClearSeries() {
-	m.clearedseries = true
+// ClearCommenter clears the "commenter" edge to the Comment entity.
+func (m *ProfileMutation) ClearCommenter() {
+	m.clearedcommenter = true
 }
 
-// SeriesCleared reports if the "series" edge to the Series entity was cleared.
-func (m *ProfileMutation) SeriesCleared() bool {
-	return m.clearedseries
+// CommenterCleared reports if the "commenter" edge to the Comment entity was cleared.
+func (m *ProfileMutation) CommenterCleared() bool {
+	return m.clearedcommenter
 }
 
-// RemoveSeriesIDs removes the "series" edge to the Series entity by IDs.
-func (m *ProfileMutation) RemoveSeriesIDs(ids ...uuid.UUID) {
-	if m.removedseries == nil {
-		m.removedseries = make(map[uuid.UUID]struct{})
+// RemoveCommenterIDs removes the "commenter" edge to the Comment entity by IDs.
+func (m *ProfileMutation) RemoveCommenterIDs(ids ...uuid.UUID) {
+	if m.removedcommenter == nil {
+		m.removedcommenter = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.series, ids[i])
-		m.removedseries[ids[i]] = struct{}{}
+		delete(m.commenter, ids[i])
+		m.removedcommenter[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedSeries returns the removed IDs of the "series" edge to the Series entity.
-func (m *ProfileMutation) RemovedSeriesIDs() (ids []uuid.UUID) {
-	for id := range m.removedseries {
+// RemovedCommenter returns the removed IDs of the "commenter" edge to the Comment entity.
+func (m *ProfileMutation) RemovedCommenterIDs() (ids []uuid.UUID) {
+	for id := range m.removedcommenter {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// SeriesIDs returns the "series" edge IDs in the mutation.
-func (m *ProfileMutation) SeriesIDs() (ids []uuid.UUID) {
-	for id := range m.series {
+// CommenterIDs returns the "commenter" edge IDs in the mutation.
+func (m *ProfileMutation) CommenterIDs() (ids []uuid.UUID) {
+	for id := range m.commenter {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetSeries resets all changes to the "series" edge.
-func (m *ProfileMutation) ResetSeries() {
-	m.series = nil
-	m.clearedseries = false
-	m.removedseries = nil
+// ResetCommenter resets all changes to the "commenter" edge.
+func (m *ProfileMutation) ResetCommenter() {
+	m.commenter = nil
+	m.clearedcommenter = false
+	m.removedcommenter = nil
 }
 
 // Where appends a list predicates to the ProfileMutation builder.
@@ -3155,8 +3770,8 @@ func (m *ProfileMutation) AddedEdges() []string {
 	if m.episode != nil {
 		edges = append(edges, profile.EdgeEpisode)
 	}
-	if m.series != nil {
-		edges = append(edges, profile.EdgeSeries)
+	if m.commenter != nil {
+		edges = append(edges, profile.EdgeCommenter)
 	}
 	return edges
 }
@@ -3175,9 +3790,9 @@ func (m *ProfileMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case profile.EdgeSeries:
-		ids := make([]ent.Value, 0, len(m.series))
-		for id := range m.series {
+	case profile.EdgeCommenter:
+		ids := make([]ent.Value, 0, len(m.commenter))
+		for id := range m.commenter {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3191,8 +3806,8 @@ func (m *ProfileMutation) RemovedEdges() []string {
 	if m.removedepisode != nil {
 		edges = append(edges, profile.EdgeEpisode)
 	}
-	if m.removedseries != nil {
-		edges = append(edges, profile.EdgeSeries)
+	if m.removedcommenter != nil {
+		edges = append(edges, profile.EdgeCommenter)
 	}
 	return edges
 }
@@ -3207,9 +3822,9 @@ func (m *ProfileMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case profile.EdgeSeries:
-		ids := make([]ent.Value, 0, len(m.removedseries))
-		for id := range m.removedseries {
+	case profile.EdgeCommenter:
+		ids := make([]ent.Value, 0, len(m.removedcommenter))
+		for id := range m.removedcommenter {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3226,8 +3841,8 @@ func (m *ProfileMutation) ClearedEdges() []string {
 	if m.clearedepisode {
 		edges = append(edges, profile.EdgeEpisode)
 	}
-	if m.clearedseries {
-		edges = append(edges, profile.EdgeSeries)
+	if m.clearedcommenter {
+		edges = append(edges, profile.EdgeCommenter)
 	}
 	return edges
 }
@@ -3240,8 +3855,8 @@ func (m *ProfileMutation) EdgeCleared(name string) bool {
 		return m.clearedaccount
 	case profile.EdgeEpisode:
 		return m.clearedepisode
-	case profile.EdgeSeries:
-		return m.clearedseries
+	case profile.EdgeCommenter:
+		return m.clearedcommenter
 	}
 	return false
 }
@@ -3267,756 +3882,11 @@ func (m *ProfileMutation) ResetEdge(name string) error {
 	case profile.EdgeEpisode:
 		m.ResetEpisode()
 		return nil
-	case profile.EdgeSeries:
-		m.ResetSeries()
+	case profile.EdgeCommenter:
+		m.ResetCommenter()
 		return nil
 	}
 	return fmt.Errorf("unknown Profile edge %s", name)
-}
-
-// SeriesMutation represents an operation that mutates the Series nodes in the graph.
-type SeriesMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	sid            *schema.ID
-	create_time    *time.Time
-	update_time    *time.Time
-	title          *string
-	call           *string
-	content        *string
-	clearedFields  map[string]struct{}
-	profile        *uuid.UUID
-	clearedprofile bool
-	episode        map[uuid.UUID]struct{}
-	removedepisode map[uuid.UUID]struct{}
-	clearedepisode bool
-	done           bool
-	oldValue       func(context.Context) (*Series, error)
-	predicates     []predicate.Series
-}
-
-var _ ent.Mutation = (*SeriesMutation)(nil)
-
-// seriesOption allows management of the mutation configuration using functional options.
-type seriesOption func(*SeriesMutation)
-
-// newSeriesMutation creates new mutation for the Series entity.
-func newSeriesMutation(c config, op Op, opts ...seriesOption) *SeriesMutation {
-	m := &SeriesMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeSeries,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withSeriesID sets the ID field of the mutation.
-func withSeriesID(id uuid.UUID) seriesOption {
-	return func(m *SeriesMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Series
-		)
-		m.oldValue = func(ctx context.Context) (*Series, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Series.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withSeries sets the old Series of the mutation.
-func withSeries(node *Series) seriesOption {
-	return func(m *SeriesMutation) {
-		m.oldValue = func(context.Context) (*Series, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m SeriesMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m SeriesMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Series entities.
-func (m *SeriesMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *SeriesMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetSid sets the "sid" field.
-func (m *SeriesMutation) SetSid(s schema.ID) {
-	m.sid = &s
-}
-
-// Sid returns the value of the "sid" field in the mutation.
-func (m *SeriesMutation) Sid() (r schema.ID, exists bool) {
-	v := m.sid
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSid returns the old "sid" field's value of the Series entity.
-// If the Series object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SeriesMutation) OldSid(ctx context.Context) (v schema.ID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSid is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldSid requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSid: %w", err)
-	}
-	return oldValue.Sid, nil
-}
-
-// ResetSid resets all changes to the "sid" field.
-func (m *SeriesMutation) ResetSid() {
-	m.sid = nil
-}
-
-// SetCreateTime sets the "create_time" field.
-func (m *SeriesMutation) SetCreateTime(t time.Time) {
-	m.create_time = &t
-}
-
-// CreateTime returns the value of the "create_time" field in the mutation.
-func (m *SeriesMutation) CreateTime() (r time.Time, exists bool) {
-	v := m.create_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreateTime returns the old "create_time" field's value of the Series entity.
-// If the Series object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SeriesMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreateTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreateTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
-	}
-	return oldValue.CreateTime, nil
-}
-
-// ResetCreateTime resets all changes to the "create_time" field.
-func (m *SeriesMutation) ResetCreateTime() {
-	m.create_time = nil
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (m *SeriesMutation) SetUpdateTime(t time.Time) {
-	m.update_time = &t
-}
-
-// UpdateTime returns the value of the "update_time" field in the mutation.
-func (m *SeriesMutation) UpdateTime() (r time.Time, exists bool) {
-	v := m.update_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdateTime returns the old "update_time" field's value of the Series entity.
-// If the Series object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SeriesMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdateTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdateTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
-	}
-	return oldValue.UpdateTime, nil
-}
-
-// ResetUpdateTime resets all changes to the "update_time" field.
-func (m *SeriesMutation) ResetUpdateTime() {
-	m.update_time = nil
-}
-
-// SetTitle sets the "title" field.
-func (m *SeriesMutation) SetTitle(s string) {
-	m.title = &s
-}
-
-// Title returns the value of the "title" field in the mutation.
-func (m *SeriesMutation) Title() (r string, exists bool) {
-	v := m.title
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTitle returns the old "title" field's value of the Series entity.
-// If the Series object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SeriesMutation) OldTitle(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTitle is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
-	}
-	return oldValue.Title, nil
-}
-
-// ResetTitle resets all changes to the "title" field.
-func (m *SeriesMutation) ResetTitle() {
-	m.title = nil
-}
-
-// SetCall sets the "call" field.
-func (m *SeriesMutation) SetCall(s string) {
-	m.call = &s
-}
-
-// Call returns the value of the "call" field in the mutation.
-func (m *SeriesMutation) Call() (r string, exists bool) {
-	v := m.call
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCall returns the old "call" field's value of the Series entity.
-// If the Series object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SeriesMutation) OldCall(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCall is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCall requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCall: %w", err)
-	}
-	return oldValue.Call, nil
-}
-
-// ClearCall clears the value of the "call" field.
-func (m *SeriesMutation) ClearCall() {
-	m.call = nil
-	m.clearedFields[series.FieldCall] = struct{}{}
-}
-
-// CallCleared returns if the "call" field was cleared in this mutation.
-func (m *SeriesMutation) CallCleared() bool {
-	_, ok := m.clearedFields[series.FieldCall]
-	return ok
-}
-
-// ResetCall resets all changes to the "call" field.
-func (m *SeriesMutation) ResetCall() {
-	m.call = nil
-	delete(m.clearedFields, series.FieldCall)
-}
-
-// SetContent sets the "content" field.
-func (m *SeriesMutation) SetContent(s string) {
-	m.content = &s
-}
-
-// Content returns the value of the "content" field in the mutation.
-func (m *SeriesMutation) Content() (r string, exists bool) {
-	v := m.content
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldContent returns the old "content" field's value of the Series entity.
-// If the Series object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SeriesMutation) OldContent(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContent: %w", err)
-	}
-	return oldValue.Content, nil
-}
-
-// ResetContent resets all changes to the "content" field.
-func (m *SeriesMutation) ResetContent() {
-	m.content = nil
-}
-
-// SetProfileID sets the "profile" edge to the Profile entity by id.
-func (m *SeriesMutation) SetProfileID(id uuid.UUID) {
-	m.profile = &id
-}
-
-// ClearProfile clears the "profile" edge to the Profile entity.
-func (m *SeriesMutation) ClearProfile() {
-	m.clearedprofile = true
-}
-
-// ProfileCleared reports if the "profile" edge to the Profile entity was cleared.
-func (m *SeriesMutation) ProfileCleared() bool {
-	return m.clearedprofile
-}
-
-// ProfileID returns the "profile" edge ID in the mutation.
-func (m *SeriesMutation) ProfileID() (id uuid.UUID, exists bool) {
-	if m.profile != nil {
-		return *m.profile, true
-	}
-	return
-}
-
-// ProfileIDs returns the "profile" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ProfileID instead. It exists only for internal usage by the builders.
-func (m *SeriesMutation) ProfileIDs() (ids []uuid.UUID) {
-	if id := m.profile; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetProfile resets all changes to the "profile" edge.
-func (m *SeriesMutation) ResetProfile() {
-	m.profile = nil
-	m.clearedprofile = false
-}
-
-// AddEpisodeIDs adds the "episode" edge to the Episode entity by ids.
-func (m *SeriesMutation) AddEpisodeIDs(ids ...uuid.UUID) {
-	if m.episode == nil {
-		m.episode = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.episode[ids[i]] = struct{}{}
-	}
-}
-
-// ClearEpisode clears the "episode" edge to the Episode entity.
-func (m *SeriesMutation) ClearEpisode() {
-	m.clearedepisode = true
-}
-
-// EpisodeCleared reports if the "episode" edge to the Episode entity was cleared.
-func (m *SeriesMutation) EpisodeCleared() bool {
-	return m.clearedepisode
-}
-
-// RemoveEpisodeIDs removes the "episode" edge to the Episode entity by IDs.
-func (m *SeriesMutation) RemoveEpisodeIDs(ids ...uuid.UUID) {
-	if m.removedepisode == nil {
-		m.removedepisode = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.episode, ids[i])
-		m.removedepisode[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedEpisode returns the removed IDs of the "episode" edge to the Episode entity.
-func (m *SeriesMutation) RemovedEpisodeIDs() (ids []uuid.UUID) {
-	for id := range m.removedepisode {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// EpisodeIDs returns the "episode" edge IDs in the mutation.
-func (m *SeriesMutation) EpisodeIDs() (ids []uuid.UUID) {
-	for id := range m.episode {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetEpisode resets all changes to the "episode" edge.
-func (m *SeriesMutation) ResetEpisode() {
-	m.episode = nil
-	m.clearedepisode = false
-	m.removedepisode = nil
-}
-
-// Where appends a list predicates to the SeriesMutation builder.
-func (m *SeriesMutation) Where(ps ...predicate.Series) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// Op returns the operation name.
-func (m *SeriesMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (Series).
-func (m *SeriesMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *SeriesMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.sid != nil {
-		fields = append(fields, series.FieldSid)
-	}
-	if m.create_time != nil {
-		fields = append(fields, series.FieldCreateTime)
-	}
-	if m.update_time != nil {
-		fields = append(fields, series.FieldUpdateTime)
-	}
-	if m.title != nil {
-		fields = append(fields, series.FieldTitle)
-	}
-	if m.call != nil {
-		fields = append(fields, series.FieldCall)
-	}
-	if m.content != nil {
-		fields = append(fields, series.FieldContent)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *SeriesMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case series.FieldSid:
-		return m.Sid()
-	case series.FieldCreateTime:
-		return m.CreateTime()
-	case series.FieldUpdateTime:
-		return m.UpdateTime()
-	case series.FieldTitle:
-		return m.Title()
-	case series.FieldCall:
-		return m.Call()
-	case series.FieldContent:
-		return m.Content()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *SeriesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case series.FieldSid:
-		return m.OldSid(ctx)
-	case series.FieldCreateTime:
-		return m.OldCreateTime(ctx)
-	case series.FieldUpdateTime:
-		return m.OldUpdateTime(ctx)
-	case series.FieldTitle:
-		return m.OldTitle(ctx)
-	case series.FieldCall:
-		return m.OldCall(ctx)
-	case series.FieldContent:
-		return m.OldContent(ctx)
-	}
-	return nil, fmt.Errorf("unknown Series field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *SeriesMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case series.FieldSid:
-		v, ok := value.(schema.ID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSid(v)
-		return nil
-	case series.FieldCreateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreateTime(v)
-		return nil
-	case series.FieldUpdateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdateTime(v)
-		return nil
-	case series.FieldTitle:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTitle(v)
-		return nil
-	case series.FieldCall:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCall(v)
-		return nil
-	case series.FieldContent:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetContent(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Series field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *SeriesMutation) AddedFields() []string {
-	var fields []string
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *SeriesMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *SeriesMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Series numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *SeriesMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(series.FieldCall) {
-		fields = append(fields, series.FieldCall)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *SeriesMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *SeriesMutation) ClearField(name string) error {
-	switch name {
-	case series.FieldCall:
-		m.ClearCall()
-		return nil
-	}
-	return fmt.Errorf("unknown Series nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *SeriesMutation) ResetField(name string) error {
-	switch name {
-	case series.FieldSid:
-		m.ResetSid()
-		return nil
-	case series.FieldCreateTime:
-		m.ResetCreateTime()
-		return nil
-	case series.FieldUpdateTime:
-		m.ResetUpdateTime()
-		return nil
-	case series.FieldTitle:
-		m.ResetTitle()
-		return nil
-	case series.FieldCall:
-		m.ResetCall()
-		return nil
-	case series.FieldContent:
-		m.ResetContent()
-		return nil
-	}
-	return fmt.Errorf("unknown Series field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *SeriesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.profile != nil {
-		edges = append(edges, series.EdgeProfile)
-	}
-	if m.episode != nil {
-		edges = append(edges, series.EdgeEpisode)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *SeriesMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case series.EdgeProfile:
-		if id := m.profile; id != nil {
-			return []ent.Value{*id}
-		}
-	case series.EdgeEpisode:
-		ids := make([]ent.Value, 0, len(m.episode))
-		for id := range m.episode {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *SeriesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedepisode != nil {
-		edges = append(edges, series.EdgeEpisode)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *SeriesMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case series.EdgeEpisode:
-		ids := make([]ent.Value, 0, len(m.removedepisode))
-		for id := range m.removedepisode {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *SeriesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedprofile {
-		edges = append(edges, series.EdgeProfile)
-	}
-	if m.clearedepisode {
-		edges = append(edges, series.EdgeEpisode)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *SeriesMutation) EdgeCleared(name string) bool {
-	switch name {
-	case series.EdgeProfile:
-		return m.clearedprofile
-	case series.EdgeEpisode:
-		return m.clearedepisode
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *SeriesMutation) ClearEdge(name string) error {
-	switch name {
-	case series.EdgeProfile:
-		m.ClearProfile()
-		return nil
-	}
-	return fmt.Errorf("unknown Series unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *SeriesMutation) ResetEdge(name string) error {
-	switch name {
-	case series.EdgeProfile:
-		m.ResetProfile()
-		return nil
-	case series.EdgeEpisode:
-		m.ResetEpisode()
-		return nil
-	}
-	return fmt.Errorf("unknown Series edge %s", name)
 }
 
 // TokenMutation represents an operation that mutates the Token nodes in the graph.

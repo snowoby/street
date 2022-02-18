@@ -116,6 +116,13 @@ func UpdateTime(v time.Time) predicate.Episode {
 	})
 }
 
+// Cover applies equality check predicate on the "cover" field. It's identical to CoverEQ.
+func Cover(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCover), v))
+	})
+}
+
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
 func Title(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
@@ -127,13 +134,6 @@ func Title(v string) predicate.Episode {
 func Content(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldContent), v))
-	})
-}
-
-// Cover applies equality check predicate on the "cover" field. It's identical to CoverEQ.
-func Cover(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCover), v))
 	})
 }
 
@@ -365,6 +365,131 @@ func UpdateTimeLTE(v time.Time) predicate.Episode {
 	})
 }
 
+// CoverEQ applies the EQ predicate on the "cover" field.
+func CoverEQ(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCover), v))
+	})
+}
+
+// CoverNEQ applies the NEQ predicate on the "cover" field.
+func CoverNEQ(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCover), v))
+	})
+}
+
+// CoverIn applies the In predicate on the "cover" field.
+func CoverIn(vs ...string) predicate.Episode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Episode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCover), v...))
+	})
+}
+
+// CoverNotIn applies the NotIn predicate on the "cover" field.
+func CoverNotIn(vs ...string) predicate.Episode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Episode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCover), v...))
+	})
+}
+
+// CoverGT applies the GT predicate on the "cover" field.
+func CoverGT(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCover), v))
+	})
+}
+
+// CoverGTE applies the GTE predicate on the "cover" field.
+func CoverGTE(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCover), v))
+	})
+}
+
+// CoverLT applies the LT predicate on the "cover" field.
+func CoverLT(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCover), v))
+	})
+}
+
+// CoverLTE applies the LTE predicate on the "cover" field.
+func CoverLTE(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCover), v))
+	})
+}
+
+// CoverContains applies the Contains predicate on the "cover" field.
+func CoverContains(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldCover), v))
+	})
+}
+
+// CoverHasPrefix applies the HasPrefix predicate on the "cover" field.
+func CoverHasPrefix(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldCover), v))
+	})
+}
+
+// CoverHasSuffix applies the HasSuffix predicate on the "cover" field.
+func CoverHasSuffix(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldCover), v))
+	})
+}
+
+// CoverIsNil applies the IsNil predicate on the "cover" field.
+func CoverIsNil() predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCover)))
+	})
+}
+
+// CoverNotNil applies the NotNil predicate on the "cover" field.
+func CoverNotNil() predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCover)))
+	})
+}
+
+// CoverEqualFold applies the EqualFold predicate on the "cover" field.
+func CoverEqualFold(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldCover), v))
+	})
+}
+
+// CoverContainsFold applies the ContainsFold predicate on the "cover" field.
+func CoverContainsFold(v string) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldCover), v))
+	})
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
@@ -587,131 +712,6 @@ func ContentContainsFold(v string) predicate.Episode {
 	})
 }
 
-// CoverEQ applies the EQ predicate on the "cover" field.
-func CoverEQ(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCover), v))
-	})
-}
-
-// CoverNEQ applies the NEQ predicate on the "cover" field.
-func CoverNEQ(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCover), v))
-	})
-}
-
-// CoverIn applies the In predicate on the "cover" field.
-func CoverIn(vs ...string) predicate.Episode {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Episode(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldCover), v...))
-	})
-}
-
-// CoverNotIn applies the NotIn predicate on the "cover" field.
-func CoverNotIn(vs ...string) predicate.Episode {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Episode(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldCover), v...))
-	})
-}
-
-// CoverGT applies the GT predicate on the "cover" field.
-func CoverGT(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCover), v))
-	})
-}
-
-// CoverGTE applies the GTE predicate on the "cover" field.
-func CoverGTE(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCover), v))
-	})
-}
-
-// CoverLT applies the LT predicate on the "cover" field.
-func CoverLT(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCover), v))
-	})
-}
-
-// CoverLTE applies the LTE predicate on the "cover" field.
-func CoverLTE(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCover), v))
-	})
-}
-
-// CoverContains applies the Contains predicate on the "cover" field.
-func CoverContains(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldCover), v))
-	})
-}
-
-// CoverHasPrefix applies the HasPrefix predicate on the "cover" field.
-func CoverHasPrefix(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldCover), v))
-	})
-}
-
-// CoverHasSuffix applies the HasSuffix predicate on the "cover" field.
-func CoverHasSuffix(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldCover), v))
-	})
-}
-
-// CoverIsNil applies the IsNil predicate on the "cover" field.
-func CoverIsNil() predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldCover)))
-	})
-}
-
-// CoverNotNil applies the NotNil predicate on the "cover" field.
-func CoverNotNil() predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldCover)))
-	})
-}
-
-// CoverEqualFold applies the EqualFold predicate on the "cover" field.
-func CoverEqualFold(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldCover), v))
-	})
-}
-
-// CoverContainsFold applies the ContainsFold predicate on the "cover" field.
-func CoverContainsFold(v string) predicate.Episode {
-	return predicate.Episode(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldCover), v))
-	})
-}
-
 // HasProfile applies the HasEdge predicate on the "profile" edge.
 func HasProfile() predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
@@ -740,25 +740,25 @@ func HasProfileWith(preds ...predicate.Profile) predicate.Episode {
 	})
 }
 
-// HasSeries applies the HasEdge predicate on the "series" edge.
-func HasSeries() predicate.Episode {
+// HasComments applies the HasEdge predicate on the "comments" edge.
+func HasComments() predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SeriesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, SeriesTable, SeriesColumn),
+			sqlgraph.To(CommentsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSeriesWith applies the HasEdge predicate on the "series" edge with a given conditions (other predicates).
-func HasSeriesWith(preds ...predicate.Series) predicate.Episode {
+// HasCommentsWith applies the HasEdge predicate on the "comments" edge with a given conditions (other predicates).
+func HasCommentsWith(preds ...predicate.Comment) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SeriesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, SeriesTable, SeriesColumn),
+			sqlgraph.To(CommentsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

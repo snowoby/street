@@ -15,9 +15,9 @@ type Episode struct {
 // Fields of the Episode.
 func (Episode) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("title").MaxLen(64).NotEmpty(),
-		field.Text("content").NotEmpty(),
 		field.String("cover").MaxLen(320).Nillable().Optional(),
+		field.String("title").MaxLen(320).NotEmpty(),
+		field.Text("content").NotEmpty(),
 	}
 }
 
@@ -32,6 +32,6 @@ func (Episode) Mixin() []ent.Mixin {
 func (Episode) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("profile", Profile.Type).Ref("episode").Required().Unique(),
-		edge.From("series", Series.Type).Ref("episode").Unique(),
+		edge.To("comments", Comment.Type),
 	}
 }

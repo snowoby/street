@@ -56,15 +56,14 @@ func (s *service) create(ctx *gin.Context, identity *operator.Identity) (int, in
 		return 0, nil, err
 	}
 
-	profileID := uuid.MustParse(episodeForm.ProfileID)
-	if !identity.HaveProfile(profileID) {
+	if !identity.HaveProfile(ctx, episodeForm.ProfileID) {
 		return 0, nil, errs.UnauthorizedError
 	}
 
 	ep, err := s.db.Episode.Create().
 		SetTitle(episodeForm.Title).
 		SetContent(episodeForm.Content).
-		SetProfileID(profileID).
+		SetProfileID(uuid.MustParse(episodeForm.ProfileID)).
 		SetCover(episodeForm.Cover).
 		Save(ctx)
 	if err != nil {
@@ -166,6 +165,6 @@ func (s *service) owned(ctx *gin.Context, operator *operator.Identity, objID str
 		return err
 	}
 
-	err = operator.HaveProfileX(id)
+	err = operator.HaveProfileX(ctx, id.String())
 	return err
 }

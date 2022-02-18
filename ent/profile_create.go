@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/ent/profile"
 	"street/ent/schema"
-	"street/ent/series"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -131,19 +131,19 @@ func (pc *ProfileCreate) AddEpisode(e ...*Episode) *ProfileCreate {
 	return pc.AddEpisodeIDs(ids...)
 }
 
-// AddSeriesIDs adds the "series" edge to the Series entity by IDs.
-func (pc *ProfileCreate) AddSeriesIDs(ids ...uuid.UUID) *ProfileCreate {
-	pc.mutation.AddSeriesIDs(ids...)
+// AddCommenterIDs adds the "commenter" edge to the Comment entity by IDs.
+func (pc *ProfileCreate) AddCommenterIDs(ids ...uuid.UUID) *ProfileCreate {
+	pc.mutation.AddCommenterIDs(ids...)
 	return pc
 }
 
-// AddSeries adds the "series" edges to the Series entity.
-func (pc *ProfileCreate) AddSeries(s ...*Series) *ProfileCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddCommenter adds the "commenter" edges to the Comment entity.
+func (pc *ProfileCreate) AddCommenter(c ...*Comment) *ProfileCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return pc.AddSeriesIDs(ids...)
+	return pc.AddCommenterIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -405,17 +405,17 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.mutation.SeriesIDs(); len(nodes) > 0 {
+	if nodes := pc.mutation.CommenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.SeriesTable,
-			Columns: []string{profile.SeriesColumn},
+			Table:   profile.CommenterTable,
+			Columns: []string{profile.CommenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}

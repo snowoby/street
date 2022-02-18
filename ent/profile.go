@@ -45,8 +45,8 @@ type ProfileEdges struct {
 	Account *Account `json:"account,omitempty"`
 	// Episode holds the value of the episode edge.
 	Episode []*Episode `json:"episode,omitempty"`
-	// Series holds the value of the series edge.
-	Series []*Series `json:"series,omitempty"`
+	// Commenter holds the value of the commenter edge.
+	Commenter []*Comment `json:"commenter,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -75,13 +75,13 @@ func (e ProfileEdges) EpisodeOrErr() ([]*Episode, error) {
 	return nil, &NotLoadedError{edge: "episode"}
 }
 
-// SeriesOrErr returns the Series value or an error if the edge
+// CommenterOrErr returns the Commenter value or an error if the edge
 // was not loaded in eager-loading.
-func (e ProfileEdges) SeriesOrErr() ([]*Series, error) {
+func (e ProfileEdges) CommenterOrErr() ([]*Comment, error) {
 	if e.loadedTypes[2] {
-		return e.Series, nil
+		return e.Commenter, nil
 	}
-	return nil, &NotLoadedError{edge: "series"}
+	return nil, &NotLoadedError{edge: "commenter"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -185,9 +185,9 @@ func (pr *Profile) QueryEpisode() *EpisodeQuery {
 	return (&ProfileClient{config: pr.config}).QueryEpisode(pr)
 }
 
-// QuerySeries queries the "series" edge of the Profile entity.
-func (pr *Profile) QuerySeries() *SeriesQuery {
-	return (&ProfileClient{config: pr.config}).QuerySeries(pr)
+// QueryCommenter queries the "commenter" edge of the Profile entity.
+func (pr *Profile) QueryCommenter() *CommentQuery {
+	return (&ProfileClient{config: pr.config}).QueryCommenter(pr)
 }
 
 // Update returns a builder for updating this Profile.

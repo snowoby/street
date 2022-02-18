@@ -16,6 +16,7 @@ import (
 	"street/ent"
 	"street/pkg/account"
 	"street/pkg/auth"
+	"street/pkg/comment"
 	"street/pkg/episode"
 	"street/pkg/profile"
 	"street/pkg/storage"
@@ -51,6 +52,7 @@ func setup() *gin.Engine {
 	account.New(entClient, authSrv, r.Group("/account"))
 	profile.New(entClient, authSrv, r.Group("/profile"))
 	episode.New(entClient, authSrv, r.Group("/episode"))
+	comment.New(entClient, authSrv, r.Group("/comment"))
 	storage.New(entClient, authSrv, redisClient, r.Group("/file"), asynqClient, s3)
 
 	return r

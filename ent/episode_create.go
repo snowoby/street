@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/ent/profile"
 	"street/ent/schema"
-	"street/ent/series"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -66,18 +66,6 @@ func (ec *EpisodeCreate) SetNillableUpdateTime(t *time.Time) *EpisodeCreate {
 	return ec
 }
 
-// SetTitle sets the "title" field.
-func (ec *EpisodeCreate) SetTitle(s string) *EpisodeCreate {
-	ec.mutation.SetTitle(s)
-	return ec
-}
-
-// SetContent sets the "content" field.
-func (ec *EpisodeCreate) SetContent(s string) *EpisodeCreate {
-	ec.mutation.SetContent(s)
-	return ec
-}
-
 // SetCover sets the "cover" field.
 func (ec *EpisodeCreate) SetCover(s string) *EpisodeCreate {
 	ec.mutation.SetCover(s)
@@ -89,6 +77,18 @@ func (ec *EpisodeCreate) SetNillableCover(s *string) *EpisodeCreate {
 	if s != nil {
 		ec.SetCover(*s)
 	}
+	return ec
+}
+
+// SetTitle sets the "title" field.
+func (ec *EpisodeCreate) SetTitle(s string) *EpisodeCreate {
+	ec.mutation.SetTitle(s)
+	return ec
+}
+
+// SetContent sets the "content" field.
+func (ec *EpisodeCreate) SetContent(s string) *EpisodeCreate {
+	ec.mutation.SetContent(s)
 	return ec
 }
 
@@ -109,23 +109,19 @@ func (ec *EpisodeCreate) SetProfile(p *Profile) *EpisodeCreate {
 	return ec.SetProfileID(p.ID)
 }
 
-// SetSeriesID sets the "series" edge to the Series entity by ID.
-func (ec *EpisodeCreate) SetSeriesID(id uuid.UUID) *EpisodeCreate {
-	ec.mutation.SetSeriesID(id)
+// AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
+func (ec *EpisodeCreate) AddCommentIDs(ids ...uuid.UUID) *EpisodeCreate {
+	ec.mutation.AddCommentIDs(ids...)
 	return ec
 }
 
-// SetNillableSeriesID sets the "series" edge to the Series entity by ID if the given value is not nil.
-func (ec *EpisodeCreate) SetNillableSeriesID(id *uuid.UUID) *EpisodeCreate {
-	if id != nil {
-		ec = ec.SetSeriesID(*id)
+// AddComments adds the "comments" edges to the Comment entity.
+func (ec *EpisodeCreate) AddComments(c ...*Comment) *EpisodeCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return ec
-}
-
-// SetSeries sets the "series" edge to the Series entity.
-func (ec *EpisodeCreate) SetSeries(s *Series) *EpisodeCreate {
-	return ec.SetSeriesID(s.ID)
+	return ec.AddCommentIDs(ids...)
 }
 
 // Mutation returns the EpisodeMutation object of the builder.
@@ -228,6 +224,11 @@ func (ec *EpisodeCreate) check() error {
 	if _, ok := ec.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
 	}
+	if v, ok := ec.mutation.Cover(); ok {
+		if err := episode.CoverValidator(v); err != nil {
+			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "cover": %w`, err)}
+		}
+	}
 	if _, ok := ec.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "title"`)}
 	}
@@ -242,11 +243,6 @@ func (ec *EpisodeCreate) check() error {
 	if v, ok := ec.mutation.Content(); ok {
 		if err := episode.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "content": %w`, err)}
-		}
-	}
-	if v, ok := ec.mutation.Cover(); ok {
-		if err := episode.CoverValidator(v); err != nil {
-			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "cover": %w`, err)}
 		}
 	}
 	if _, ok := ec.mutation.ProfileID(); !ok {
@@ -308,6 +304,14 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 		})
 		_node.UpdateTime = value
 	}
+	if value, ok := ec.mutation.Cover(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: episode.FieldCover,
+		})
+		_node.Cover = &value
+	}
 	if value, ok := ec.mutation.Title(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -323,14 +327,6 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 			Column: episode.FieldContent,
 		})
 		_node.Content = value
-	}
-	if value, ok := ec.mutation.Cover(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: episode.FieldCover,
-		})
-		_node.Cover = &value
 	}
 	if nodes := ec.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -352,24 +348,23 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 		_node.profile_episode = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ec.mutation.SeriesIDs(); len(nodes) > 0 {
+	if nodes := ec.mutation.CommentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   episode.SeriesTable,
-			Columns: []string{episode.SeriesColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   episode.CommentsTable,
+			Columns: []string{episode.CommentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.series_episode = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

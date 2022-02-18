@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"math"
 	"street/ent/account"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
-	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -30,10 +30,10 @@ type ProfileQuery struct {
 	fields     []string
 	predicates []predicate.Profile
 	// eager-loading edges.
-	withAccount *AccountQuery
-	withEpisode *EpisodeQuery
-	withSeries  *SeriesQuery
-	withFKs     bool
+	withAccount   *AccountQuery
+	withEpisode   *EpisodeQuery
+	withCommenter *CommentQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -114,9 +114,9 @@ func (pq *ProfileQuery) QueryEpisode() *EpisodeQuery {
 	return query
 }
 
-// QuerySeries chains the current query on the "series" edge.
-func (pq *ProfileQuery) QuerySeries() *SeriesQuery {
-	query := &SeriesQuery{config: pq.config}
+// QueryCommenter chains the current query on the "commenter" edge.
+func (pq *ProfileQuery) QueryCommenter() *CommentQuery {
+	query := &CommentQuery{config: pq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -127,8 +127,8 @@ func (pq *ProfileQuery) QuerySeries() *SeriesQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profile.Table, profile.FieldID, selector),
-			sqlgraph.To(series.Table, series.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profile.SeriesTable, profile.SeriesColumn),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.CommenterTable, profile.CommenterColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -312,14 +312,14 @@ func (pq *ProfileQuery) Clone() *ProfileQuery {
 		return nil
 	}
 	return &ProfileQuery{
-		config:      pq.config,
-		limit:       pq.limit,
-		offset:      pq.offset,
-		order:       append([]OrderFunc{}, pq.order...),
-		predicates:  append([]predicate.Profile{}, pq.predicates...),
-		withAccount: pq.withAccount.Clone(),
-		withEpisode: pq.withEpisode.Clone(),
-		withSeries:  pq.withSeries.Clone(),
+		config:        pq.config,
+		limit:         pq.limit,
+		offset:        pq.offset,
+		order:         append([]OrderFunc{}, pq.order...),
+		predicates:    append([]predicate.Profile{}, pq.predicates...),
+		withAccount:   pq.withAccount.Clone(),
+		withEpisode:   pq.withEpisode.Clone(),
+		withCommenter: pq.withCommenter.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -348,14 +348,14 @@ func (pq *ProfileQuery) WithEpisode(opts ...func(*EpisodeQuery)) *ProfileQuery {
 	return pq
 }
 
-// WithSeries tells the query-builder to eager-load the nodes that are connected to
-// the "series" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ProfileQuery) WithSeries(opts ...func(*SeriesQuery)) *ProfileQuery {
-	query := &SeriesQuery{config: pq.config}
+// WithCommenter tells the query-builder to eager-load the nodes that are connected to
+// the "commenter" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProfileQuery) WithCommenter(opts ...func(*CommentQuery)) *ProfileQuery {
+	query := &CommentQuery{config: pq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withSeries = query
+	pq.withCommenter = query
 	return pq
 }
 
@@ -428,7 +428,7 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 		loadedTypes = [3]bool{
 			pq.withAccount != nil,
 			pq.withEpisode != nil,
-			pq.withSeries != nil,
+			pq.withCommenter != nil,
 		}
 	)
 	if pq.withAccount != nil {
@@ -515,32 +515,32 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 		}
 	}
 
-	if query := pq.withSeries; query != nil {
+	if query := pq.withCommenter; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[uuid.UUID]*Profile)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Series = []*Series{}
+			nodes[i].Edges.Commenter = []*Comment{}
 		}
 		query.withFKs = true
-		query.Where(predicate.Series(func(s *sql.Selector) {
-			s.Where(sql.InValues(profile.SeriesColumn, fks...))
+		query.Where(predicate.Comment(func(s *sql.Selector) {
+			s.Where(sql.InValues(profile.CommenterColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.profile_series
+			fk := n.profile_commenter
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "profile_series" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "profile_commenter" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "profile_series" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "profile_commenter" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Series = append(node.Edges.Series, n)
+			node.Edges.Commenter = append(node.Edges.Commenter, n)
 		}
 	}
 

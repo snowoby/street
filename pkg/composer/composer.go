@@ -2,9 +2,16 @@ package composer
 
 import (
 	"github.com/gin-gonic/gin"
+	"street/ent"
 	"street/errs"
+	"street/pkg/d"
 	"street/pkg/operator"
 )
+
+func extractOperator(ctx *gin.Context) *operator.Identity {
+	acc := ctx.MustGet(d.StringAccount).(*ent.Account)
+	return operator.New(acc)
+}
 
 func Bare(f func(ctx *gin.Context) (int, interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -15,7 +22,7 @@ func Bare(f func(ctx *gin.Context) (int, interface{}, error)) gin.HandlerFunc {
 
 func Authed(f func(ctx *gin.Context, operator *operator.Identity) (int, interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		code, responseValue, err := f(ctx, nil)
+		code, responseValue, err := f(ctx, extractOperator(ctx))
 		resultProcess(ctx, code, responseValue, err)
 	}
 }
@@ -28,7 +35,7 @@ func AuthedID(f func(ctx *gin.Context, operator *operator.Identity, id string) (
 	return func(ctx *gin.Context) {
 		var eid id
 		if err := ctx.ShouldBindUri(&eid); err == nil {
-			code, responseValue, err := f(ctx, nil, eid.ID)
+			code, responseValue, err := f(ctx, extractOperator(ctx), eid.ID)
 			resultProcess(ctx, code, responseValue, err)
 		}
 		resultProcess(ctx, errs.NotFoundError.Code, errs.NotFoundError, errs.NotFoundError)

@@ -1022,6 +1022,48 @@
                 }
             }
         },
+        "ent.Comment": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Content holds the value of the \"content\" field.",
+                    "type": "string"
+                },
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the CommentQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.CommentEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.CommentEdges": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "description": "Author holds the value of the author edge.",
+                    "$ref": "#/definitions/ent.Profile"
+                },
+                "episode": {
+                    "description": "Episode holds the value of the episode edge.",
+                    "$ref": "#/definitions/ent.Episode"
+                }
+            }
+        },
         "ent.Episode": {
             "type": "object",
             "properties": {
@@ -1062,13 +1104,16 @@
         "ent.EpisodeEdges": {
             "type": "object",
             "properties": {
+                "comments": {
+                    "description": "Comments holds the value of the comments edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Comment"
+                    }
+                },
                 "profile": {
                     "description": "Profile holds the value of the profile edge.",
                     "$ref": "#/definitions/ent.Profile"
-                },
-                "series": {
-                    "description": "Series holds the value of the series edge.",
-                    "$ref": "#/definitions/ent.Series"
                 }
             }
         },
@@ -1178,72 +1223,19 @@
                     "description": "Account holds the value of the account edge.",
                     "$ref": "#/definitions/ent.Account"
                 },
+                "commenter": {
+                    "description": "Commenter holds the value of the commenter edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Comment"
+                    }
+                },
                 "episode": {
                     "description": "Episode holds the value of the episode edge.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.Episode"
                     }
-                },
-                "series": {
-                    "description": "Series holds the value of the series edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Series"
-                    }
-                }
-            }
-        },
-        "ent.Series": {
-            "type": "object",
-            "properties": {
-                "call": {
-                    "description": "Call holds the value of the \"call\" field.",
-                    "type": "string"
-                },
-                "content": {
-                    "description": "Content holds the value of the \"content\" field.",
-                    "type": "string"
-                },
-                "create_time": {
-                    "description": "CreateTime holds the value of the \"create_time\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the SeriesQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.SeriesEdges"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "sid": {
-                    "description": "Sid holds the value of the \"sid\" field.",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "Title holds the value of the \"title\" field.",
-                    "type": "string"
-                },
-                "update_time": {
-                    "description": "UpdateTime holds the value of the \"update_time\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.SeriesEdges": {
-            "type": "object",
-            "properties": {
-                "episode": {
-                    "description": "Episode holds the value of the episode edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Episode"
-                    }
-                },
-                "profile": {
-                    "description": "Profile holds the value of the profile edge.",
-                    "$ref": "#/definitions/ent.Profile"
                 }
             }
         },

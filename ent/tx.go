@@ -14,14 +14,14 @@ type Tx struct {
 	config
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// Comment is the client for interacting with the Comment builders.
+	Comment *CommentClient
 	// Episode is the client for interacting with the Episode builders.
 	Episode *EpisodeClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
-	// Series is the client for interacting with the Series builders.
-	Series *SeriesClient
 	// Token is the client for interacting with the Token builders.
 	Token *TokenClient
 
@@ -160,10 +160,10 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
+	tx.Comment = NewCommentClient(tx.config)
 	tx.Episode = NewEpisodeClient(tx.config)
 	tx.File = NewFileClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
-	tx.Series = NewSeriesClient(tx.config)
 	tx.Token = NewTokenClient(tx.config)
 }
 

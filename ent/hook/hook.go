@@ -21,6 +21,19 @@ func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The CommentFunc type is an adapter to allow the use of ordinary
+// function as Comment mutator.
+type CommentFunc func(context.Context, *ent.CommentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CommentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CommentMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CommentMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The EpisodeFunc type is an adapter to allow the use of ordinary
 // function as Episode mutator.
 type EpisodeFunc func(context.Context, *ent.EpisodeMutation) (ent.Value, error)
@@ -56,19 +69,6 @@ func (f ProfileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	mv, ok := m.(*ent.ProfileMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProfileMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The SeriesFunc type is an adapter to allow the use of ordinary
-// function as Series mutator.
-type SeriesFunc func(context.Context, *ent.SeriesMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f SeriesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SeriesMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SeriesMutation", m)
 	}
 	return f(ctx, mv)
 }

@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"street/ent/account"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
 	"street/ent/schema"
-	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -110,19 +110,19 @@ func (pu *ProfileUpdate) AddEpisode(e ...*Episode) *ProfileUpdate {
 	return pu.AddEpisodeIDs(ids...)
 }
 
-// AddSeriesIDs adds the "series" edge to the Series entity by IDs.
-func (pu *ProfileUpdate) AddSeriesIDs(ids ...uuid.UUID) *ProfileUpdate {
-	pu.mutation.AddSeriesIDs(ids...)
+// AddCommenterIDs adds the "commenter" edge to the Comment entity by IDs.
+func (pu *ProfileUpdate) AddCommenterIDs(ids ...uuid.UUID) *ProfileUpdate {
+	pu.mutation.AddCommenterIDs(ids...)
 	return pu
 }
 
-// AddSeries adds the "series" edges to the Series entity.
-func (pu *ProfileUpdate) AddSeries(s ...*Series) *ProfileUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddCommenter adds the "commenter" edges to the Comment entity.
+func (pu *ProfileUpdate) AddCommenter(c ...*Comment) *ProfileUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return pu.AddSeriesIDs(ids...)
+	return pu.AddCommenterIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -157,25 +157,25 @@ func (pu *ProfileUpdate) RemoveEpisode(e ...*Episode) *ProfileUpdate {
 	return pu.RemoveEpisodeIDs(ids...)
 }
 
-// ClearSeries clears all "series" edges to the Series entity.
-func (pu *ProfileUpdate) ClearSeries() *ProfileUpdate {
-	pu.mutation.ClearSeries()
+// ClearCommenter clears all "commenter" edges to the Comment entity.
+func (pu *ProfileUpdate) ClearCommenter() *ProfileUpdate {
+	pu.mutation.ClearCommenter()
 	return pu
 }
 
-// RemoveSeriesIDs removes the "series" edge to Series entities by IDs.
-func (pu *ProfileUpdate) RemoveSeriesIDs(ids ...uuid.UUID) *ProfileUpdate {
-	pu.mutation.RemoveSeriesIDs(ids...)
+// RemoveCommenterIDs removes the "commenter" edge to Comment entities by IDs.
+func (pu *ProfileUpdate) RemoveCommenterIDs(ids ...uuid.UUID) *ProfileUpdate {
+	pu.mutation.RemoveCommenterIDs(ids...)
 	return pu
 }
 
-// RemoveSeries removes "series" edges to Series entities.
-func (pu *ProfileUpdate) RemoveSeries(s ...*Series) *ProfileUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveCommenter removes "commenter" edges to Comment entities.
+func (pu *ProfileUpdate) RemoveCommenter(c ...*Comment) *ProfileUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return pu.RemoveSeriesIDs(ids...)
+	return pu.RemoveCommenterIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -430,33 +430,33 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pu.mutation.SeriesCleared() {
+	if pu.mutation.CommenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.SeriesTable,
-			Columns: []string{profile.SeriesColumn},
+			Table:   profile.CommenterTable,
+			Columns: []string{profile.CommenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.mutation.RemovedSeriesIDs(); len(nodes) > 0 && !pu.mutation.SeriesCleared() {
+	if nodes := pu.mutation.RemovedCommenterIDs(); len(nodes) > 0 && !pu.mutation.CommenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.SeriesTable,
-			Columns: []string{profile.SeriesColumn},
+			Table:   profile.CommenterTable,
+			Columns: []string{profile.CommenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
@@ -465,17 +465,17 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.mutation.SeriesIDs(); len(nodes) > 0 {
+	if nodes := pu.mutation.CommenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.SeriesTable,
-			Columns: []string{profile.SeriesColumn},
+			Table:   profile.CommenterTable,
+			Columns: []string{profile.CommenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
@@ -581,19 +581,19 @@ func (puo *ProfileUpdateOne) AddEpisode(e ...*Episode) *ProfileUpdateOne {
 	return puo.AddEpisodeIDs(ids...)
 }
 
-// AddSeriesIDs adds the "series" edge to the Series entity by IDs.
-func (puo *ProfileUpdateOne) AddSeriesIDs(ids ...uuid.UUID) *ProfileUpdateOne {
-	puo.mutation.AddSeriesIDs(ids...)
+// AddCommenterIDs adds the "commenter" edge to the Comment entity by IDs.
+func (puo *ProfileUpdateOne) AddCommenterIDs(ids ...uuid.UUID) *ProfileUpdateOne {
+	puo.mutation.AddCommenterIDs(ids...)
 	return puo
 }
 
-// AddSeries adds the "series" edges to the Series entity.
-func (puo *ProfileUpdateOne) AddSeries(s ...*Series) *ProfileUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddCommenter adds the "commenter" edges to the Comment entity.
+func (puo *ProfileUpdateOne) AddCommenter(c ...*Comment) *ProfileUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return puo.AddSeriesIDs(ids...)
+	return puo.AddCommenterIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -628,25 +628,25 @@ func (puo *ProfileUpdateOne) RemoveEpisode(e ...*Episode) *ProfileUpdateOne {
 	return puo.RemoveEpisodeIDs(ids...)
 }
 
-// ClearSeries clears all "series" edges to the Series entity.
-func (puo *ProfileUpdateOne) ClearSeries() *ProfileUpdateOne {
-	puo.mutation.ClearSeries()
+// ClearCommenter clears all "commenter" edges to the Comment entity.
+func (puo *ProfileUpdateOne) ClearCommenter() *ProfileUpdateOne {
+	puo.mutation.ClearCommenter()
 	return puo
 }
 
-// RemoveSeriesIDs removes the "series" edge to Series entities by IDs.
-func (puo *ProfileUpdateOne) RemoveSeriesIDs(ids ...uuid.UUID) *ProfileUpdateOne {
-	puo.mutation.RemoveSeriesIDs(ids...)
+// RemoveCommenterIDs removes the "commenter" edge to Comment entities by IDs.
+func (puo *ProfileUpdateOne) RemoveCommenterIDs(ids ...uuid.UUID) *ProfileUpdateOne {
+	puo.mutation.RemoveCommenterIDs(ids...)
 	return puo
 }
 
-// RemoveSeries removes "series" edges to Series entities.
-func (puo *ProfileUpdateOne) RemoveSeries(s ...*Series) *ProfileUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveCommenter removes "commenter" edges to Comment entities.
+func (puo *ProfileUpdateOne) RemoveCommenter(c ...*Comment) *ProfileUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return puo.RemoveSeriesIDs(ids...)
+	return puo.RemoveCommenterIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -925,33 +925,33 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if puo.mutation.SeriesCleared() {
+	if puo.mutation.CommenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.SeriesTable,
-			Columns: []string{profile.SeriesColumn},
+			Table:   profile.CommenterTable,
+			Columns: []string{profile.CommenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.mutation.RemovedSeriesIDs(); len(nodes) > 0 && !puo.mutation.SeriesCleared() {
+	if nodes := puo.mutation.RemovedCommenterIDs(); len(nodes) > 0 && !puo.mutation.CommenterCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.SeriesTable,
-			Columns: []string{profile.SeriesColumn},
+			Table:   profile.CommenterTable,
+			Columns: []string{profile.CommenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}
@@ -960,17 +960,17 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.mutation.SeriesIDs(); len(nodes) > 0 {
+	if nodes := puo.mutation.CommenterIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.SeriesTable,
-			Columns: []string{profile.SeriesColumn},
+			Table:   profile.CommenterTable,
+			Columns: []string{profile.CommenterColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: series.FieldID,
+					Column: comment.FieldID,
 				},
 			},
 		}

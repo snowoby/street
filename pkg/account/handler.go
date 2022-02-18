@@ -126,9 +126,9 @@ func (s *service) login(ctx *gin.Context) (int, interface{}, error) {
 // @Success 201 {object} d.Identity
 // @Failure 400 {object} errs.HTTPError
 // @Router /account [get]
-func (s *service) info(_ *gin.Context, operator *operator.Identity) (int, interface{}, error) {
+func (s *service) info(ctx *gin.Context, operator *operator.Identity) (int, interface{}, error) {
 
-	profiles := d.ProfilesFromEnt(operator.AllProfiles())
+	profiles := d.ProfilesFromEnt(operator.AllProfiles(ctx))
 
 	return http.StatusOK, &d.Identity{
 		Account:  d.AccountFromEnt(operator.Account()),

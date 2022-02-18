@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"street/ent"
@@ -88,6 +89,12 @@ func (s *service) MustLogin(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, &errs.UnauthorizedError)
 		return
 	}
+	account := t.Edges.Account
+	if account == nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, errs.WTF(errors.New("account is nil")))
+		return
+	}
+
 	ctx.Set(d.StringAccount, t.Edges.Account)
 	ctx.Set(d.StringAccessToken, t)
 	ctx.Next()

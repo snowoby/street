@@ -886,25 +886,25 @@ func HasEpisodeWith(preds ...predicate.Episode) predicate.Profile {
 	})
 }
 
-// HasSeries applies the HasEdge predicate on the "series" edge.
-func HasSeries() predicate.Profile {
+// HasCommenter applies the HasEdge predicate on the "commenter" edge.
+func HasCommenter() predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SeriesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SeriesTable, SeriesColumn),
+			sqlgraph.To(CommenterTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommenterTable, CommenterColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSeriesWith applies the HasEdge predicate on the "series" edge with a given conditions (other predicates).
-func HasSeriesWith(preds ...predicate.Series) predicate.Profile {
+// HasCommenterWith applies the HasEdge predicate on the "commenter" edge with a given conditions (other predicates).
+func HasCommenterWith(preds ...predicate.Comment) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SeriesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SeriesTable, SeriesColumn),
+			sqlgraph.To(CommenterInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommenterTable, CommenterColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

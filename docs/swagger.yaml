@@ -242,6 +242,38 @@ definitions:
           $ref: '#/definitions/ent.Token'
         type: array
     type: object
+  ent.Comment:
+    properties:
+      content:
+        description: Content holds the value of the "content" field.
+        type: string
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.CommentEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the CommentQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.CommentEdges:
+    properties:
+      author:
+        $ref: '#/definitions/ent.Profile'
+        description: Author holds the value of the author edge.
+      episode:
+        $ref: '#/definitions/ent.Episode'
+        description: Episode holds the value of the episode edge.
+    type: object
   ent.Episode:
     properties:
       content:
@@ -273,12 +305,14 @@ definitions:
     type: object
   ent.EpisodeEdges:
     properties:
+      comments:
+        description: Comments holds the value of the comments edge.
+        items:
+          $ref: '#/definitions/ent.Comment'
+        type: array
       profile:
         $ref: '#/definitions/ent.Profile'
         description: Profile holds the value of the profile edge.
-      series:
-        $ref: '#/definitions/ent.Series'
-        description: Series holds the value of the series edge.
     type: object
   ent.File:
     properties:
@@ -361,56 +395,16 @@ definitions:
       account:
         $ref: '#/definitions/ent.Account'
         description: Account holds the value of the account edge.
+      commenter:
+        description: Commenter holds the value of the commenter edge.
+        items:
+          $ref: '#/definitions/ent.Comment'
+        type: array
       episode:
         description: Episode holds the value of the episode edge.
         items:
           $ref: '#/definitions/ent.Episode'
         type: array
-      series:
-        description: Series holds the value of the series edge.
-        items:
-          $ref: '#/definitions/ent.Series'
-        type: array
-    type: object
-  ent.Series:
-    properties:
-      call:
-        description: Call holds the value of the "call" field.
-        type: string
-      content:
-        description: Content holds the value of the "content" field.
-        type: string
-      create_time:
-        description: CreateTime holds the value of the "create_time" field.
-        type: string
-      edges:
-        $ref: '#/definitions/ent.SeriesEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the SeriesQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-      sid:
-        description: Sid holds the value of the "sid" field.
-        type: string
-      title:
-        description: Title holds the value of the "title" field.
-        type: string
-      update_time:
-        description: UpdateTime holds the value of the "update_time" field.
-        type: string
-    type: object
-  ent.SeriesEdges:
-    properties:
-      episode:
-        description: Episode holds the value of the episode edge.
-        items:
-          $ref: '#/definitions/ent.Episode'
-        type: array
-      profile:
-        $ref: '#/definitions/ent.Profile'
-        description: Profile holds the value of the profile edge.
     type: object
   ent.Token:
     properties:

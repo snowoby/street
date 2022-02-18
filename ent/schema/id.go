@@ -17,6 +17,15 @@ type IDMixin struct {
 	mixin.Schema
 }
 
+func (IDMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int64("sid").GoType(ID("")).DefaultFunc(func() ID {
+			return ID(utils.RandomString(8))
+		}).Unique(),
+		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
+	}
+}
+
 type ID string
 
 func (i ID) Value() (driver.Value, error) {
@@ -62,13 +71,4 @@ func Int64ToString(value int64) string {
 		fmt.Println("something wrong at id")
 	}
 	return string(data)
-}
-
-func (IDMixin) Fields() []ent.Field {
-	return []ent.Field{
-		field.Int64("sid").GoType(ID("")).DefaultFunc(func() ID {
-			return ID(utils.RandomString(8))
-		}).Unique(),
-		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
-	}
 }

@@ -9,6 +9,9 @@ import (
 // Account is the predicate function for account builders.
 type Account func(*sql.Selector)
 
+// Comment is the predicate function for comment builders.
+type Comment func(*sql.Selector)
+
 // Episode is the predicate function for episode builders.
 type Episode func(*sql.Selector)
 
@@ -17,9 +20,6 @@ type File func(*sql.Selector)
 
 // Profile is the predicate function for profile builders.
 type Profile func(*sql.Selector)
-
-// Series is the predicate function for series builders.
-type Series func(*sql.Selector)
 
 // Token is the predicate function for token builders.
 type Token func(*sql.Selector)
