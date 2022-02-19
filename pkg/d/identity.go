@@ -1,6 +1,6 @@
 package d
 
 type Identity struct {
-	Account  *Account
-	Profiles []*Profile
+	Account  *Account   `json:"account"`
+	Profiles []*Profile `json:"profiles"`
 }

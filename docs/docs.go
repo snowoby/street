@@ -719,9 +719,6 @@ var doc = `{
                 },
                 "id": {
                     "type": "string"
-                },
-                "password": {
-                    "type": "string"
                 }
             }
         },
@@ -756,8 +753,7 @@ var doc = `{
                     "type": "string"
                 },
                 "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the EpisodeQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.EpisodeEdges"
+                    "type": "object"
                 },
                 "id": {
                     "description": "ID of the ent.",
@@ -794,6 +790,9 @@ var doc = `{
                     "type": "string"
                 },
                 "profileID": {
+                    "type": "string"
+                },
+                "seriesID": {
                     "type": "string"
                 },
                 "title": {
@@ -906,8 +905,7 @@ var doc = `{
                     "type": "string"
                 },
                 "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the ProfileQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.ProfileEdges"
+                    "type": "object"
                 },
                 "id": {
                     "description": "ID of the ent.",
@@ -1133,6 +1131,10 @@ var doc = `{
                 "profile": {
                     "description": "Profile holds the value of the profile edge.",
                     "$ref": "#/definitions/ent.Profile"
+                },
+                "series": {
+                    "description": "Series holds the value of the series edge.",
+                    "$ref": "#/definitions/ent.Series"
                 }
             }
         },
@@ -1254,6 +1256,76 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/ent.Episode"
+                    }
+                },
+                "joined_series": {
+                    "description": "JoinedSeries holds the value of the joined_series edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Series"
+                    }
+                },
+                "series": {
+                    "description": "Series holds the value of the series edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Series"
+                    }
+                }
+            }
+        },
+        "ent.Series": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the SeriesQuery when eager-loading is set.",
+                    "$ref": "#/definitions/ent.SeriesEdges"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type holds the value of the \"type\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                }
+            }
+        },
+        "ent.SeriesEdges": {
+            "type": "object",
+            "properties": {
+                "episodes": {
+                    "description": "Episodes holds the value of the episodes edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Episode"
+                    }
+                },
+                "owner": {
+                    "description": "Owner holds the value of the owner edge.",
+                    "$ref": "#/definitions/ent.Profile"
+                },
+                "participant": {
+                    "description": "Participant holds the value of the participant edge.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ent.Profile"
                     }
                 }
             }

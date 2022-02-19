@@ -34,12 +34,16 @@ type id struct {
 func AuthedID(f func(ctx *gin.Context, operator *operator.Identity, id string) (int, interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var eid id
-		if err := ctx.ShouldBindUri(&eid); err == nil {
-			code, responseValue, err := f(ctx, extractOperator(ctx), eid.ID)
-			resultProcess(ctx, code, responseValue, err)
+		err := ctx.ShouldBindUri(&eid)
+		if err != nil {
+			resultProcess(ctx, 0, nil, err)
+			ctx.Abort()
+			return
 		}
-		resultProcess(ctx, errs.NotFoundError.Code, errs.NotFoundError, errs.NotFoundError)
-		return
+
+		code, responseValue, err := f(ctx, extractOperator(ctx), eid.ID)
+		resultProcess(ctx, code, responseValue, err)
+		ctx.Next()
 
 	}
 }
@@ -49,12 +53,14 @@ func AuthedIDCheck(f func(ctx *gin.Context, operator *operator.Identity, id stri
 		var eid id
 		if err := ctx.ShouldBindUri(&eid); err != nil {
 			resultProcess(ctx, errs.NotFoundError.Code, errs.NotFoundError, errs.NotFoundError)
+			ctx.Abort()
 			return
 		}
 
-		err := f(ctx, nil, eid.ID)
+		err := f(ctx, extractOperator(ctx), eid.ID)
 		if err != nil {
 			resultProcess(ctx, errs.NotBelongsToOperator.Code, errs.NotBelongsToOperator, errs.NotBelongsToOperator)
+			ctx.Abort()
 			return
 		}
 		ctx.Next()
@@ -64,13 +70,15 @@ func AuthedIDCheck(f func(ctx *gin.Context, operator *operator.Identity, id stri
 func ID(f func(ctx *gin.Context, id string) (int, interface{}, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var eid id
-		if err := ctx.ShouldBindUri(&eid); err == nil {
-			code, responseValue, err := f(ctx, eid.ID)
-			resultProcess(ctx, code, responseValue, err)
+		err := ctx.ShouldBindUri(&eid)
+		if err != nil {
+			resultProcess(ctx, errs.NotFoundError.Code, errs.NotFoundError, errs.NotFoundError)
+			return
 		}
-		resultProcess(ctx, 0, errs.NotFoundError, errs.NotFoundError)
+		code, responseValue, err := f(ctx, eid.ID)
+		resultProcess(ctx, code, responseValue, err)
+		ctx.Next()
 		return
-
 	}
 }
 

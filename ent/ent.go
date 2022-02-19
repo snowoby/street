@@ -10,6 +10,7 @@ import (
 	"street/ent/episode"
 	"street/ent/file"
 	"street/ent/profile"
+	"street/ent/series"
 	"street/ent/token"
 
 	"entgo.io/ent"
@@ -39,6 +40,7 @@ func columnChecker(table string) func(string) error {
 		episode.Table: episode.ValidColumn,
 		file.Table:    file.ValidColumn,
 		profile.Table: profile.ValidColumn,
+		series.Table:  series.ValidColumn,
 		token.Table:   token.ValidColumn,
 	}
 	check, ok := checks[table]

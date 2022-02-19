@@ -36,6 +36,8 @@ func (Profile) Edges() []ent.Edge {
 		edge.From("account", Account.Type).Ref("profile").Required().Unique(),
 		edge.To("episode", Episode.Type),
 		edge.To("commenter", Comment.Type),
+		edge.To("series", Series.Type),
+		edge.To("joined_series", Series.Type),
 	}
 }
 

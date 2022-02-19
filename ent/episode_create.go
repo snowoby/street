@@ -10,6 +10,7 @@ import (
 	"street/ent/episode"
 	"street/ent/profile"
 	"street/ent/schema"
+	"street/ent/series"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -122,6 +123,25 @@ func (ec *EpisodeCreate) AddComments(c ...*Comment) *EpisodeCreate {
 		ids[i] = c[i].ID
 	}
 	return ec.AddCommentIDs(ids...)
+}
+
+// SetSeriesID sets the "series" edge to the Series entity by ID.
+func (ec *EpisodeCreate) SetSeriesID(id uuid.UUID) *EpisodeCreate {
+	ec.mutation.SetSeriesID(id)
+	return ec
+}
+
+// SetNillableSeriesID sets the "series" edge to the Series entity by ID if the given value is not nil.
+func (ec *EpisodeCreate) SetNillableSeriesID(id *uuid.UUID) *EpisodeCreate {
+	if id != nil {
+		ec = ec.SetSeriesID(*id)
+	}
+	return ec
+}
+
+// SetSeries sets the "series" edge to the Series entity.
+func (ec *EpisodeCreate) SetSeries(s *Series) *EpisodeCreate {
+	return ec.SetSeriesID(s.ID)
 }
 
 // Mutation returns the EpisodeMutation object of the builder.
@@ -365,6 +385,26 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ec.mutation.SeriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   episode.SeriesTable,
+			Columns: []string{episode.SeriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: series.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.series_episodes = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

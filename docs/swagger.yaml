@@ -5,8 +5,6 @@ definitions:
         type: string
       id:
         type: string
-      password:
-        type: string
     type: object
   d.AccountForm:
     properties:
@@ -30,10 +28,7 @@ definitions:
         description: CreateTime holds the value of the "create_time" field.
         type: string
       edges:
-        $ref: '#/definitions/ent.EpisodeEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the EpisodeQuery when eager-loading is set.
+        type: object
       id:
         description: ID of the ent.
         type: string
@@ -56,6 +51,8 @@ definitions:
       cover:
         type: string
       profileID:
+        type: string
+      seriesID:
         type: string
       title:
         type: string
@@ -140,10 +137,7 @@ definitions:
         description: CreateTime holds the value of the "create_time" field.
         type: string
       edges:
-        $ref: '#/definitions/ent.ProfileEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the ProfileQuery when eager-loading is set.
+        type: object
       id:
         description: ID of the ent.
         type: string
@@ -313,6 +307,9 @@ definitions:
       profile:
         $ref: '#/definitions/ent.Profile'
         description: Profile holds the value of the profile edge.
+      series:
+        $ref: '#/definitions/ent.Series'
+        description: Series holds the value of the series edge.
     type: object
   ent.File:
     properties:
@@ -404,6 +401,58 @@ definitions:
         description: Episode holds the value of the episode edge.
         items:
           $ref: '#/definitions/ent.Episode'
+        type: array
+      joined_series:
+        description: JoinedSeries holds the value of the joined_series edge.
+        items:
+          $ref: '#/definitions/ent.Series'
+        type: array
+      series:
+        description: Series holds the value of the series edge.
+        items:
+          $ref: '#/definitions/ent.Series'
+        type: array
+    type: object
+  ent.Series:
+    properties:
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        $ref: '#/definitions/ent.SeriesEdges'
+        description: |-
+          Edges holds the relations/edges for other nodes in the graph.
+          The values are being populated by the SeriesQuery when eager-loading is set.
+      id:
+        description: ID of the ent.
+        type: string
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      title:
+        description: Title holds the value of the "title" field.
+        type: string
+      type:
+        description: Type holds the value of the "type" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+    type: object
+  ent.SeriesEdges:
+    properties:
+      episodes:
+        description: Episodes holds the value of the episodes edge.
+        items:
+          $ref: '#/definitions/ent.Episode'
+        type: array
+      owner:
+        $ref: '#/definitions/ent.Profile'
+        description: Owner holds the value of the owner edge.
+      participant:
+        description: Participant holds the value of the participant edge.
+        items:
+          $ref: '#/definitions/ent.Profile'
         type: array
     type: object
   ent.Token:

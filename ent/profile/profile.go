@@ -34,6 +34,10 @@ const (
 	EdgeEpisode = "episode"
 	// EdgeCommenter holds the string denoting the commenter edge name in mutations.
 	EdgeCommenter = "commenter"
+	// EdgeSeries holds the string denoting the series edge name in mutations.
+	EdgeSeries = "series"
+	// EdgeJoinedSeries holds the string denoting the joined_series edge name in mutations.
+	EdgeJoinedSeries = "joined_series"
 	// Table holds the table name of the profile in the database.
 	Table = "profiles"
 	// AccountTable is the table that holds the account relation/edge.
@@ -57,6 +61,18 @@ const (
 	CommenterInverseTable = "comments"
 	// CommenterColumn is the table column denoting the commenter relation/edge.
 	CommenterColumn = "profile_commenter"
+	// SeriesTable is the table that holds the series relation/edge.
+	SeriesTable = "series"
+	// SeriesInverseTable is the table name for the Series entity.
+	// It exists in this package in order to avoid circular dependency with the "series" package.
+	SeriesInverseTable = "series"
+	// SeriesColumn is the table column denoting the series relation/edge.
+	SeriesColumn = "profile_series"
+	// JoinedSeriesTable is the table that holds the joined_series relation/edge. The primary key declared below.
+	JoinedSeriesTable = "profile_joined_series"
+	// JoinedSeriesInverseTable is the table name for the Series entity.
+	// It exists in this package in order to avoid circular dependency with the "series" package.
+	JoinedSeriesInverseTable = "series"
 )
 
 // Columns holds all SQL columns for profile fields.
@@ -76,6 +92,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"account_profile",
 }
+
+var (
+	// JoinedSeriesPrimaryKey and JoinedSeriesColumn2 are the table columns denoting the
+	// primary key for the joined_series relation (M2M).
+	JoinedSeriesPrimaryKey = []string{"profile_id", "series_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

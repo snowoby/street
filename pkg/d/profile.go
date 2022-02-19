@@ -4,6 +4,7 @@ import "street/ent"
 
 type Profile struct {
 	*ent.Profile
+	NoEdges
 }
 
 type ProfileForm struct {

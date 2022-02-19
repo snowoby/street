@@ -1,9 +1,32 @@
-package config
+package site
 
 import (
+	"github.com/gin-gonic/gin"
+	"net/http"
 	"os"
 	"time"
 )
+
+type service struct {
+	router *gin.RouterGroup
+	site   *Site
+}
+
+func New(site *Site, router *gin.RouterGroup) *service {
+	s := &service{
+		site:   site,
+		router: router,
+	}
+	s.registerRouters()
+	return s
+}
+
+func (s *service) registerRouters() {
+	s.router.GET("", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, s.site)
+	})
+
+}
 
 type Site struct {
 	RefreshTokenExpireTime time.Duration `json:"refreshTokenExpireTime"`

@@ -4,14 +4,16 @@ import "street/ent"
 
 type Episode struct {
 	*ent.Episode
-	Profile *Profile
+	Profile *Profile `json:"profile"`
+	NoEdges
 }
 
 type EpisodeForm struct {
-	ProfileID string `json:"profileID" binding:"uuid,required"`
-	Title     string `json:"title" binding:"required"`
-	Content   string `json:"content"`
-	Cover     string `json:"cover"`
+	ProfileID string  `json:"profileID" binding:"uuid,required"`
+	SeriesID  *string `json:"seriesID" binding:"omitempty,uuid"`
+	Title     string  `json:"title" binding:"required"`
+	Content   string  `json:"content"`
+	Cover     string  `json:"cover"`
 }
 
 func EpisodeFromEnt(episode *ent.Episode) *Episode {

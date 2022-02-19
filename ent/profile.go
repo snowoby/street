@@ -47,9 +47,13 @@ type ProfileEdges struct {
 	Episode []*Episode `json:"episode,omitempty"`
 	// Commenter holds the value of the commenter edge.
 	Commenter []*Comment `json:"commenter,omitempty"`
+	// Series holds the value of the series edge.
+	Series []*Series `json:"series,omitempty"`
+	// JoinedSeries holds the value of the joined_series edge.
+	JoinedSeries []*Series `json:"joined_series,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // AccountOrErr returns the Account value or an error if the edge
@@ -82,6 +86,24 @@ func (e ProfileEdges) CommenterOrErr() ([]*Comment, error) {
 		return e.Commenter, nil
 	}
 	return nil, &NotLoadedError{edge: "commenter"}
+}
+
+// SeriesOrErr returns the Series value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProfileEdges) SeriesOrErr() ([]*Series, error) {
+	if e.loadedTypes[3] {
+		return e.Series, nil
+	}
+	return nil, &NotLoadedError{edge: "series"}
+}
+
+// JoinedSeriesOrErr returns the JoinedSeries value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProfileEdges) JoinedSeriesOrErr() ([]*Series, error) {
+	if e.loadedTypes[4] {
+		return e.JoinedSeries, nil
+	}
+	return nil, &NotLoadedError{edge: "joined_series"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -188,6 +210,16 @@ func (pr *Profile) QueryEpisode() *EpisodeQuery {
 // QueryCommenter queries the "commenter" edge of the Profile entity.
 func (pr *Profile) QueryCommenter() *CommentQuery {
 	return (&ProfileClient{config: pr.config}).QueryCommenter(pr)
+}
+
+// QuerySeries queries the "series" edge of the Profile entity.
+func (pr *Profile) QuerySeries() *SeriesQuery {
+	return (&ProfileClient{config: pr.config}).QuerySeries(pr)
+}
+
+// QueryJoinedSeries queries the "joined_series" edge of the Profile entity.
+func (pr *Profile) QueryJoinedSeries() *SeriesQuery {
+	return (&ProfileClient{config: pr.config}).QueryJoinedSeries(pr)
 }
 
 // Update returns a builder for updating this Profile.

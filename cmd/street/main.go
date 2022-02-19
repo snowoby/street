@@ -19,6 +19,8 @@ import (
 	"street/pkg/comment"
 	"street/pkg/episode"
 	"street/pkg/profile"
+	"street/pkg/series"
+	"street/pkg/site"
 	"street/pkg/storage"
 )
 
@@ -49,10 +51,12 @@ func setup() *gin.Engine {
 	s3 := NewDefaultS3()
 	authSrv := auth.New(entClient)
 
+	site.New(site.NewDefault(), r.Group("/site"))
 	account.New(entClient, authSrv, r.Group("/account"))
 	profile.New(entClient, authSrv, r.Group("/profile"))
 	episode.New(entClient, authSrv, r.Group("/episode"))
 	comment.New(entClient, authSrv, r.Group("/comment"))
+	series.New(entClient, authSrv, r.Group("/series"))
 	storage.New(entClient, authSrv, redisClient, r.Group("/file"), asynqClient, s3)
 
 	return r

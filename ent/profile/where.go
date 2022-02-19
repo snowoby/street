@@ -914,6 +914,62 @@ func HasCommenterWith(preds ...predicate.Comment) predicate.Profile {
 	})
 }
 
+// HasSeries applies the HasEdge predicate on the "series" edge.
+func HasSeries() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SeriesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SeriesTable, SeriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSeriesWith applies the HasEdge predicate on the "series" edge with a given conditions (other predicates).
+func HasSeriesWith(preds ...predicate.Series) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SeriesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SeriesTable, SeriesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasJoinedSeries applies the HasEdge predicate on the "joined_series" edge.
+func HasJoinedSeries() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(JoinedSeriesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, JoinedSeriesTable, JoinedSeriesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasJoinedSeriesWith applies the HasEdge predicate on the "joined_series" edge with a given conditions (other predicates).
+func HasJoinedSeriesWith(preds ...predicate.Series) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(JoinedSeriesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, JoinedSeriesTable, JoinedSeriesPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Profile) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {

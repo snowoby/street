@@ -13,6 +13,7 @@ import (
 	"street/ent/episode"
 	"street/ent/predicate"
 	"street/ent/profile"
+	"street/ent/series"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -30,10 +31,12 @@ type ProfileQuery struct {
 	fields     []string
 	predicates []predicate.Profile
 	// eager-loading edges.
-	withAccount   *AccountQuery
-	withEpisode   *EpisodeQuery
-	withCommenter *CommentQuery
-	withFKs       bool
+	withAccount      *AccountQuery
+	withEpisode      *EpisodeQuery
+	withCommenter    *CommentQuery
+	withSeries       *SeriesQuery
+	withJoinedSeries *SeriesQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -129,6 +132,50 @@ func (pq *ProfileQuery) QueryCommenter() *CommentQuery {
 			sqlgraph.From(profile.Table, profile.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, profile.CommenterTable, profile.CommenterColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySeries chains the current query on the "series" edge.
+func (pq *ProfileQuery) QuerySeries() *SeriesQuery {
+	query := &SeriesQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, selector),
+			sqlgraph.To(series.Table, series.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.SeriesTable, profile.SeriesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryJoinedSeries chains the current query on the "joined_series" edge.
+func (pq *ProfileQuery) QueryJoinedSeries() *SeriesQuery {
+	query := &SeriesQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, selector),
+			sqlgraph.To(series.Table, series.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, profile.JoinedSeriesTable, profile.JoinedSeriesPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -312,14 +359,16 @@ func (pq *ProfileQuery) Clone() *ProfileQuery {
 		return nil
 	}
 	return &ProfileQuery{
-		config:        pq.config,
-		limit:         pq.limit,
-		offset:        pq.offset,
-		order:         append([]OrderFunc{}, pq.order...),
-		predicates:    append([]predicate.Profile{}, pq.predicates...),
-		withAccount:   pq.withAccount.Clone(),
-		withEpisode:   pq.withEpisode.Clone(),
-		withCommenter: pq.withCommenter.Clone(),
+		config:           pq.config,
+		limit:            pq.limit,
+		offset:           pq.offset,
+		order:            append([]OrderFunc{}, pq.order...),
+		predicates:       append([]predicate.Profile{}, pq.predicates...),
+		withAccount:      pq.withAccount.Clone(),
+		withEpisode:      pq.withEpisode.Clone(),
+		withCommenter:    pq.withCommenter.Clone(),
+		withSeries:       pq.withSeries.Clone(),
+		withJoinedSeries: pq.withJoinedSeries.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -356,6 +405,28 @@ func (pq *ProfileQuery) WithCommenter(opts ...func(*CommentQuery)) *ProfileQuery
 		opt(query)
 	}
 	pq.withCommenter = query
+	return pq
+}
+
+// WithSeries tells the query-builder to eager-load the nodes that are connected to
+// the "series" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProfileQuery) WithSeries(opts ...func(*SeriesQuery)) *ProfileQuery {
+	query := &SeriesQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withSeries = query
+	return pq
+}
+
+// WithJoinedSeries tells the query-builder to eager-load the nodes that are connected to
+// the "joined_series" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProfileQuery) WithJoinedSeries(opts ...func(*SeriesQuery)) *ProfileQuery {
+	query := &SeriesQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withJoinedSeries = query
 	return pq
 }
 
@@ -425,10 +496,12 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 		nodes       = []*Profile{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [5]bool{
 			pq.withAccount != nil,
 			pq.withEpisode != nil,
 			pq.withCommenter != nil,
+			pq.withSeries != nil,
+			pq.withJoinedSeries != nil,
 		}
 	)
 	if pq.withAccount != nil {
@@ -541,6 +614,100 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "profile_commenter" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Commenter = append(node.Edges.Commenter, n)
+		}
+	}
+
+	if query := pq.withSeries; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Profile)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Series = []*Series{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Series(func(s *sql.Selector) {
+			s.Where(sql.InValues(profile.SeriesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.profile_series
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "profile_series" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "profile_series" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Series = append(node.Edges.Series, n)
+		}
+	}
+
+	if query := pq.withJoinedSeries; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uuid.UUID]*Profile, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.JoinedSeries = []*Series{}
+		}
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Profile)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   profile.JoinedSeriesTable,
+				Columns: profile.JoinedSeriesPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(profile.JoinedSeriesPrimaryKey[0], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, pq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "joined_series": %w`, err)
+		}
+		query.Where(series.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "joined_series" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.JoinedSeries = append(nodes[i].Edges.JoinedSeries, n)
+			}
 		}
 	}
 

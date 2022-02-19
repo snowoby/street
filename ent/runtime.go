@@ -9,6 +9,7 @@ import (
 	"street/ent/file"
 	"street/ent/profile"
 	"street/ent/schema"
+	"street/ent/series"
 	"street/ent/token"
 	"time"
 
@@ -320,6 +321,53 @@ func init() {
 	profileDescID := profileMixinFields0[1].Descriptor()
 	// profile.DefaultID holds the default value on creation for the id field.
 	profile.DefaultID = profileDescID.Default.(func() uuid.UUID)
+	seriesMixin := schema.Series{}.Mixin()
+	seriesMixinFields0 := seriesMixin[0].Fields()
+	_ = seriesMixinFields0
+	seriesMixinFields1 := seriesMixin[1].Fields()
+	_ = seriesMixinFields1
+	seriesFields := schema.Series{}.Fields()
+	_ = seriesFields
+	// seriesDescSid is the schema descriptor for sid field.
+	seriesDescSid := seriesMixinFields0[0].Descriptor()
+	// series.DefaultSid holds the default value on creation for the sid field.
+	series.DefaultSid = seriesDescSid.Default.(func() schema.ID)
+	// seriesDescCreateTime is the schema descriptor for create_time field.
+	seriesDescCreateTime := seriesMixinFields1[0].Descriptor()
+	// series.DefaultCreateTime holds the default value on creation for the create_time field.
+	series.DefaultCreateTime = seriesDescCreateTime.Default.(func() time.Time)
+	// seriesDescUpdateTime is the schema descriptor for update_time field.
+	seriesDescUpdateTime := seriesMixinFields1[1].Descriptor()
+	// series.DefaultUpdateTime holds the default value on creation for the update_time field.
+	series.DefaultUpdateTime = seriesDescUpdateTime.Default.(func() time.Time)
+	// series.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	series.UpdateDefaultUpdateTime = seriesDescUpdateTime.UpdateDefault.(func() time.Time)
+	// seriesDescTitle is the schema descriptor for title field.
+	seriesDescTitle := seriesFields[0].Descriptor()
+	// series.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	series.TitleValidator = func() func(string) error {
+		validators := seriesDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// seriesDescType is the schema descriptor for type field.
+	seriesDescType := seriesFields[1].Descriptor()
+	// series.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	series.TypeValidator = seriesDescType.Validators[0].(func(string) error)
+	// seriesDescID is the schema descriptor for id field.
+	seriesDescID := seriesMixinFields0[1].Descriptor()
+	// series.DefaultID holds the default value on creation for the id field.
+	series.DefaultID = seriesDescID.Default.(func() uuid.UUID)
 	tokenMixin := schema.Token{}.Mixin()
 	tokenMixinFields0 := tokenMixin[0].Fields()
 	_ = tokenMixinFields0

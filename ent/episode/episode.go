@@ -30,6 +30,8 @@ const (
 	EdgeProfile = "profile"
 	// EdgeComments holds the string denoting the comments edge name in mutations.
 	EdgeComments = "comments"
+	// EdgeSeries holds the string denoting the series edge name in mutations.
+	EdgeSeries = "series"
 	// Table holds the table name of the episode in the database.
 	Table = "episodes"
 	// ProfileTable is the table that holds the profile relation/edge.
@@ -46,6 +48,13 @@ const (
 	CommentsInverseTable = "comments"
 	// CommentsColumn is the table column denoting the comments relation/edge.
 	CommentsColumn = "episode_comments"
+	// SeriesTable is the table that holds the series relation/edge.
+	SeriesTable = "episodes"
+	// SeriesInverseTable is the table name for the Series entity.
+	// It exists in this package in order to avoid circular dependency with the "series" package.
+	SeriesInverseTable = "series"
+	// SeriesColumn is the table column denoting the series relation/edge.
+	SeriesColumn = "series_episodes"
 )
 
 // Columns holds all SQL columns for episode fields.
@@ -63,6 +72,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"profile_episode",
+	"series_episodes",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

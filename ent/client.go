@@ -14,6 +14,7 @@ import (
 	"street/ent/episode"
 	"street/ent/file"
 	"street/ent/profile"
+	"street/ent/series"
 	"street/ent/token"
 
 	"entgo.io/ent/dialect"
@@ -37,6 +38,8 @@ type Client struct {
 	File *FileClient
 	// Profile is the client for interacting with the Profile builders.
 	Profile *ProfileClient
+	// Series is the client for interacting with the Series builders.
+	Series *SeriesClient
 	// Token is the client for interacting with the Token builders.
 	Token *TokenClient
 }
@@ -57,6 +60,7 @@ func (c *Client) init() {
 	c.Episode = NewEpisodeClient(c.config)
 	c.File = NewFileClient(c.config)
 	c.Profile = NewProfileClient(c.config)
+	c.Series = NewSeriesClient(c.config)
 	c.Token = NewTokenClient(c.config)
 }
 
@@ -96,6 +100,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Episode: NewEpisodeClient(cfg),
 		File:    NewFileClient(cfg),
 		Profile: NewProfileClient(cfg),
+		Series:  NewSeriesClient(cfg),
 		Token:   NewTokenClient(cfg),
 	}, nil
 }
@@ -120,6 +125,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Episode: NewEpisodeClient(cfg),
 		File:    NewFileClient(cfg),
 		Profile: NewProfileClient(cfg),
+		Series:  NewSeriesClient(cfg),
 		Token:   NewTokenClient(cfg),
 	}, nil
 }
@@ -155,6 +161,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Episode.Use(hooks...)
 	c.File.Use(hooks...)
 	c.Profile.Use(hooks...)
+	c.Series.Use(hooks...)
 	c.Token.Use(hooks...)
 }
 
@@ -535,6 +542,22 @@ func (c *EpisodeClient) QueryComments(e *Episode) *CommentQuery {
 	return query
 }
 
+// QuerySeries queries the series edge of a Episode.
+func (c *EpisodeClient) QuerySeries(e *Episode) *SeriesQuery {
+	query := &SeriesQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(episode.Table, episode.FieldID, id),
+			sqlgraph.To(series.Table, series.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, episode.SeriesTable, episode.SeriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *EpisodeClient) Hooks() []Hook {
 	return c.hooks.Episode
@@ -779,9 +802,179 @@ func (c *ProfileClient) QueryCommenter(pr *Profile) *CommentQuery {
 	return query
 }
 
+// QuerySeries queries the series edge of a Profile.
+func (c *ProfileClient) QuerySeries(pr *Profile) *SeriesQuery {
+	query := &SeriesQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, id),
+			sqlgraph.To(series.Table, series.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.SeriesTable, profile.SeriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryJoinedSeries queries the joined_series edge of a Profile.
+func (c *ProfileClient) QueryJoinedSeries(pr *Profile) *SeriesQuery {
+	query := &SeriesQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, id),
+			sqlgraph.To(series.Table, series.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, profile.JoinedSeriesTable, profile.JoinedSeriesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ProfileClient) Hooks() []Hook {
 	return c.hooks.Profile
+}
+
+// SeriesClient is a client for the Series schema.
+type SeriesClient struct {
+	config
+}
+
+// NewSeriesClient returns a client for the Series from the given config.
+func NewSeriesClient(c config) *SeriesClient {
+	return &SeriesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `series.Hooks(f(g(h())))`.
+func (c *SeriesClient) Use(hooks ...Hook) {
+	c.hooks.Series = append(c.hooks.Series, hooks...)
+}
+
+// Create returns a create builder for Series.
+func (c *SeriesClient) Create() *SeriesCreate {
+	mutation := newSeriesMutation(c.config, OpCreate)
+	return &SeriesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Series entities.
+func (c *SeriesClient) CreateBulk(builders ...*SeriesCreate) *SeriesCreateBulk {
+	return &SeriesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Series.
+func (c *SeriesClient) Update() *SeriesUpdate {
+	mutation := newSeriesMutation(c.config, OpUpdate)
+	return &SeriesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SeriesClient) UpdateOne(s *Series) *SeriesUpdateOne {
+	mutation := newSeriesMutation(c.config, OpUpdateOne, withSeries(s))
+	return &SeriesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SeriesClient) UpdateOneID(id uuid.UUID) *SeriesUpdateOne {
+	mutation := newSeriesMutation(c.config, OpUpdateOne, withSeriesID(id))
+	return &SeriesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Series.
+func (c *SeriesClient) Delete() *SeriesDelete {
+	mutation := newSeriesMutation(c.config, OpDelete)
+	return &SeriesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *SeriesClient) DeleteOne(s *Series) *SeriesDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *SeriesClient) DeleteOneID(id uuid.UUID) *SeriesDeleteOne {
+	builder := c.Delete().Where(series.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SeriesDeleteOne{builder}
+}
+
+// Query returns a query builder for Series.
+func (c *SeriesClient) Query() *SeriesQuery {
+	return &SeriesQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Series entity by its id.
+func (c *SeriesClient) Get(ctx context.Context, id uuid.UUID) (*Series, error) {
+	return c.Query().Where(series.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SeriesClient) GetX(ctx context.Context, id uuid.UUID) *Series {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryEpisodes queries the episodes edge of a Series.
+func (c *SeriesClient) QueryEpisodes(s *Series) *EpisodeQuery {
+	query := &EpisodeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(series.Table, series.FieldID, id),
+			sqlgraph.To(episode.Table, episode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, series.EpisodesTable, series.EpisodesColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOwner queries the owner edge of a Series.
+func (c *SeriesClient) QueryOwner(s *Series) *ProfileQuery {
+	query := &ProfileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(series.Table, series.FieldID, id),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, series.OwnerTable, series.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParticipant queries the participant edge of a Series.
+func (c *SeriesClient) QueryParticipant(s *Series) *ProfileQuery {
+	query := &ProfileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(series.Table, series.FieldID, id),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, series.ParticipantTable, series.ParticipantPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SeriesClient) Hooks() []Hook {
+	return c.hooks.Series
 }
 
 // TokenClient is a client for the Token schema.

@@ -15,15 +15,13 @@ type AccountForm struct {
 }
 
 type Account struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	ID    string `json:"id"`
+	Email string `json:"email"`
 }
 
 func AccountFromEnt(data *ent.Account) *Account {
 	return &Account{
-		ID:       data.ID.String(),
-		Email:    data.Email,
-		Password: data.Password,
+		ID:    data.ID.String(),
+		Email: data.Email,
 	}
 }

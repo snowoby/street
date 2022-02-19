@@ -70,6 +70,7 @@ var (
 		{Name: "title", Type: field.TypeString, Size: 320},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
 		{Name: "profile_episode", Type: field.TypeUUID, Nullable: true},
+		{Name: "series_episodes", Type: field.TypeUUID, Nullable: true},
 	}
 	// EpisodesTable holds the schema information for the "episodes" table.
 	EpisodesTable = &schema.Table{
@@ -81,6 +82,12 @@ var (
 				Symbol:     "episodes_profiles_episode",
 				Columns:    []*schema.Column{EpisodesColumns[7]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "episodes_series_episodes",
+				Columns:    []*schema.Column{EpisodesColumns[8]},
+				RefColumns: []*schema.Column{SeriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -151,6 +158,30 @@ var (
 			},
 		},
 	}
+	// SeriesColumns holds the columns for the "series" table.
+	SeriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "sid", Type: field.TypeInt64, Unique: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "title", Type: field.TypeString, Size: 320},
+		{Name: "type", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "profile_series", Type: field.TypeUUID, Nullable: true},
+	}
+	// SeriesTable holds the schema information for the "series" table.
+	SeriesTable = &schema.Table{
+		Name:       "series",
+		Columns:    SeriesColumns,
+		PrimaryKey: []*schema.Column{SeriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "series_profiles_series",
+				Columns:    []*schema.Column{SeriesColumns[6]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// TokensColumns holds the columns for the "tokens" table.
 	TokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -183,6 +214,31 @@ var (
 			},
 		},
 	}
+	// ProfileJoinedSeriesColumns holds the columns for the "profile_joined_series" table.
+	ProfileJoinedSeriesColumns = []*schema.Column{
+		{Name: "profile_id", Type: field.TypeUUID},
+		{Name: "series_id", Type: field.TypeUUID},
+	}
+	// ProfileJoinedSeriesTable holds the schema information for the "profile_joined_series" table.
+	ProfileJoinedSeriesTable = &schema.Table{
+		Name:       "profile_joined_series",
+		Columns:    ProfileJoinedSeriesColumns,
+		PrimaryKey: []*schema.Column{ProfileJoinedSeriesColumns[0], ProfileJoinedSeriesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "profile_joined_series_profile_id",
+				Columns:    []*schema.Column{ProfileJoinedSeriesColumns[0]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "profile_joined_series_series_id",
+				Columns:    []*schema.Column{ProfileJoinedSeriesColumns[1]},
+				RefColumns: []*schema.Column{SeriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
@@ -190,7 +246,9 @@ var (
 		EpisodesTable,
 		FilesTable,
 		ProfilesTable,
+		SeriesTable,
 		TokensTable,
+		ProfileJoinedSeriesTable,
 	}
 )
 
@@ -198,7 +256,11 @@ func init() {
 	CommentsTable.ForeignKeys[0].RefTable = EpisodesTable
 	CommentsTable.ForeignKeys[1].RefTable = ProfilesTable
 	EpisodesTable.ForeignKeys[0].RefTable = ProfilesTable
+	EpisodesTable.ForeignKeys[1].RefTable = SeriesTable
 	FilesTable.ForeignKeys[0].RefTable = AccountsTable
 	ProfilesTable.ForeignKeys[0].RefTable = AccountsTable
+	SeriesTable.ForeignKeys[0].RefTable = ProfilesTable
 	TokensTable.ForeignKeys[0].RefTable = AccountsTable
+	ProfileJoinedSeriesTable.ForeignKeys[0].RefTable = ProfilesTable
+	ProfileJoinedSeriesTable.ForeignKeys[1].RefTable = SeriesTable
 }

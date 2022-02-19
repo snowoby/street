@@ -60,12 +60,17 @@ func (s *service) create(ctx *gin.Context, identity *operator.Identity) (int, in
 		return 0, nil, errs.UnauthorizedError
 	}
 
-	ep, err := s.db.Episode.Create().
+	episodeBuilder := s.db.Episode.Create().
 		SetTitle(episodeForm.Title).
 		SetContent(episodeForm.Content).
 		SetProfileID(uuid.MustParse(episodeForm.ProfileID)).
-		SetCover(episodeForm.Cover).
-		Save(ctx)
+		SetCover(episodeForm.Cover)
+	if episodeForm.SeriesID != nil {
+		episodeBuilder = episodeBuilder.SetSeriesID(uuid.MustParse(*episodeForm.SeriesID))
+	}
+
+	ep, err := episodeBuilder.Save(ctx)
+
 	if err != nil {
 		return 0, nil, err
 	}
@@ -91,10 +96,17 @@ func (s *service) update(ctx *gin.Context, id string) (int, interface{}, error) 
 		return 0, nil, errs.BindingError(err)
 	}
 
-	ep, err := s.db.Episode.UpdateOneID(uuid.MustParse(id)).
+	episodeBuilder := s.db.Episode.UpdateOneID(uuid.MustParse(id)).
 		SetTitle(episodeForm.Title).
 		SetContent(episodeForm.Content).
-		Save(ctx)
+		SetCover(episodeForm.Cover)
+
+	if episodeForm.SeriesID != nil {
+		episodeBuilder = episodeBuilder.SetSeriesID(uuid.MustParse(*episodeForm.SeriesID))
+	}
+
+	ep, err := episodeBuilder.Save(ctx)
+
 	if err != nil {
 		return 0, nil, err
 	}
@@ -116,7 +128,6 @@ func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
 	ep, err := s.db.Episode.Query().Where(episode.ID(uuid.MustParse(id))).WithProfile().Only(ctx)
 	if err != nil {
 		return 0, nil, err
-
 	}
 
 	return http.StatusOK, d.EpisodeFromEnt(ep), nil
@@ -131,7 +142,7 @@ func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode [get]
 func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {
-	eps, err := s.db.Episode.Query().All(ctx)
+	eps, err := s.db.Episode.Query().WithProfile().All(ctx)
 	if err != nil {
 		return 0, nil, err
 
@@ -141,7 +152,7 @@ func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {
 
 }
 
-// del godoc
+// delete godoc
 // @Summary delete one episode
 // @Tags episode
 // @Produce json
@@ -150,7 +161,7 @@ func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {
 // @Success 204
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode/{id} [delete]
-func (s *service) del(ctx *gin.Context, id string) (int, interface{}, error) {
+func (s *service) delete(ctx *gin.Context, id string) (int, interface{}, error) {
 	err := s.db.Episode.DeleteOneID(uuid.MustParse(id)).Exec(ctx)
 	if err != nil {
 		return 0, nil, err
