@@ -10,10 +10,15 @@ type CommentForm struct {
 
 type Comment struct {
 	*ent.Comment
+	ValueType
+	NoEdges
 }
 
 func CommentFromEnt(c *ent.Comment) *Comment {
-	return &Comment{c}
+	return &Comment{
+		Comment:   c,
+		ValueType: ValueType{"comment"},
+	}
 }
 
 func CommentsFromEnt(cs []*ent.Comment) []*Comment {

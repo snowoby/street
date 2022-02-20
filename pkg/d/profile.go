@@ -5,6 +5,7 @@ import "street/ent"
 type Profile struct {
 	*ent.Profile
 	NoEdges
+	ValueType
 }
 
 type ProfileForm struct {
@@ -16,7 +17,8 @@ type ProfileForm struct {
 
 func ProfileFromEnt(profile *ent.Profile) *Profile {
 	return &Profile{
-		Profile: profile,
+		Profile:   profile,
+		ValueType: ValueType{"profile"},
 	}
 }
 

@@ -5,6 +5,8 @@ definitions:
         type: string
       id:
         type: string
+      valueType:
+        type: string
     type: object
   d.AccountForm:
     properties:
@@ -34,6 +36,8 @@ definitions:
         type: string
       profile:
         $ref: '#/definitions/d.Profile'
+      series:
+        $ref: '#/definitions/d.Series'
       sid:
         description: Sid holds the value of the "sid" field.
         type: string
@@ -42,6 +46,8 @@ definitions:
         type: string
       update_time:
         description: UpdateTime holds the value of the "update_time" field.
+        type: string
+      valueType:
         type: string
     type: object
   d.EpisodeForm:
@@ -66,10 +72,7 @@ definitions:
         description: CreateTime holds the value of the "create_time" field.
         type: string
       edges:
-        $ref: '#/definitions/ent.FileEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the FileQuery when eager-loading is set.
+        type: object
       filename:
         description: Filename holds the value of the "filename" field.
         type: string
@@ -96,6 +99,8 @@ definitions:
         type: string
       update_time:
         description: UpdateTime holds the value of the "update_time" field.
+        type: string
+      valueType:
         type: string
     type: object
   d.FileForm:
@@ -150,6 +155,8 @@ definitions:
       update_time:
         description: UpdateTime holds the value of the "update_time" field.
         type: string
+      valueType:
+        type: string
     type: object
   d.ProfileForm:
     properties:
@@ -166,6 +173,33 @@ definitions:
     - category
     - title
     type: object
+  d.Series:
+    properties:
+      create_time:
+        description: CreateTime holds the value of the "create_time" field.
+        type: string
+      edges:
+        type: object
+      id:
+        description: ID of the ent.
+        type: string
+      profile:
+        $ref: '#/definitions/d.Profile'
+      sid:
+        description: Sid holds the value of the "sid" field.
+        type: string
+      title:
+        description: Title holds the value of the "title" field.
+        type: string
+      type:
+        description: Type holds the value of the "type" field.
+        type: string
+      update_time:
+        description: UpdateTime holds the value of the "update_time" field.
+        type: string
+      valueType:
+        type: string
+    type: object
   d.Token:
     properties:
       body:
@@ -175,10 +209,7 @@ definitions:
         description: CreateTime holds the value of the "create_time" field.
         type: string
       edges:
-        $ref: '#/definitions/ent.TokenEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the TokenQuery when eager-loading is set.
+        type: object
       expire:
         description: Expire holds the value of the "expire" field.
         type: string
@@ -193,6 +224,8 @@ definitions:
         type: string
       update_time:
         description: UpdateTime holds the value of the "update_time" field.
+        type: string
+      valueType:
         type: string
     type: object
   ent.Account:

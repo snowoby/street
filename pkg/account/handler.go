@@ -171,8 +171,8 @@ func tokenIsValid(token *ent.Token) bool {
 // @Failure 400 {object} errs.HTTPError
 // @Router /account/refresh [post]
 func (s *service) refresh(ctx *gin.Context) {
-	tokenType := d.StringRefreshToken
-	t := s.tryToken(ctx, tokenType)
+
+	t := s.tryToken(ctx, d.StringRefreshToken)
 	if t == nil {
 		ctx.AbortWithStatusJSON(errs.UnauthorizedError.Code, errs.UnauthorizedError)
 		return
@@ -183,7 +183,7 @@ func (s *service) refresh(ctx *gin.Context) {
 	t, err := s.db.Token.Create().
 		SetAccountID(t.Edges.Account.ID).
 		SetBody(tokenBody).
-		SetType(tokenType).
+		SetType(d.StringAccessToken).
 		SetExpire(time.Now().Add(time.Hour * 24 * 7)).
 		Save(ctx)
 	if t == nil {

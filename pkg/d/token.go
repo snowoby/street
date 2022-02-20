@@ -4,11 +4,14 @@ import "street/ent"
 
 type Token struct {
 	*ent.Token
+	NoEdges
+	ValueType
 }
 
 func TokenFromEnt(token *ent.Token) *Token {
 	return &Token{
-		Token: token,
+		Token:     token,
+		ValueType: ValueType{"token"},
 	}
 }
 

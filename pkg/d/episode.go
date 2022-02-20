@@ -5,7 +5,9 @@ import "street/ent"
 type Episode struct {
 	*ent.Episode
 	Profile *Profile `json:"profile"`
+	Series  *Series  `json:"series"`
 	NoEdges
+	ValueType
 }
 
 type EpisodeForm struct {
@@ -18,8 +20,10 @@ type EpisodeForm struct {
 
 func EpisodeFromEnt(episode *ent.Episode) *Episode {
 	return &Episode{
-		Episode: episode,
-		Profile: ProfileFromEnt(episode.Edges.Profile),
+		Episode:   episode,
+		Profile:   ProfileFromEnt(episode.Edges.Profile),
+		Series:    SeriesFromEnt(episode.Edges.Series),
+		ValueType: ValueType{"episode"},
 	}
 }
 

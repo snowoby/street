@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"street/ent"
+	"street/ent/file"
 	"street/errs"
 	"street/pkg/auth"
 	"street/pkg/composer"
@@ -31,6 +32,7 @@ type service struct {
 }
 
 func (s *service) registerRouters() {
+	s.router.Use(s.auth.MustLogin)
 	single := s.router.Group("single")
 	single.POST("", composer.Authed(s.create))
 	single.PUT("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.put))
@@ -314,12 +316,12 @@ func (s *service) doneMulti(ctx *gin.Context, id string) (int, interface{}, erro
 }
 
 func (s *service) owned(ctx *gin.Context, operator *operator.Identity, objID string) error {
-	file, err := s.db.File.Get(ctx, uuid.MustParse(objID))
+	f, err := s.db.File.Query().WithAccount().Where(file.ID(uuid.MustParse(objID))).Only(ctx)
 	if err != nil {
 		return err
 	}
 
-	if file.Edges.Account.ID != operator.Account().ID {
+	if f.Edges.Account.ID != operator.Account().ID {
 		return errs.NotBelongsToOperator
 	}
 	return nil

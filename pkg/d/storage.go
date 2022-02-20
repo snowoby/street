@@ -11,6 +11,8 @@ type FileForm struct {
 
 type File struct {
 	*ent.File
+	NoEdges
+	ValueType
 }
 
 type Part struct {
@@ -18,5 +20,8 @@ type Part struct {
 }
 
 func FileFromEnt(f *ent.File) *File {
-	return &File{f}
+	return &File{
+		File:      f,
+		ValueType: ValueType{"file"},
+	}
 }

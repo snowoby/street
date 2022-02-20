@@ -5,6 +5,8 @@ import "street/ent"
 type Series struct {
 	*ent.Series
 	Profile *Profile `json:"profile,omitempty"`
+	NoEdges
+	ValueType
 }
 
 type SeriesForm struct {
@@ -14,9 +16,13 @@ type SeriesForm struct {
 }
 
 func SeriesFromEnt(series *ent.Series) *Series {
+	if series == nil {
+		return nil
+	}
 	return &Series{
-		Series:  series,
-		Profile: ProfileFromEnt(series.Edges.Owner),
+		Series:    series,
+		Profile:   ProfileFromEnt(series.Edges.Owner),
+		ValueType: ValueType{"series"},
 	}
 }
 

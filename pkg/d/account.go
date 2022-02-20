@@ -17,11 +17,13 @@ type AccountForm struct {
 type Account struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
+	ValueType
 }
 
 func AccountFromEnt(data *ent.Account) *Account {
 	return &Account{
-		ID:    data.ID.String(),
-		Email: data.Email,
+		ID:        data.ID.String(),
+		Email:     data.Email,
+		ValueType: ValueType{"account"},
 	}
 }

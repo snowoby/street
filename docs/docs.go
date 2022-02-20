@@ -719,6 +719,9 @@ var doc = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "valueType": {
+                    "type": "string"
                 }
             }
         },
@@ -762,6 +765,9 @@ var doc = `{
                 "profile": {
                     "$ref": "#/definitions/d.Profile"
                 },
+                "series": {
+                    "$ref": "#/definitions/d.Series"
+                },
                 "sid": {
                     "description": "Sid holds the value of the \"sid\" field.",
                     "type": "string"
@@ -772,6 +778,9 @@ var doc = `{
                 },
                 "update_time": {
                     "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                },
+                "valueType": {
                     "type": "string"
                 }
             }
@@ -808,8 +817,7 @@ var doc = `{
                     "type": "string"
                 },
                 "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the FileQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.FileEdges"
+                    "type": "object"
                 },
                 "filename": {
                     "description": "Filename holds the value of the \"filename\" field.",
@@ -845,6 +853,9 @@ var doc = `{
                 },
                 "update_time": {
                     "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                },
+                "valueType": {
                     "type": "string"
                 }
             }
@@ -922,6 +933,9 @@ var doc = `{
                 "update_time": {
                     "description": "UpdateTime holds the value of the \"update_time\" field.",
                     "type": "string"
+                },
+                "valueType": {
+                    "type": "string"
                 }
             }
         },
@@ -947,6 +961,44 @@ var doc = `{
                 }
             }
         },
+        "d.Series": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "description": "CreateTime holds the value of the \"create_time\" field.",
+                    "type": "string"
+                },
+                "edges": {
+                    "type": "object"
+                },
+                "id": {
+                    "description": "ID of the ent.",
+                    "type": "string"
+                },
+                "profile": {
+                    "$ref": "#/definitions/d.Profile"
+                },
+                "sid": {
+                    "description": "Sid holds the value of the \"sid\" field.",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Title holds the value of the \"title\" field.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type holds the value of the \"type\" field.",
+                    "type": "string"
+                },
+                "update_time": {
+                    "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                },
+                "valueType": {
+                    "type": "string"
+                }
+            }
+        },
         "d.Token": {
             "type": "object",
             "properties": {
@@ -959,8 +1011,7 @@ var doc = `{
                     "type": "string"
                 },
                 "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the TokenQuery when eager-loading is set.",
-                    "$ref": "#/definitions/ent.TokenEdges"
+                    "type": "object"
                 },
                 "expire": {
                     "description": "Expire holds the value of the \"expire\" field.",
@@ -980,6 +1031,9 @@ var doc = `{
                 },
                 "update_time": {
                     "description": "UpdateTime holds the value of the \"update_time\" field.",
+                    "type": "string"
+                },
+                "valueType": {
                     "type": "string"
                 }
             }

@@ -125,7 +125,11 @@ func (s *service) update(ctx *gin.Context, id string) (int, interface{}, error) 
 // @Router /episode/{id} [get]
 func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
 
-	ep, err := s.db.Episode.Query().Where(episode.ID(uuid.MustParse(id))).WithProfile().Only(ctx)
+	ep, err := s.db.Episode.Query().
+		Where(episode.ID(uuid.MustParse(id))).
+		WithProfile().
+		WithSeries().
+		Only(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -142,7 +146,10 @@ func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
 // @Failure 400 {object} errs.HTTPError
 // @Router /episode [get]
 func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {
-	eps, err := s.db.Episode.Query().WithProfile().All(ctx)
+	eps, err := s.db.Episode.Query().
+		WithProfile().
+		WithSeries().
+		All(ctx)
 	if err != nil {
 		return 0, nil, err
 
