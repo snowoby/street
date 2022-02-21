@@ -45,8 +45,8 @@ func setup() *gin.Engine {
 
 	r := gin.Default()
 	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"*"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"}
 	r.Use(cors.New(config))
 	r.Use(ginredoc.New(doc))
