@@ -6,36 +6,11 @@ services:
     env_file:
       - ./.env
     volumes:
-      - storage_volume:/var/lib/postgresql/data
+      - database_volume:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:2345:5432"
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
-
-  street:
-    build: .
-    env_file:
-      - ./.env
-    restart: always
-    ports:
-      - "0.0.0.0:8088:8088"
-    depends_on:
-      - database
-      - storage
-      - redis
-      - worker
-
-  worker:
-    build:
-      context: .
-      dockerfile: worker.Dockerfile
-    env_file:
-      - ./.env
-    restart: always
-    depends_on:
-      - database
-      - storage
-      - redis
 
   storage:
     image: "minio/minio"
@@ -56,7 +31,7 @@ services:
   redis:
     image: "redis:6.2.6-alpine3.15"
     volumes:
-      - database_volume:/data
+      - redis_volume:/data
     ports:
       - "6379:6379"
 
@@ -65,6 +40,33 @@ services:
     ports:
       - "8889:8080"
     command: --redis-addr=redis:6379 --redis-db=1
+
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    env_file:
+      - ./.env
+    restart: always
+    depends_on:
+      - database
+      - storage
+      - redis
+
+
+  street:
+    build: .
+    env_file:
+      - ./.env
+    restart: always
+    ports:
+      - "0.0.0.0:8088:8088"
+    depends_on:
+      - database
+      - storage
+      - redis
+      - worker
 
 volumes:
   storage_volume:
