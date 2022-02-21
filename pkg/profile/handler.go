@@ -124,7 +124,7 @@ func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
 }
 
 func (s *service) owned(ctx *gin.Context, operator *operator.Identity, objID string) error {
-	profileData, err := s.db.Profile.Get(ctx, uuid.MustParse(objID))
+	profileData, err := s.db.Profile.Query().Where(profile.ID(uuid.MustParse(objID))).WithAccount().Only(ctx)
 	if err != nil {
 		return err
 	}
