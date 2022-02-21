@@ -22,7 +22,7 @@ func New(site *Site, router *gin.RouterGroup) *service {
 }
 
 func (s *service) registerRouters() {
-	s.router.GET("", func(ctx *gin.Context) {
+	s.router.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, s.site)
 	})
 
