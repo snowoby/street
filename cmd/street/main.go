@@ -64,7 +64,10 @@ func setup() *gin.Engine {
 	s3 := NewDefaultS3()
 	authSrv := auth.New(entClient)
 
+	// gin executes middleware after route is matched
+	// https://github.com/gin-gonic/gin/issues/2413#issuecomment-645768561
 	site.New(site.NewDefault(), r.Group("/site"))
+
 	account.New(entClient, authSrv, r.Group("/account"))
 	profile.New(entClient, authSrv, r.Group("/profile"))
 	episode.New(entClient, authSrv, r.Group("/episode"))
