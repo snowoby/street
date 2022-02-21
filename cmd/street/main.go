@@ -43,6 +43,8 @@ func setup() *gin.Engine {
 	}
 
 	r := gin.Default()
+	r.RedirectTrailingSlash = false
+
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -63,7 +65,6 @@ func setup() *gin.Engine {
 	asynqClient := NewDefaultAsynq()
 	s3 := NewDefaultS3()
 	authSrv := auth.New(entClient)
-
 	// gin executes middleware after route is matched
 	// https://github.com/gin-gonic/gin/issues/2413#issuecomment-645768561
 	site.New(site.NewDefault(), r.Group("/site"))
