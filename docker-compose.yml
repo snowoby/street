@@ -4,7 +4,7 @@ services:
     image: "postgres:13-alpine3.15"
     restart: always
     environment:
-      - PGDATA:/var/lib/postgresql/data/dbdata/
+      PGDATA: /var/lib/postgresql/data/dbdata/
     env_file:
       - ./.env
     volumes:
