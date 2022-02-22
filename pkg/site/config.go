@@ -40,11 +40,11 @@ type Site struct {
 
 func NewDefault() *Site {
 	return &Site{
-		Domain:                 os.Getenv("site"),
-		storageAccessEndpoint:  os.Getenv("storage_access_endpoint"),
-		StorageEndpoint:        os.Getenv("storage_endpoint"),
-		StorageBucket:          os.Getenv("storage_bucket"),
-		SiteName:               os.Getenv("site_name"),
+		Domain:                 os.Getenv("DOMAIN"),
+		storageAccessEndpoint:  os.Getenv("STORAGE_ACCESS_ENDPOINT"),
+		StorageEndpoint:        os.Getenv("STORAGE_PUBLIC_ENDPOINT"),
+		StorageBucket:          os.Getenv("STORAGE_BUCKET"),
+		SiteName:               os.Getenv("SITE_NAME"),
 		RefreshTokenExpireTime: time.Hour * 24 * 7 * 4,
 		AccessTokenExpireTime:  time.Hour,
 	}
