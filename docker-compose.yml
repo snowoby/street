@@ -9,8 +9,6 @@ services:
       - ./.env
     volumes:
       - database_volume:/var/lib/postgresql/data
-    ports:
-      - "127.0.0.1:2345:5432"
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
 
@@ -34,8 +32,6 @@ services:
     image: "redis:6.2.6-alpine3.15"
     volumes:
       - redis_volume:/data
-    ports:
-      - "6379:6379"
 
   asynqmon:
     image: "hibiken/asynqmon"
