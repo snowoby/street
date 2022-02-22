@@ -3,37 +3,26 @@ services:
   database:
     image: "postgres:13-alpine3.15"
     restart: always
+    environment:
+      PGDATA: /var/lib/postgresql/data/dbdata/
     env_file:
       - ./.env
     volumes:
-      - ./.develop/db:/var/lib/postgresql/data
+      - database_volume:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:23456:5432"
+      - "127.0.0.1:2345:5432"
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
-
-  street:
-    build: .
-    env_file:
-      - ./.env
-    restart: always
-    ports:
-      - "127.0.0.1:8088:8088"
-    depends_on:
-      - database
-      - storage
-      - redis
 
   storage:
     image: "minio/minio"
     volumes:
-      - ./.develop/files:/data
+      - storage_volume:/data
     ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9001:9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      - "0.0.0.0:9000:9000"
+      - "0.0.0.0:9001:9001"
+    env_file:
+      - ./.env
     command: server /data --address 0.0.0.0:9000 --console-address ":9001"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -44,7 +33,7 @@ services:
   redis:
     image: "redis:6.2.6-alpine3.15"
     volumes:
-      - ./.develop/redis:/data
+      - redis_volume:/data
     ports:
       - "6379:6379"
 
@@ -53,3 +42,35 @@ services:
     ports:
       - "8889:8080"
     command: --redis-addr=redis:6379 --redis-db=1
+
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    env_file:
+      - ./.env
+    restart: always
+    depends_on:
+      - database
+      - storage
+      - redis
+
+
+  street:
+    build: .
+    env_file:
+      - ./.env
+    restart: always
+    ports:
+      - "0.0.0.0:8088:8088"
+    depends_on:
+      - database
+      - storage
+      - redis
+      - worker
+
+volumes:
+  storage_volume:
+  redis_volume:
+  database_volume:
