@@ -34,7 +34,7 @@ type service struct {
 func (s *service) registerRouters() {
 	s.router.Use(s.auth.MustLogin)
 	single := s.router.Group("single")
-	single.POST("", composer.Authed(s.create))
+	single.POST("/", composer.Authed(s.create))
 	single.PUT("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.put))
 
 	large := s.router.Group("large")

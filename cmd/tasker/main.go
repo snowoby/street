@@ -2,14 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"golang.org/x/net/context"
 	"os"
-	"street/ent"
+	"street/cmd/config"
 	"street/pkg/factory"
 )
 
@@ -38,31 +35,5 @@ func main() {
 		},
 	)
 
-	factory.New(server, NewDefaultEnt(), NewDefaultS3()).Run()
-}
-
-func NewDefaultEnt() *ent.Client {
-	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		panic(err)
-	}
-	err = client.Schema.Create(context.Background())
-	if err != nil {
-		panic(err)
-	}
-	return client
-}
-
-func NewDefaultS3() *aws.Config {
-	return &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(os.Getenv("s3_accesskey"), os.Getenv("s3_secretkey"), ""),
-		Endpoint:         aws.String(os.Getenv("storage_access_endpoint")),
-		Region:           aws.String(os.Getenv("s3_region")),
-		DisableSSL:       aws.Bool(true),
-		S3ForcePathStyle: aws.Bool(true),
-	}
-}
-
-func NewDefaultAsynq() *asynq.Client {
-	return asynq.NewClient(asynq.RedisClientOpt{Addr: os.Getenv("redis"), DB: 1})
+	factory.New(server, config.NewDefaultEnt(), config.NewDefaultS3()).Run()
 }
