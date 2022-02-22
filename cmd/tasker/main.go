@@ -20,7 +20,7 @@ func init() {
 func main() {
 
 	server := asynq.NewServer(
-		asynq.RedisClientOpt{Addr: os.Getenv("redis"), DB: 1},
+		asynq.RedisClientOpt{Addr: os.Getenv("REDIS"), DB: 1},
 		asynq.Config{
 			// Specify how many concurrent workers to use
 			Concurrency: 10,
