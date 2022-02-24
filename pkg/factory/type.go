@@ -71,7 +71,7 @@ func (s *service) HandleImageCompressTask(_ context.Context, t *asynq.Task) erro
 	if err != nil {
 		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
 	}
-	nb, err := imageWebpCompress(b, 90)
+	nb, err := imageWebpCompress(b, 80)
 	if err != nil {
 		return fmt.Errorf("compress failed: %v: %w", err, asynq.SkipRetry)
 	}
@@ -93,7 +93,7 @@ func (s *service) HandleAvatarCompressTask(_ context.Context, t *asynq.Task) err
 		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	b, err = imageWebpCompress(b, 100)
+	b, err = imageWebpCompress(b, 80)
 	if err != nil {
 		return err
 	}

@@ -75,8 +75,11 @@ func setup() *gin.Engine {
 }
 
 func main() {
-
-	err := setup().Run("0.0.0.0:8088")
+	address := "127.0.0.1:8089"
+	if os.Getenv("MODE") != "debug" {
+		address = "0.0.0.0:8088"
+	}
+	err := setup().Run(address)
 	if err != nil {
 		panic(err)
 	}
