@@ -1,6 +1,9 @@
 package main
 
-import "gopkg.in/gographics/imagick.v3/imagick"
+import (
+	"gopkg.in/gographics/imagick.v3/imagick"
+	"street/pkg/utils"
+)
 
 func main() {
 	imagick.Initialize()
@@ -11,7 +14,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = mw.SetImageCompressionQuality(90)
+	width, height := utils.ResizeCalculator(mw.GetImageWidth(), mw.GetImageHeight(), 512)
+	mw.ResizeImage(width, height, imagick.FILTER_UNDEFINED)
+	mw.SetImageCompressionQuality(90)
 	if err != nil {
 		panic(err)
 	}

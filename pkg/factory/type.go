@@ -8,58 +8,22 @@ import (
 	"golang.org/x/net/context"
 	"gopkg.in/gographics/imagick.v3/imagick"
 	"street/ent"
+	"street/pkg/utils"
 )
 
-func imageWebpCompress(b []byte, quality uint) ([]byte, error) {
+const (
+	ResizeWidth  = 512
+	ResizeHeight = 512
 
-	mw := imagick.NewMagickWand()
-	defer mw.Destroy()
-	err := mw.ReadImageBlob(b)
-	if err != nil {
-		return nil, fmt.Errorf("read imagick failed: %v: %w", err, asynq.SkipRetry)
-	}
+	ThumbnailWidth  = 512
+	ThumbnailHeight = 512
 
-	err = mw.SetImageCompressionQuality(quality)
-	if err != nil {
-		return nil, fmt.Errorf("set compress quality failed: %v: %w", err, asynq.SkipRetry)
-	}
+	Quality = 80
+)
 
-	err = mw.SetFormat("webp")
-	if err != nil {
-		return nil, fmt.Errorf("set format failed: %v: %w", err, asynq.SkipRetry)
-	}
+func (s *service) createImageCompress(thumbMw *imagick.MagickWand, maxSize int) error {
 
-	nb := mw.GetImageBlob()
-	return nb, nil
-
-}
-
-func imageCrop(b []byte, max uint) ([]byte, error) {
-
-	mw := imagick.NewMagickWand()
-	defer mw.Destroy()
-	err := mw.ReadImageBlob(b)
-	if err != nil {
-		return nil, fmt.Errorf("read imagick failed: %v: %w", err, asynq.SkipRetry)
-	}
-	height := mw.GetImageHeight()
-	size := height
-	width := mw.GetImageWidth()
-	if width < size {
-		size = width
-	}
-	if size > max {
-		size = max
-	}
-
-	err = mw.ResizeImage(size, size, imagick.FILTER_UNDEFINED)
-	if err != nil {
-		return nil, fmt.Errorf("crop failed: %v: %w", err, asynq.SkipRetry)
-	}
-
-	nb := mw.GetImageBlob()
-	return nb, nil
-
+	return nil
 }
 
 func (s *service) HandleImageCompressTask(_ context.Context, t *asynq.Task) error {
@@ -71,18 +35,67 @@ func (s *service) HandleImageCompressTask(_ context.Context, t *asynq.Task) erro
 	if err != nil {
 		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
 	}
-	nb, err := imageWebpCompress(b, 80)
+
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+	err = mw.ReadImageBlob(b)
 	if err != nil {
-		return fmt.Errorf("compress failed: %v: %w", err, asynq.SkipRetry)
+		return fmt.Errorf("read blob failed: %v: %w", err, asynq.SkipRetry)
 	}
-	newFilename := p.Filename + ".webp"
-	_, err = s.storageService.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
-	if err != nil {
-		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
+
+	// thumbnail
+	{
+		mw := mw.Clone()
+		defer mw.Destroy()
+		if mw.GetImageWidth() > ResizeWidth || mw.GetImageHeight() > ResizeHeight {
+			width, height := utils.ResizeCalculator(mw.GetImageWidth(), mw.GetImageHeight(), ResizeWidth)
+			err := mw.ResizeImage(width, height, imagick.FILTER_UNDEFINED)
+			if err != nil {
+				return fmt.Errorf("resize failed: %v: %w", err, asynq.SkipRetry)
+			}
+		}
+		err := mw.SetImageCompressionQuality(Quality)
+		if err != nil {
+			return fmt.Errorf("set compress quality failed: %v: %w", err, asynq.SkipRetry)
+		}
+
+		err = mw.SetFormat("webp")
+		if err != nil {
+			return fmt.Errorf("set format failed: %v: %w", err, asynq.SkipRetry)
+		}
+
+		filename := fmt.Sprintf("%s_%s.%s", p.Filename, "thumbnail", "webp")
+		_, err = s.storageService.PutSingle(bytes.NewReader(mw.GetImageBlob()), p.Path, p.ID, filename, "thumbnail", "image/webp")
+		if err != nil {
+			return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
+		}
+	}
+
+	// original size compress
+	{
+		mw := mw.Clone()
+		defer mw.Destroy()
+
+		err := mw.SetImageCompressionQuality(Quality)
+		if err != nil {
+			return fmt.Errorf("set compress quality failed: %v: %w", err, asynq.SkipRetry)
+		}
+
+		err = mw.SetFormat("webp")
+		if err != nil {
+			return fmt.Errorf("set format failed: %v: %w", err, asynq.SkipRetry)
+		}
+
+		filename := fmt.Sprintf("%s_%s.%s", p.Filename, "compressed", "webp")
+		_, err = s.storageService.PutSingle(bytes.NewReader(mw.GetImageBlob()), p.Path, p.ID, filename, "thumbnail", "image/webp")
+		if err != nil {
+			return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
+		}
 	}
 	return nil
 
 }
+
 func (s *service) HandleAvatarCompressTask(_ context.Context, t *asynq.Task) error {
 	var p ent.File
 	if err := json.Unmarshal(t.Payload(), &p); err != nil {
@@ -93,18 +106,34 @@ func (s *service) HandleAvatarCompressTask(_ context.Context, t *asynq.Task) err
 		return fmt.Errorf("get from s3 failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	b, err = imageWebpCompress(b, 80)
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+	err = mw.ReadImageBlob(b)
+
 	if err != nil {
-		return err
+		return fmt.Errorf("read image blob failed: %v: %w", err, asynq.SkipRetry)
 	}
 
-	nb, err := imageCrop(b, 512)
+	err = mw.SetImageCompressionQuality(Quality)
 	if err != nil {
-		return err
+		return fmt.Errorf("set compress quality failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	if mw.GetImageWidth() > ResizeWidth || mw.GetImageHeight() > ResizeHeight {
+
+		width, height := utils.ResizeCalculator(mw.GetImageWidth(), mw.GetImageHeight(), ResizeWidth)
+
+		err := mw.ResizeImage(width, height, imagick.FILTER_UNDEFINED)
+		if err != nil {
+			return fmt.Errorf("resize failed: %v: %w", err, asynq.SkipRetry)
+		}
+	}
+	if err != nil {
+		return fmt.Errorf("crop failed: %v: %w", err, asynq.SkipRetry)
 	}
 
 	newFilename := p.Filename + ".webp"
-	_, err = s.storageService.PutSingle(bytes.NewReader(nb), p.Path, p.ID, newFilename, "compressed", "image/webp")
+	_, err = s.storageService.PutSingle(bytes.NewReader(mw.GetImageBlob()), p.Path, p.ID, newFilename, "compressed", "image/webp")
 	if err != nil {
 		return fmt.Errorf("upload failed: %v: %w", err, asynq.SkipRetry)
 	}

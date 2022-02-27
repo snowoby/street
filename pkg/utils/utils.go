@@ -48,3 +48,15 @@ func Encrypt(rawPassword string) (string, error) {
 func Validate(rawPassword string, recordPassword string) bool {
 	return CheckPassword(rawPassword, recordPassword)
 }
+
+func ResizeCalculator(originalWidth uint, originalHeight uint, max uint) (uint, uint) {
+	if originalWidth < max && originalHeight < max {
+		return originalWidth, originalHeight
+	}
+
+	if originalWidth > originalHeight {
+		return max, uint(float64(max) * float64(originalHeight) / float64(originalWidth))
+	} else {
+		return uint(float64(max) * float64(originalWidth) / float64(originalHeight)), max
+	}
+}
