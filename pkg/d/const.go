@@ -10,6 +10,7 @@ const (
 	StringAllProfiles       = "allProfiles"
 	StringOriginal          = "original"
 	StringCompressed        = "compressed"
+	StringThumbnail         = "thumbnail"
 	StringTaskImageCompress = "image:compress"
 	StringTaskAvatar        = "image:avatar"
 )

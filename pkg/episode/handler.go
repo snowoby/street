@@ -149,6 +149,7 @@ func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {
 	eps, err := s.db.Episode.Query().
 		WithProfile().
 		WithSeries().
+		Order(ent.Desc(episode.FieldCreateTime)).
 		All(ctx)
 	if err != nil {
 		return 0, nil, err
