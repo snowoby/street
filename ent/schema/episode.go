@@ -18,6 +18,7 @@ func (Episode) Fields() []ent.Field {
 		field.String("cover").MaxLen(320).Nillable().Optional(),
 		field.String("title").MaxLen(320).NotEmpty(),
 		field.Text("content").NotEmpty(),
+		field.Bytes("files").GoType(Medias{}).DefaultFunc(NewMedias),
 	}
 }
 

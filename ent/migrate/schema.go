@@ -69,6 +69,7 @@ var (
 		{Name: "cover", Type: field.TypeString, Nullable: true, Size: 320},
 		{Name: "title", Type: field.TypeString, Size: 320},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
+		{Name: "files", Type: field.TypeBytes},
 		{Name: "profile_episode", Type: field.TypeUUID, Nullable: true},
 		{Name: "series_episodes", Type: field.TypeUUID, Nullable: true},
 	}
@@ -80,13 +81,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "episodes_profiles_episode",
-				Columns:    []*schema.Column{EpisodesColumns[7]},
+				Columns:    []*schema.Column{EpisodesColumns[8]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "episodes_series_episodes",
-				Columns:    []*schema.Column{EpisodesColumns[8]},
+				Columns:    []*schema.Column{EpisodesColumns[9]},
 				RefColumns: []*schema.Column{SeriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

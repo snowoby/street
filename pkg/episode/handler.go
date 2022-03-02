@@ -64,7 +64,9 @@ func (s *service) create(ctx *gin.Context, identity *operator.Identity) (int, in
 		SetTitle(episodeForm.Title).
 		SetContent(episodeForm.Content).
 		SetProfileID(uuid.MustParse(episodeForm.ProfileID)).
-		SetCover(episodeForm.Cover)
+		SetCover(episodeForm.Cover).
+		SetFiles(episodeForm.Files)
+
 	if episodeForm.SeriesID != nil {
 		episodeBuilder = episodeBuilder.SetSeriesID(uuid.MustParse(*episodeForm.SeriesID))
 	}
@@ -99,7 +101,8 @@ func (s *service) update(ctx *gin.Context, id string) (int, interface{}, error) 
 	episodeBuilder := s.db.Episode.UpdateOneID(uuid.MustParse(id)).
 		SetTitle(episodeForm.Title).
 		SetContent(episodeForm.Content).
-		SetCover(episodeForm.Cover)
+		SetCover(episodeForm.Cover).
+		SetFiles(episodeForm.Files)
 
 	if episodeForm.SeriesID != nil {
 		episodeBuilder = episodeBuilder.SetSeriesID(uuid.MustParse(*episodeForm.SeriesID))

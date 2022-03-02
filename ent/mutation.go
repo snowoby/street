@@ -1419,6 +1419,7 @@ type EpisodeMutation struct {
 	cover           *string
 	title           *string
 	content         *string
+	files           *schema.Medias
 	clearedFields   map[string]struct{}
 	profile         *uuid.UUID
 	clearedprofile  bool
@@ -1746,6 +1747,42 @@ func (m *EpisodeMutation) ResetContent() {
 	m.content = nil
 }
 
+// SetFiles sets the "files" field.
+func (m *EpisodeMutation) SetFiles(s schema.Medias) {
+	m.files = &s
+}
+
+// Files returns the value of the "files" field in the mutation.
+func (m *EpisodeMutation) Files() (r schema.Medias, exists bool) {
+	v := m.files
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFiles returns the old "files" field's value of the Episode entity.
+// If the Episode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EpisodeMutation) OldFiles(ctx context.Context) (v schema.Medias, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldFiles is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldFiles requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFiles: %w", err)
+	}
+	return oldValue.Files, nil
+}
+
+// ResetFiles resets all changes to the "files" field.
+func (m *EpisodeMutation) ResetFiles() {
+	m.files = nil
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by id.
 func (m *EpisodeMutation) SetProfileID(id uuid.UUID) {
 	m.profile = &id
@@ -1897,7 +1934,7 @@ func (m *EpisodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EpisodeMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.sid != nil {
 		fields = append(fields, episode.FieldSid)
 	}
@@ -1915,6 +1952,9 @@ func (m *EpisodeMutation) Fields() []string {
 	}
 	if m.content != nil {
 		fields = append(fields, episode.FieldContent)
+	}
+	if m.files != nil {
+		fields = append(fields, episode.FieldFiles)
 	}
 	return fields
 }
@@ -1936,6 +1976,8 @@ func (m *EpisodeMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case episode.FieldContent:
 		return m.Content()
+	case episode.FieldFiles:
+		return m.Files()
 	}
 	return nil, false
 }
@@ -1957,6 +1999,8 @@ func (m *EpisodeMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldTitle(ctx)
 	case episode.FieldContent:
 		return m.OldContent(ctx)
+	case episode.FieldFiles:
+		return m.OldFiles(ctx)
 	}
 	return nil, fmt.Errorf("unknown Episode field %s", name)
 }
@@ -2007,6 +2051,13 @@ func (m *EpisodeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetContent(v)
+		return nil
+	case episode.FieldFiles:
+		v, ok := value.(schema.Medias)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFiles(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)
@@ -2086,6 +2137,9 @@ func (m *EpisodeMutation) ResetField(name string) error {
 		return nil
 	case episode.FieldContent:
 		m.ResetContent()
+		return nil
+	case episode.FieldFiles:
+		m.ResetFiles()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode field %s", name)

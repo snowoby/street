@@ -26,6 +26,8 @@ const (
 	FieldTitle = "title"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
+	// FieldFiles holds the string denoting the files field in the database.
+	FieldFiles = "files"
 	// EdgeProfile holds the string denoting the profile edge name in mutations.
 	EdgeProfile = "profile"
 	// EdgeComments holds the string denoting the comments edge name in mutations.
@@ -66,6 +68,7 @@ var Columns = []string{
 	FieldCover,
 	FieldTitle,
 	FieldContent,
+	FieldFiles,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "episodes"
@@ -105,6 +108,8 @@ var (
 	TitleValidator func(string) error
 	// ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	ContentValidator func(string) error
+	// DefaultFiles holds the default value on creation for the "files" field.
+	DefaultFiles func() schema.Medias
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

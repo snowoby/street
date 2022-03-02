@@ -1,6 +1,9 @@
 package d
 
-import "street/ent"
+import (
+	"street/ent"
+	"street/ent/schema"
+)
 
 type Episode struct {
 	*ent.Episode
@@ -11,11 +14,12 @@ type Episode struct {
 }
 
 type EpisodeForm struct {
-	ProfileID string  `json:"profileID" binding:"uuid,required"`
-	SeriesID  *string `json:"seriesID" binding:"omitempty,uuid"`
-	Title     string  `json:"title" binding:"required"`
-	Content   string  `json:"content"`
-	Cover     string  `json:"cover"`
+	ProfileID string        `json:"profileID" binding:"uuid,required"`
+	SeriesID  *string       `json:"seriesID" binding:"omitempty,uuid"`
+	Title     string        `json:"title" binding:"required"`
+	Content   string        `json:"content"`
+	Cover     string        `json:"cover"`
+	Files     schema.Medias `json:"files" binding:"omitempty"`
 }
 
 func EpisodeFromEnt(episode *ent.Episode) *Episode {

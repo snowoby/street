@@ -137,6 +137,13 @@ func Content(v string) predicate.Episode {
 	})
 }
 
+// Files applies equality check predicate on the "files" field. It's identical to FilesEQ.
+func Files(v schema.Medias) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFiles), v))
+	})
+}
+
 // SidEQ applies the EQ predicate on the "sid" field.
 func SidEQ(v schema.ID) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
@@ -709,6 +716,82 @@ func ContentEqualFold(v string) predicate.Episode {
 func ContentContainsFold(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldContent), v))
+	})
+}
+
+// FilesEQ applies the EQ predicate on the "files" field.
+func FilesEQ(v schema.Medias) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFiles), v))
+	})
+}
+
+// FilesNEQ applies the NEQ predicate on the "files" field.
+func FilesNEQ(v schema.Medias) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFiles), v))
+	})
+}
+
+// FilesIn applies the In predicate on the "files" field.
+func FilesIn(vs ...schema.Medias) predicate.Episode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Episode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldFiles), v...))
+	})
+}
+
+// FilesNotIn applies the NotIn predicate on the "files" field.
+func FilesNotIn(vs ...schema.Medias) predicate.Episode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Episode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldFiles), v...))
+	})
+}
+
+// FilesGT applies the GT predicate on the "files" field.
+func FilesGT(v schema.Medias) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldFiles), v))
+	})
+}
+
+// FilesGTE applies the GTE predicate on the "files" field.
+func FilesGTE(v schema.Medias) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldFiles), v))
+	})
+}
+
+// FilesLT applies the LT predicate on the "files" field.
+func FilesLT(v schema.Medias) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldFiles), v))
+	})
+}
+
+// FilesLTE applies the LTE predicate on the "files" field.
+func FilesLTE(v schema.Medias) predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldFiles), v))
 	})
 }
 

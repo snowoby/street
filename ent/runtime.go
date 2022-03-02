@@ -139,6 +139,10 @@ func init() {
 	episodeDescContent := episodeFields[2].Descriptor()
 	// episode.ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	episode.ContentValidator = episodeDescContent.Validators[0].(func(string) error)
+	// episodeDescFiles is the schema descriptor for files field.
+	episodeDescFiles := episodeFields[3].Descriptor()
+	// episode.DefaultFiles holds the default value on creation for the files field.
+	episode.DefaultFiles = episodeDescFiles.Default.(func() schema.Medias)
 	// episodeDescID is the schema descriptor for id field.
 	episodeDescID := episodeMixinFields0[1].Descriptor()
 	// episode.DefaultID holds the default value on creation for the id field.

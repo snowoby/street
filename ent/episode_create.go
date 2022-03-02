@@ -93,6 +93,12 @@ func (ec *EpisodeCreate) SetContent(s string) *EpisodeCreate {
 	return ec
 }
 
+// SetFiles sets the "files" field.
+func (ec *EpisodeCreate) SetFiles(s schema.Medias) *EpisodeCreate {
+	ec.mutation.SetFiles(s)
+	return ec
+}
+
 // SetID sets the "id" field.
 func (ec *EpisodeCreate) SetID(u uuid.UUID) *EpisodeCreate {
 	ec.mutation.SetID(u)
@@ -227,6 +233,10 @@ func (ec *EpisodeCreate) defaults() {
 		v := episode.DefaultUpdateTime()
 		ec.mutation.SetUpdateTime(v)
 	}
+	if _, ok := ec.mutation.Files(); !ok {
+		v := episode.DefaultFiles()
+		ec.mutation.SetFiles(v)
+	}
 	if _, ok := ec.mutation.ID(); !ok {
 		v := episode.DefaultID()
 		ec.mutation.SetID(v)
@@ -264,6 +274,9 @@ func (ec *EpisodeCreate) check() error {
 		if err := episode.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "content": %w`, err)}
 		}
+	}
+	if _, ok := ec.mutation.Files(); !ok {
+		return &ValidationError{Name: "files", err: errors.New(`ent: missing required field "files"`)}
 	}
 	if _, ok := ec.mutation.ProfileID(); !ok {
 		return &ValidationError{Name: "profile", err: errors.New("ent: missing required edge \"profile\"")}
@@ -347,6 +360,14 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 			Column: episode.FieldContent,
 		})
 		_node.Content = value
+	}
+	if value, ok := ec.mutation.Files(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: episode.FieldFiles,
+		})
+		_node.Files = value
 	}
 	if nodes := ec.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

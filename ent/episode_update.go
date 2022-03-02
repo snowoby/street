@@ -78,6 +78,12 @@ func (eu *EpisodeUpdate) SetContent(s string) *EpisodeUpdate {
 	return eu
 }
 
+// SetFiles sets the "files" field.
+func (eu *EpisodeUpdate) SetFiles(s schema.Medias) *EpisodeUpdate {
+	eu.mutation.SetFiles(s)
+	return eu
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by ID.
 func (eu *EpisodeUpdate) SetProfileID(id uuid.UUID) *EpisodeUpdate {
 	eu.mutation.SetProfileID(id)
@@ -312,6 +318,13 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: episode.FieldContent,
 		})
 	}
+	if value, ok := eu.mutation.Files(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: episode.FieldFiles,
+		})
+	}
 	if eu.mutation.ProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -498,6 +511,12 @@ func (euo *EpisodeUpdateOne) SetTitle(s string) *EpisodeUpdateOne {
 // SetContent sets the "content" field.
 func (euo *EpisodeUpdateOne) SetContent(s string) *EpisodeUpdateOne {
 	euo.mutation.SetContent(s)
+	return euo
+}
+
+// SetFiles sets the "files" field.
+func (euo *EpisodeUpdateOne) SetFiles(s schema.Medias) *EpisodeUpdateOne {
+	euo.mutation.SetFiles(s)
 	return euo
 }
 
@@ -757,6 +776,13 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: episode.FieldContent,
+		})
+	}
+	if value, ok := euo.mutation.Files(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: episode.FieldFiles,
 		})
 	}
 	if euo.mutation.ProfileCleared() {
