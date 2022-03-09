@@ -16,9 +16,9 @@ type Episode struct {
 type EpisodeForm struct {
 	ProfileID string        `json:"profileID" binding:"uuid,required"`
 	SeriesID  *string       `json:"seriesID" binding:"omitempty,uuid"`
-	Title     string        `json:"title" binding:"required"`
+	Title     *string       `json:"title" binding:"omitempty"`
 	Content   string        `json:"content"`
-	Cover     string        `json:"cover"`
+	Cover     *string       `json:"cover" binding:"omitempty"`
 	Files     schema.Medias `json:"files" binding:"omitempty"`
 }
 

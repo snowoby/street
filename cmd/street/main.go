@@ -75,7 +75,7 @@ func setup() *gin.Engine {
 }
 
 func main() {
-	address := "127.0.0.1:8089"
+	address := "127.0.0.1:28089"
 	if os.Getenv("MODE") != "debug" {
 		address = "0.0.0.0:8088"
 	}

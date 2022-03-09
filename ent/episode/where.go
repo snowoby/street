@@ -594,6 +594,20 @@ func TitleHasSuffix(v string) predicate.Episode {
 	})
 }
 
+// TitleIsNil applies the IsNil predicate on the "title" field.
+func TitleIsNil() predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTitle)))
+	})
+}
+
+// TitleNotNil applies the NotNil predicate on the "title" field.
+func TitleNotNil() predicate.Episode {
+	return predicate.Episode(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTitle)))
+	})
+}
+
 // TitleEqualFold applies the EqualFold predicate on the "title" field.
 func TitleEqualFold(v string) predicate.Episode {
 	return predicate.Episode(func(s *sql.Selector) {

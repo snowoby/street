@@ -120,21 +120,7 @@ func init() {
 	// episodeDescTitle is the schema descriptor for title field.
 	episodeDescTitle := episodeFields[1].Descriptor()
 	// episode.TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	episode.TitleValidator = func() func(string) error {
-		validators := episodeDescTitle.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(title string) error {
-			for _, fn := range fns {
-				if err := fn(title); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
+	episode.TitleValidator = episodeDescTitle.Validators[0].(func(string) error)
 	// episodeDescContent is the schema descriptor for content field.
 	episodeDescContent := episodeFields[2].Descriptor()
 	// episode.ContentValidator is a validator for the "content" field. It is called by the builders before save.

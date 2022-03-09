@@ -29,7 +29,7 @@ type Episode struct {
 	// Cover holds the value of the "cover" field.
 	Cover *string `json:"cover,omitempty"`
 	// Title holds the value of the "title" field.
-	Title string `json:"title,omitempty"`
+	Title *string `json:"title,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
 	// Files holds the value of the "files" field.
@@ -160,7 +160,8 @@ func (e *Episode) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				e.Title = value.String
+				e.Title = new(string)
+				*e.Title = value.String
 			}
 		case episode.FieldContent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -241,8 +242,10 @@ func (e *Episode) String() string {
 		builder.WriteString(", cover=")
 		builder.WriteString(*v)
 	}
-	builder.WriteString(", title=")
-	builder.WriteString(e.Title)
+	if v := e.Title; v != nil {
+		builder.WriteString(", title=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", content=")
 	builder.WriteString(e.Content)
 	builder.WriteString(", files=")

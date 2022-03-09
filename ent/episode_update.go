@@ -72,6 +72,20 @@ func (eu *EpisodeUpdate) SetTitle(s string) *EpisodeUpdate {
 	return eu
 }
 
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (eu *EpisodeUpdate) SetNillableTitle(s *string) *EpisodeUpdate {
+	if s != nil {
+		eu.SetTitle(*s)
+	}
+	return eu
+}
+
+// ClearTitle clears the value of the "title" field.
+func (eu *EpisodeUpdate) ClearTitle() *EpisodeUpdate {
+	eu.mutation.ClearTitle()
+	return eu
+}
+
 // SetContent sets the "content" field.
 func (eu *EpisodeUpdate) SetContent(s string) *EpisodeUpdate {
 	eu.mutation.SetContent(s)
@@ -311,6 +325,12 @@ func (eu *EpisodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: episode.FieldTitle,
 		})
 	}
+	if eu.mutation.TitleCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: episode.FieldTitle,
+		})
+	}
 	if value, ok := eu.mutation.Content(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -505,6 +525,20 @@ func (euo *EpisodeUpdateOne) ClearCover() *EpisodeUpdateOne {
 // SetTitle sets the "title" field.
 func (euo *EpisodeUpdateOne) SetTitle(s string) *EpisodeUpdateOne {
 	euo.mutation.SetTitle(s)
+	return euo
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (euo *EpisodeUpdateOne) SetNillableTitle(s *string) *EpisodeUpdateOne {
+	if s != nil {
+		euo.SetTitle(*s)
+	}
+	return euo
+}
+
+// ClearTitle clears the value of the "title" field.
+func (euo *EpisodeUpdateOne) ClearTitle() *EpisodeUpdateOne {
+	euo.mutation.ClearTitle()
 	return euo
 }
 
@@ -768,6 +802,12 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: episode.FieldTitle,
+		})
+	}
+	if euo.mutation.TitleCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: episode.FieldTitle,
 		})
 	}

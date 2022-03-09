@@ -87,6 +87,14 @@ func (ec *EpisodeCreate) SetTitle(s string) *EpisodeCreate {
 	return ec
 }
 
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (ec *EpisodeCreate) SetNillableTitle(s *string) *EpisodeCreate {
+	if s != nil {
+		ec.SetTitle(*s)
+	}
+	return ec
+}
+
 // SetContent sets the "content" field.
 func (ec *EpisodeCreate) SetContent(s string) *EpisodeCreate {
 	ec.mutation.SetContent(s)
@@ -259,9 +267,6 @@ func (ec *EpisodeCreate) check() error {
 			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "cover": %w`, err)}
 		}
 	}
-	if _, ok := ec.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "title"`)}
-	}
 	if v, ok := ec.mutation.Title(); ok {
 		if err := episode.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
@@ -351,7 +356,7 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: episode.FieldTitle,
 		})
-		_node.Title = value
+		_node.Title = &value
 	}
 	if value, ok := ec.mutation.Content(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

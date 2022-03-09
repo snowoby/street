@@ -1692,7 +1692,7 @@ func (m *EpisodeMutation) Title() (r string, exists bool) {
 // OldTitle returns the old "title" field's value of the Episode entity.
 // If the Episode object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EpisodeMutation) OldTitle(ctx context.Context) (v string, err error) {
+func (m *EpisodeMutation) OldTitle(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldTitle is only allowed on UpdateOne operations")
 	}
@@ -1706,9 +1706,22 @@ func (m *EpisodeMutation) OldTitle(ctx context.Context) (v string, err error) {
 	return oldValue.Title, nil
 }
 
+// ClearTitle clears the value of the "title" field.
+func (m *EpisodeMutation) ClearTitle() {
+	m.title = nil
+	m.clearedFields[episode.FieldTitle] = struct{}{}
+}
+
+// TitleCleared returns if the "title" field was cleared in this mutation.
+func (m *EpisodeMutation) TitleCleared() bool {
+	_, ok := m.clearedFields[episode.FieldTitle]
+	return ok
+}
+
 // ResetTitle resets all changes to the "title" field.
 func (m *EpisodeMutation) ResetTitle() {
 	m.title = nil
+	delete(m.clearedFields, episode.FieldTitle)
 }
 
 // SetContent sets the "content" field.
@@ -2095,6 +2108,9 @@ func (m *EpisodeMutation) ClearedFields() []string {
 	if m.FieldCleared(episode.FieldCover) {
 		fields = append(fields, episode.FieldCover)
 	}
+	if m.FieldCleared(episode.FieldTitle) {
+		fields = append(fields, episode.FieldTitle)
+	}
 	return fields
 }
 
@@ -2111,6 +2127,9 @@ func (m *EpisodeMutation) ClearField(name string) error {
 	switch name {
 	case episode.FieldCover:
 		m.ClearCover()
+		return nil
+	case episode.FieldTitle:
+		m.ClearTitle()
 		return nil
 	}
 	return fmt.Errorf("unknown Episode nullable field %s", name)

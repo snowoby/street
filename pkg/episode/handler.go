@@ -61,14 +61,18 @@ func (s *service) create(ctx *gin.Context, identity *operator.Identity) (int, in
 	}
 
 	episodeBuilder := s.db.Episode.Create().
-		SetTitle(episodeForm.Title).
 		SetContent(episodeForm.Content).
 		SetProfileID(uuid.MustParse(episodeForm.ProfileID)).
-		SetCover(episodeForm.Cover).
 		SetFiles(episodeForm.Files)
 
 	if episodeForm.SeriesID != nil {
 		episodeBuilder = episodeBuilder.SetSeriesID(uuid.MustParse(*episodeForm.SeriesID))
+	}
+	if episodeForm.Title != nil {
+		episodeBuilder = episodeBuilder.SetTitle(*episodeForm.Title)
+	}
+	if episodeForm.Cover != nil {
+		episodeBuilder = episodeBuilder.SetCover(*episodeForm.Cover)
 	}
 
 	ep, err := episodeBuilder.Save(ctx)
@@ -99,15 +103,18 @@ func (s *service) update(ctx *gin.Context, id string) (int, interface{}, error) 
 	}
 
 	episodeBuilder := s.db.Episode.UpdateOneID(uuid.MustParse(id)).
-		SetTitle(episodeForm.Title).
 		SetContent(episodeForm.Content).
-		SetCover(episodeForm.Cover).
 		SetFiles(episodeForm.Files)
 
 	if episodeForm.SeriesID != nil {
 		episodeBuilder = episodeBuilder.SetSeriesID(uuid.MustParse(*episodeForm.SeriesID))
 	}
-
+	if episodeForm.Title != nil {
+		episodeBuilder = episodeBuilder.SetTitle(*episodeForm.Title)
+	}
+	if episodeForm.Cover != nil {
+		episodeBuilder = episodeBuilder.SetCover(*episodeForm.Cover)
+	}
 	ep, err := episodeBuilder.Save(ctx)
 
 	if err != nil {
