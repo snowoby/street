@@ -2,7 +2,6 @@ package base3
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -71,11 +70,11 @@ func (p *prototype) Delete(path string, id uuid.UUID, fileIdentifier string) err
 
 func (p *prototype) PutSingle(stream *bytes.Reader, path string, id uuid.UUID, filename string, fileIdentifier string, mime string) (*s3manager.UploadOutput, error) {
 	return p.uploader.Upload(&s3manager.UploadInput{
-		Bucket:             aws.String(p.bucketName),
-		Key:                aws.String(strings.Join([]string{path, id.String(), fileIdentifier}, "/")),
-		ContentType:        aws.String(mime),
-		Body:               stream,
-		ContentDisposition: aws.String(fmt.Sprintf("filename=%s", filename)),
+		Bucket:      aws.String(p.bucketName),
+		Key:         aws.String(strings.Join([]string{path, id.String(), fileIdentifier}, "/")),
+		ContentType: aws.String(mime),
+		Body:        stream,
+		//ContentDisposition: aws.String(fmt.Sprintf("filename=%s", filename)),
 	})
 
 }

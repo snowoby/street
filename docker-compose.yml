@@ -4,6 +4,7 @@ services:
     image: "postgres:13-alpine3.15"
     restart: always
     environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
       PGDATA: /var/lib/postgresql/data/dbdata/
     env_file:
       - ./.env
