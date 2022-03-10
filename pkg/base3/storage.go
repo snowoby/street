@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
+	"os"
 	"strings"
 )
 
@@ -99,7 +100,7 @@ func New(s3Config *aws.Config) *prototype {
 		client:     client,
 		uploader:   s3manager.NewUploader(newSession),
 		downloader: s3manager.NewDownloader(newSession),
-		bucketName: "develop",
+		bucketName: os.Getenv("STORAGE_BUCKET"),
 	}
 
 }
