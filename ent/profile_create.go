@@ -106,6 +106,14 @@ func (pc *ProfileCreate) SetID(u uuid.UUID) *ProfileCreate {
 	return pc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableID(u *uuid.UUID) *ProfileCreate {
+	if u != nil {
+		pc.SetID(*u)
+	}
+	return pc
+}
+
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (pc *ProfileCreate) SetAccountID(id uuid.UUID) *ProfileCreate {
 	pc.mutation.SetAccountID(id)
@@ -269,45 +277,45 @@ func (pc *ProfileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProfileCreate) check() error {
 	if _, ok := pc.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Profile.sid"`)}
 	}
 	if _, ok := pc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Profile.create_time"`)}
 	}
 	if _, ok := pc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Profile.update_time"`)}
 	}
 	if _, ok := pc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "title"`)}
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Profile.title"`)}
 	}
 	if v, ok := pc.mutation.Title(); ok {
 		if err := profile.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Profile.title": %w`, err)}
 		}
 	}
 	if _, ok := pc.mutation.Call(); !ok {
-		return &ValidationError{Name: "call", err: errors.New(`ent: missing required field "call"`)}
+		return &ValidationError{Name: "call", err: errors.New(`ent: missing required field "Profile.call"`)}
 	}
 	if v, ok := pc.mutation.Call(); ok {
 		if err := profile.CallValidator(v); err != nil {
-			return &ValidationError{Name: "call", err: fmt.Errorf(`ent: validator failed for field "call": %w`, err)}
+			return &ValidationError{Name: "call", err: fmt.Errorf(`ent: validator failed for field "Profile.call": %w`, err)}
 		}
 	}
 	if _, ok := pc.mutation.Category(); !ok {
-		return &ValidationError{Name: "category", err: errors.New(`ent: missing required field "category"`)}
+		return &ValidationError{Name: "category", err: errors.New(`ent: missing required field "Profile.category"`)}
 	}
 	if v, ok := pc.mutation.Category(); ok {
 		if err := profile.CategoryValidator(v); err != nil {
-			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "category": %w`, err)}
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "Profile.category": %w`, err)}
 		}
 	}
 	if v, ok := pc.mutation.Avatar(); ok {
 		if err := profile.AvatarValidator(v); err != nil {
-			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "avatar": %w`, err)}
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar": %w`, err)}
 		}
 	}
 	if _, ok := pc.mutation.AccountID(); !ok {
-		return &ValidationError{Name: "account", err: errors.New("ent: missing required edge \"account\"")}
+		return &ValidationError{Name: "account", err: errors.New(`ent: missing required edge "Profile.account"`)}
 	}
 	return nil
 }
@@ -321,7 +329,11 @@ func (pc *ProfileCreate) sqlSave(ctx context.Context) (*Profile, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -339,7 +351,7 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := pc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

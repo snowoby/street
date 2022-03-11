@@ -113,6 +113,14 @@ func (ec *EpisodeCreate) SetID(u uuid.UUID) *EpisodeCreate {
 	return ec
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ec *EpisodeCreate) SetNillableID(u *uuid.UUID) *EpisodeCreate {
+	if u != nil {
+		ec.SetID(*u)
+	}
+	return ec
+}
+
 // SetProfileID sets the "profile" edge to the Profile entity by ID.
 func (ec *EpisodeCreate) SetProfileID(id uuid.UUID) *EpisodeCreate {
 	ec.mutation.SetProfileID(id)
@@ -254,37 +262,37 @@ func (ec *EpisodeCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (ec *EpisodeCreate) check() error {
 	if _, ok := ec.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Episode.sid"`)}
 	}
 	if _, ok := ec.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Episode.create_time"`)}
 	}
 	if _, ok := ec.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Episode.update_time"`)}
 	}
 	if v, ok := ec.mutation.Cover(); ok {
 		if err := episode.CoverValidator(v); err != nil {
-			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "cover": %w`, err)}
+			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "Episode.cover": %w`, err)}
 		}
 	}
 	if v, ok := ec.mutation.Title(); ok {
 		if err := episode.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Episode.title": %w`, err)}
 		}
 	}
 	if _, ok := ec.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "content"`)}
+		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Episode.content"`)}
 	}
 	if v, ok := ec.mutation.Content(); ok {
 		if err := episode.ContentValidator(v); err != nil {
-			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "content": %w`, err)}
+			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Episode.content": %w`, err)}
 		}
 	}
 	if _, ok := ec.mutation.Files(); !ok {
-		return &ValidationError{Name: "files", err: errors.New(`ent: missing required field "files"`)}
+		return &ValidationError{Name: "files", err: errors.New(`ent: missing required field "Episode.files"`)}
 	}
 	if _, ok := ec.mutation.ProfileID(); !ok {
-		return &ValidationError{Name: "profile", err: errors.New("ent: missing required edge \"profile\"")}
+		return &ValidationError{Name: "profile", err: errors.New(`ent: missing required edge "Episode.profile"`)}
 	}
 	return nil
 }
@@ -298,7 +306,11 @@ func (ec *EpisodeCreate) sqlSave(ctx context.Context) (*Episode, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -316,7 +328,7 @@ func (ec *EpisodeCreate) createSpec() (*Episode, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := ec.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := ec.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

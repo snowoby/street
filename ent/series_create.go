@@ -92,6 +92,14 @@ func (sc *SeriesCreate) SetID(u uuid.UUID) *SeriesCreate {
 	return sc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (sc *SeriesCreate) SetNillableID(u *uuid.UUID) *SeriesCreate {
+	if u != nil {
+		sc.SetID(*u)
+	}
+	return sc
+}
+
 // AddEpisodeIDs adds the "episodes" edge to the Episode entity by IDs.
 func (sc *SeriesCreate) AddEpisodeIDs(ids ...uuid.UUID) *SeriesCreate {
 	sc.mutation.AddEpisodeIDs(ids...)
@@ -225,29 +233,29 @@ func (sc *SeriesCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (sc *SeriesCreate) check() error {
 	if _, ok := sc.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Series.sid"`)}
 	}
 	if _, ok := sc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Series.create_time"`)}
 	}
 	if _, ok := sc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Series.update_time"`)}
 	}
 	if _, ok := sc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "title"`)}
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Series.title"`)}
 	}
 	if v, ok := sc.mutation.Title(); ok {
 		if err := series.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Series.title": %w`, err)}
 		}
 	}
 	if v, ok := sc.mutation.GetType(); ok {
 		if err := series.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "type": %w`, err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Series.type": %w`, err)}
 		}
 	}
 	if _, ok := sc.mutation.OwnerID(); !ok {
-		return &ValidationError{Name: "owner", err: errors.New("ent: missing required edge \"owner\"")}
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Series.owner"`)}
 	}
 	return nil
 }
@@ -261,7 +269,11 @@ func (sc *SeriesCreate) sqlSave(ctx context.Context) (*Series, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -279,7 +291,7 @@ func (sc *SeriesCreate) createSpec() (*Series, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := sc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := sc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

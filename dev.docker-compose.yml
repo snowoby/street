@@ -12,18 +12,6 @@ services:
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
 
-  street:
-    build: .
-    env_file:
-      - ./.env
-    restart: always
-    ports:
-      - "127.0.0.1:8088:8088"
-    depends_on:
-      - database
-      - storage
-      - redis
-
   storage:
     image: "minio/minio"
     volumes:

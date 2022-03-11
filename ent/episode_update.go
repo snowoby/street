@@ -12,6 +12,7 @@ import (
 	"street/ent/profile"
 	"street/ent/schema"
 	"street/ent/series"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -43,6 +44,12 @@ func (eu *EpisodeUpdate) SetNillableSid(s *schema.ID) *EpisodeUpdate {
 	if s != nil {
 		eu.SetSid(*s)
 	}
+	return eu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (eu *EpisodeUpdate) SetUpdateTime(t time.Time) *EpisodeUpdate {
+	eu.mutation.SetUpdateTime(t)
 	return eu
 }
 
@@ -254,21 +261,21 @@ func (eu *EpisodeUpdate) defaults() {
 func (eu *EpisodeUpdate) check() error {
 	if v, ok := eu.mutation.Cover(); ok {
 		if err := episode.CoverValidator(v); err != nil {
-			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
+			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "Episode.cover": %w`, err)}
 		}
 	}
 	if v, ok := eu.mutation.Title(); ok {
 		if err := episode.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Episode.title": %w`, err)}
 		}
 	}
 	if v, ok := eu.mutation.Content(); ok {
 		if err := episode.ContentValidator(v); err != nil {
-			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
+			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Episode.content": %w`, err)}
 		}
 	}
 	if _, ok := eu.mutation.ProfileID(); eu.mutation.ProfileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"profile\"")
+		return errors.New(`ent: clearing a required unique edge "Episode.profile"`)
 	}
 	return nil
 }
@@ -502,6 +509,12 @@ func (euo *EpisodeUpdateOne) SetNillableSid(s *schema.ID) *EpisodeUpdateOne {
 	return euo
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (euo *EpisodeUpdateOne) SetUpdateTime(t time.Time) *EpisodeUpdateOne {
+	euo.mutation.SetUpdateTime(t)
+	return euo
+}
+
 // SetCover sets the "cover" field.
 func (euo *EpisodeUpdateOne) SetCover(s string) *EpisodeUpdateOne {
 	euo.mutation.SetCover(s)
@@ -717,21 +730,21 @@ func (euo *EpisodeUpdateOne) defaults() {
 func (euo *EpisodeUpdateOne) check() error {
 	if v, ok := euo.mutation.Cover(); ok {
 		if err := episode.CoverValidator(v); err != nil {
-			return &ValidationError{Name: "cover", err: fmt.Errorf("ent: validator failed for field \"cover\": %w", err)}
+			return &ValidationError{Name: "cover", err: fmt.Errorf(`ent: validator failed for field "Episode.cover": %w`, err)}
 		}
 	}
 	if v, ok := euo.mutation.Title(); ok {
 		if err := episode.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Episode.title": %w`, err)}
 		}
 	}
 	if v, ok := euo.mutation.Content(); ok {
 		if err := episode.ContentValidator(v); err != nil {
-			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
+			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Episode.content": %w`, err)}
 		}
 	}
 	if _, ok := euo.mutation.ProfileID(); euo.mutation.ProfileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"profile\"")
+		return errors.New(`ent: clearing a required unique edge "Episode.profile"`)
 	}
 	return nil
 }
@@ -749,7 +762,7 @@ func (euo *EpisodeUpdateOne) sqlSave(ctx context.Context) (_node *Episode, err e
 	}
 	id, ok := euo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Episode.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Episode.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := euo.fields; len(fields) > 0 {

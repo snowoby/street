@@ -147,6 +147,14 @@ func (fc *FileCreate) SetID(u uuid.UUID) *FileCreate {
 	return fc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableID(u *uuid.UUID) *FileCreate {
+	if u != nil {
+		fc.SetID(*u)
+	}
+	return fc
+}
+
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (fc *FileCreate) SetAccountID(id uuid.UUID) *FileCreate {
 	fc.mutation.SetAccountID(id)
@@ -266,56 +274,56 @@ func (fc *FileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "File.sid"`)}
 	}
 	if _, ok := fc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "File.create_time"`)}
 	}
 	if _, ok := fc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "File.update_time"`)}
 	}
 	if _, ok := fc.mutation.Filename(); !ok {
-		return &ValidationError{Name: "filename", err: errors.New(`ent: missing required field "filename"`)}
+		return &ValidationError{Name: "filename", err: errors.New(`ent: missing required field "File.filename"`)}
 	}
 	if v, ok := fc.mutation.Filename(); ok {
 		if err := file.FilenameValidator(v); err != nil {
-			return &ValidationError{Name: "filename", err: fmt.Errorf(`ent: validator failed for field "filename": %w`, err)}
+			return &ValidationError{Name: "filename", err: fmt.Errorf(`ent: validator failed for field "File.filename": %w`, err)}
 		}
 	}
 	if _, ok := fc.mutation.Path(); !ok {
-		return &ValidationError{Name: "path", err: errors.New(`ent: missing required field "path"`)}
+		return &ValidationError{Name: "path", err: errors.New(`ent: missing required field "File.path"`)}
 	}
 	if v, ok := fc.mutation.Path(); ok {
 		if err := file.PathValidator(v); err != nil {
-			return &ValidationError{Name: "path", err: fmt.Errorf(`ent: validator failed for field "path": %w`, err)}
+			return &ValidationError{Name: "path", err: fmt.Errorf(`ent: validator failed for field "File.path": %w`, err)}
 		}
 	}
 	if _, ok := fc.mutation.Mime(); !ok {
-		return &ValidationError{Name: "mime", err: errors.New(`ent: missing required field "mime"`)}
+		return &ValidationError{Name: "mime", err: errors.New(`ent: missing required field "File.mime"`)}
 	}
 	if v, ok := fc.mutation.Mime(); ok {
 		if err := file.MimeValidator(v); err != nil {
-			return &ValidationError{Name: "mime", err: fmt.Errorf(`ent: validator failed for field "mime": %w`, err)}
+			return &ValidationError{Name: "mime", err: fmt.Errorf(`ent: validator failed for field "File.mime": %w`, err)}
 		}
 	}
 	if _, ok := fc.mutation.Size(); !ok {
-		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "size"`)}
+		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
 	}
 	if _, ok := fc.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "status"`)}
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "File.status"`)}
 	}
 	if v, ok := fc.mutation.Status(); ok {
 		if err := file.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "status": %w`, err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "File.status": %w`, err)}
 		}
 	}
 	if v, ok := fc.mutation.Note(); ok {
 		if err := file.NoteValidator(v); err != nil {
-			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "note": %w`, err)}
+			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "File.note": %w`, err)}
 		}
 	}
 	if _, ok := fc.mutation.AccountID(); !ok {
-		return &ValidationError{Name: "account", err: errors.New("ent: missing required edge \"account\"")}
+		return &ValidationError{Name: "account", err: errors.New(`ent: missing required edge "File.account"`)}
 	}
 	return nil
 }
@@ -329,7 +337,11 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -347,7 +359,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := fc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := fc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"street/ent/account"
 	"street/ent/file"
@@ -11,6 +12,7 @@ import (
 	"street/ent/profile"
 	"street/ent/schema"
 	"street/ent/token"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -42,6 +44,12 @@ func (au *AccountUpdate) SetNillableSid(s *schema.ID) *AccountUpdate {
 	if s != nil {
 		au.SetSid(*s)
 	}
+	return au
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (au *AccountUpdate) SetUpdateTime(t time.Time) *AccountUpdate {
+	au.mutation.SetUpdateTime(t)
 	return au
 }
 
@@ -243,7 +251,7 @@ func (au *AccountUpdate) defaults() {
 func (au *AccountUpdate) check() error {
 	if v, ok := au.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf("ent: validator failed for field \"email\": %w", err)}
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Account.email": %w`, err)}
 		}
 	}
 	return nil
@@ -490,6 +498,12 @@ func (auo *AccountUpdateOne) SetNillableSid(s *schema.ID) *AccountUpdateOne {
 	return auo
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (auo *AccountUpdateOne) SetUpdateTime(t time.Time) *AccountUpdateOne {
+	auo.mutation.SetUpdateTime(t)
+	return auo
+}
+
 // SetEmail sets the "email" field.
 func (auo *AccountUpdateOne) SetEmail(s string) *AccountUpdateOne {
 	auo.mutation.SetEmail(s)
@@ -695,7 +709,7 @@ func (auo *AccountUpdateOne) defaults() {
 func (auo *AccountUpdateOne) check() error {
 	if v, ok := auo.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf("ent: validator failed for field \"email\": %w", err)}
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Account.email": %w`, err)}
 		}
 	}
 	return nil
@@ -714,7 +728,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	id, ok := auo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Account.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Account.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := auo.fields; len(fields) > 0 {

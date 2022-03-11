@@ -78,6 +78,14 @@ func (cc *CommentCreate) SetID(u uuid.UUID) *CommentCreate {
 	return cc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableID(u *uuid.UUID) *CommentCreate {
+	if u != nil {
+		cc.SetID(*u)
+	}
+	return cc
+}
+
 // SetEpisodeID sets the "episode" edge to the Episode entity by ID.
 func (cc *CommentCreate) SetEpisodeID(id uuid.UUID) *CommentCreate {
 	cc.mutation.SetEpisodeID(id)
@@ -192,27 +200,27 @@ func (cc *CommentCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Comment.sid"`)}
 	}
 	if _, ok := cc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Comment.create_time"`)}
 	}
 	if _, ok := cc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Comment.update_time"`)}
 	}
 	if _, ok := cc.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "content"`)}
+		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Comment.content"`)}
 	}
 	if v, ok := cc.mutation.Content(); ok {
 		if err := comment.ContentValidator(v); err != nil {
-			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "content": %w`, err)}
+			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Comment.content": %w`, err)}
 		}
 	}
 	if _, ok := cc.mutation.EpisodeID(); !ok {
-		return &ValidationError{Name: "episode", err: errors.New("ent: missing required edge \"episode\"")}
+		return &ValidationError{Name: "episode", err: errors.New(`ent: missing required edge "Comment.episode"`)}
 	}
 	if _, ok := cc.mutation.AuthorID(); !ok {
-		return &ValidationError{Name: "author", err: errors.New("ent: missing required edge \"author\"")}
+		return &ValidationError{Name: "author", err: errors.New(`ent: missing required edge "Comment.author"`)}
 	}
 	return nil
 }
@@ -226,7 +234,11 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -244,7 +256,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := cc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := cc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

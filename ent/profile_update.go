@@ -13,6 +13,7 @@ import (
 	"street/ent/profile"
 	"street/ent/schema"
 	"street/ent/series"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -44,6 +45,12 @@ func (pu *ProfileUpdate) SetNillableSid(s *schema.ID) *ProfileUpdate {
 	if s != nil {
 		pu.SetSid(*s)
 	}
+	return pu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (pu *ProfileUpdate) SetUpdateTime(t time.Time) *ProfileUpdate {
+	pu.mutation.SetUpdateTime(t)
 	return pu
 }
 
@@ -324,26 +331,26 @@ func (pu *ProfileUpdate) defaults() {
 func (pu *ProfileUpdate) check() error {
 	if v, ok := pu.mutation.Title(); ok {
 		if err := profile.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Profile.title": %w`, err)}
 		}
 	}
 	if v, ok := pu.mutation.Call(); ok {
 		if err := profile.CallValidator(v); err != nil {
-			return &ValidationError{Name: "call", err: fmt.Errorf("ent: validator failed for field \"call\": %w", err)}
+			return &ValidationError{Name: "call", err: fmt.Errorf(`ent: validator failed for field "Profile.call": %w`, err)}
 		}
 	}
 	if v, ok := pu.mutation.Category(); ok {
 		if err := profile.CategoryValidator(v); err != nil {
-			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "Profile.category": %w`, err)}
 		}
 	}
 	if v, ok := pu.mutation.Avatar(); ok {
 		if err := profile.AvatarValidator(v); err != nil {
-			return &ValidationError{Name: "avatar", err: fmt.Errorf("ent: validator failed for field \"avatar\": %w", err)}
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar": %w`, err)}
 		}
 	}
 	if _, ok := pu.mutation.AccountID(); pu.mutation.AccountCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"account\"")
+		return errors.New(`ent: clearing a required unique edge "Profile.account"`)
 	}
 	return nil
 }
@@ -698,6 +705,12 @@ func (puo *ProfileUpdateOne) SetNillableSid(s *schema.ID) *ProfileUpdateOne {
 	return puo
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (puo *ProfileUpdateOne) SetUpdateTime(t time.Time) *ProfileUpdateOne {
+	puo.mutation.SetUpdateTime(t)
+	return puo
+}
+
 // SetTitle sets the "title" field.
 func (puo *ProfileUpdateOne) SetTitle(s string) *ProfileUpdateOne {
 	puo.mutation.SetTitle(s)
@@ -982,26 +995,26 @@ func (puo *ProfileUpdateOne) defaults() {
 func (puo *ProfileUpdateOne) check() error {
 	if v, ok := puo.mutation.Title(); ok {
 		if err := profile.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Profile.title": %w`, err)}
 		}
 	}
 	if v, ok := puo.mutation.Call(); ok {
 		if err := profile.CallValidator(v); err != nil {
-			return &ValidationError{Name: "call", err: fmt.Errorf("ent: validator failed for field \"call\": %w", err)}
+			return &ValidationError{Name: "call", err: fmt.Errorf(`ent: validator failed for field "Profile.call": %w`, err)}
 		}
 	}
 	if v, ok := puo.mutation.Category(); ok {
 		if err := profile.CategoryValidator(v); err != nil {
-			return &ValidationError{Name: "category", err: fmt.Errorf("ent: validator failed for field \"category\": %w", err)}
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "Profile.category": %w`, err)}
 		}
 	}
 	if v, ok := puo.mutation.Avatar(); ok {
 		if err := profile.AvatarValidator(v); err != nil {
-			return &ValidationError{Name: "avatar", err: fmt.Errorf("ent: validator failed for field \"avatar\": %w", err)}
+			return &ValidationError{Name: "avatar", err: fmt.Errorf(`ent: validator failed for field "Profile.avatar": %w`, err)}
 		}
 	}
 	if _, ok := puo.mutation.AccountID(); puo.mutation.AccountCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"account\"")
+		return errors.New(`ent: clearing a required unique edge "Profile.account"`)
 	}
 	return nil
 }
@@ -1019,7 +1032,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 	}
 	id, ok := puo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Profile.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Profile.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := puo.fields; len(fields) > 0 {

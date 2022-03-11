@@ -89,6 +89,14 @@ func (tc *TokenCreate) SetID(u uuid.UUID) *TokenCreate {
 	return tc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (tc *TokenCreate) SetNillableID(u *uuid.UUID) *TokenCreate {
+	if u != nil {
+		tc.SetID(*u)
+	}
+	return tc
+}
+
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (tc *TokenCreate) SetAccountID(id uuid.UUID) *TokenCreate {
 	tc.mutation.SetAccountID(id)
@@ -192,35 +200,35 @@ func (tc *TokenCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TokenCreate) check() error {
 	if _, ok := tc.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Token.sid"`)}
 	}
 	if _, ok := tc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Token.create_time"`)}
 	}
 	if _, ok := tc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Token.update_time"`)}
 	}
 	if _, ok := tc.mutation.Body(); !ok {
-		return &ValidationError{Name: "body", err: errors.New(`ent: missing required field "body"`)}
+		return &ValidationError{Name: "body", err: errors.New(`ent: missing required field "Token.body"`)}
 	}
 	if v, ok := tc.mutation.Body(); ok {
 		if err := token.BodyValidator(v); err != nil {
-			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "body": %w`, err)}
+			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "type"`)}
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Token.type"`)}
 	}
 	if v, ok := tc.mutation.GetType(); ok {
 		if err := token.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "type": %w`, err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Token.type": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.Expire(); !ok {
-		return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "expire"`)}
+		return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "Token.expire"`)}
 	}
 	if _, ok := tc.mutation.AccountID(); !ok {
-		return &ValidationError{Name: "account", err: errors.New("ent: missing required edge \"account\"")}
+		return &ValidationError{Name: "account", err: errors.New(`ent: missing required edge "Token.account"`)}
 	}
 	return nil
 }
@@ -234,7 +242,11 @@ func (tc *TokenCreate) sqlSave(ctx context.Context) (*Token, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -252,7 +264,7 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := tc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

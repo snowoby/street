@@ -45,6 +45,12 @@ func (tu *TokenUpdate) SetNillableSid(s *schema.ID) *TokenUpdate {
 	return tu
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (tu *TokenUpdate) SetUpdateTime(t time.Time) *TokenUpdate {
+	tu.mutation.SetUpdateTime(t)
+	return tu
+}
+
 // SetBody sets the "body" field.
 func (tu *TokenUpdate) SetBody(s string) *TokenUpdate {
 	tu.mutation.SetBody(s)
@@ -158,16 +164,16 @@ func (tu *TokenUpdate) defaults() {
 func (tu *TokenUpdate) check() error {
 	if v, ok := tu.mutation.Body(); ok {
 		if err := token.BodyValidator(v); err != nil {
-			return &ValidationError{Name: "body", err: fmt.Errorf("ent: validator failed for field \"body\": %w", err)}
+			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
 	if v, ok := tu.mutation.GetType(); ok {
 		if err := token.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Token.type": %w`, err)}
 		}
 	}
 	if _, ok := tu.mutation.AccountID(); tu.mutation.AccountCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"account\"")
+		return errors.New(`ent: clearing a required unique edge "Token.account"`)
 	}
 	return nil
 }
@@ -293,6 +299,12 @@ func (tuo *TokenUpdateOne) SetNillableSid(s *schema.ID) *TokenUpdateOne {
 	return tuo
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (tuo *TokenUpdateOne) SetUpdateTime(t time.Time) *TokenUpdateOne {
+	tuo.mutation.SetUpdateTime(t)
+	return tuo
+}
+
 // SetBody sets the "body" field.
 func (tuo *TokenUpdateOne) SetBody(s string) *TokenUpdateOne {
 	tuo.mutation.SetBody(s)
@@ -413,16 +425,16 @@ func (tuo *TokenUpdateOne) defaults() {
 func (tuo *TokenUpdateOne) check() error {
 	if v, ok := tuo.mutation.Body(); ok {
 		if err := token.BodyValidator(v); err != nil {
-			return &ValidationError{Name: "body", err: fmt.Errorf("ent: validator failed for field \"body\": %w", err)}
+			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
 	if v, ok := tuo.mutation.GetType(); ok {
 		if err := token.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Token.type": %w`, err)}
 		}
 	}
 	if _, ok := tuo.mutation.AccountID(); tuo.mutation.AccountCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"account\"")
+		return errors.New(`ent: clearing a required unique edge "Token.account"`)
 	}
 	return nil
 }
@@ -440,7 +452,7 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 	}
 	id, ok := tuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Token.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Token.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := tuo.fields; len(fields) > 0 {

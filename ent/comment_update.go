@@ -11,6 +11,7 @@ import (
 	"street/ent/predicate"
 	"street/ent/profile"
 	"street/ent/schema"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -42,6 +43,12 @@ func (cu *CommentUpdate) SetNillableSid(s *schema.ID) *CommentUpdate {
 	if s != nil {
 		cu.SetSid(*s)
 	}
+	return cu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cu *CommentUpdate) SetUpdateTime(t time.Time) *CommentUpdate {
+	cu.mutation.SetUpdateTime(t)
 	return cu
 }
 
@@ -163,14 +170,14 @@ func (cu *CommentUpdate) defaults() {
 func (cu *CommentUpdate) check() error {
 	if v, ok := cu.mutation.Content(); ok {
 		if err := comment.ContentValidator(v); err != nil {
-			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
+			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Comment.content": %w`, err)}
 		}
 	}
 	if _, ok := cu.mutation.EpisodeID(); cu.mutation.EpisodeCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"episode\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.episode"`)
 	}
 	if _, ok := cu.mutation.AuthorID(); cu.mutation.AuthorCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"author\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.author"`)
 	}
 	return nil
 }
@@ -317,6 +324,12 @@ func (cuo *CommentUpdateOne) SetNillableSid(s *schema.ID) *CommentUpdateOne {
 	return cuo
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (cuo *CommentUpdateOne) SetUpdateTime(t time.Time) *CommentUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
+	return cuo
+}
+
 // SetContent sets the "content" field.
 func (cuo *CommentUpdateOne) SetContent(s string) *CommentUpdateOne {
 	cuo.mutation.SetContent(s)
@@ -442,14 +455,14 @@ func (cuo *CommentUpdateOne) defaults() {
 func (cuo *CommentUpdateOne) check() error {
 	if v, ok := cuo.mutation.Content(); ok {
 		if err := comment.ContentValidator(v); err != nil {
-			return &ValidationError{Name: "content", err: fmt.Errorf("ent: validator failed for field \"content\": %w", err)}
+			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Comment.content": %w`, err)}
 		}
 	}
 	if _, ok := cuo.mutation.EpisodeID(); cuo.mutation.EpisodeCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"episode\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.episode"`)
 	}
 	if _, ok := cuo.mutation.AuthorID(); cuo.mutation.AuthorCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"author\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.author"`)
 	}
 	return nil
 }
@@ -467,7 +480,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Comment.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Comment.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := cuo.fields; len(fields) > 0 {

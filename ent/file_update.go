@@ -10,6 +10,7 @@ import (
 	"street/ent/file"
 	"street/ent/predicate"
 	"street/ent/schema"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -41,6 +42,12 @@ func (fu *FileUpdate) SetNillableSid(s *schema.ID) *FileUpdate {
 	if s != nil {
 		fu.SetSid(*s)
 	}
+	return fu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (fu *FileUpdate) SetUpdateTime(t time.Time) *FileUpdate {
+	fu.mutation.SetUpdateTime(t)
 	return fu
 }
 
@@ -228,31 +235,31 @@ func (fu *FileUpdate) defaults() {
 func (fu *FileUpdate) check() error {
 	if v, ok := fu.mutation.Filename(); ok {
 		if err := file.FilenameValidator(v); err != nil {
-			return &ValidationError{Name: "filename", err: fmt.Errorf("ent: validator failed for field \"filename\": %w", err)}
+			return &ValidationError{Name: "filename", err: fmt.Errorf(`ent: validator failed for field "File.filename": %w`, err)}
 		}
 	}
 	if v, ok := fu.mutation.Path(); ok {
 		if err := file.PathValidator(v); err != nil {
-			return &ValidationError{Name: "path", err: fmt.Errorf("ent: validator failed for field \"path\": %w", err)}
+			return &ValidationError{Name: "path", err: fmt.Errorf(`ent: validator failed for field "File.path": %w`, err)}
 		}
 	}
 	if v, ok := fu.mutation.Mime(); ok {
 		if err := file.MimeValidator(v); err != nil {
-			return &ValidationError{Name: "mime", err: fmt.Errorf("ent: validator failed for field \"mime\": %w", err)}
+			return &ValidationError{Name: "mime", err: fmt.Errorf(`ent: validator failed for field "File.mime": %w`, err)}
 		}
 	}
 	if v, ok := fu.mutation.Status(); ok {
 		if err := file.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "File.status": %w`, err)}
 		}
 	}
 	if v, ok := fu.mutation.Note(); ok {
 		if err := file.NoteValidator(v); err != nil {
-			return &ValidationError{Name: "note", err: fmt.Errorf("ent: validator failed for field \"note\": %w", err)}
+			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "File.note": %w`, err)}
 		}
 	}
 	if _, ok := fu.mutation.AccountID(); fu.mutation.AccountCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"account\"")
+		return errors.New(`ent: clearing a required unique edge "File.account"`)
 	}
 	return nil
 }
@@ -409,6 +416,12 @@ func (fuo *FileUpdateOne) SetNillableSid(s *schema.ID) *FileUpdateOne {
 	if s != nil {
 		fuo.SetSid(*s)
 	}
+	return fuo
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (fuo *FileUpdateOne) SetUpdateTime(t time.Time) *FileUpdateOne {
+	fuo.mutation.SetUpdateTime(t)
 	return fuo
 }
 
@@ -603,31 +616,31 @@ func (fuo *FileUpdateOne) defaults() {
 func (fuo *FileUpdateOne) check() error {
 	if v, ok := fuo.mutation.Filename(); ok {
 		if err := file.FilenameValidator(v); err != nil {
-			return &ValidationError{Name: "filename", err: fmt.Errorf("ent: validator failed for field \"filename\": %w", err)}
+			return &ValidationError{Name: "filename", err: fmt.Errorf(`ent: validator failed for field "File.filename": %w`, err)}
 		}
 	}
 	if v, ok := fuo.mutation.Path(); ok {
 		if err := file.PathValidator(v); err != nil {
-			return &ValidationError{Name: "path", err: fmt.Errorf("ent: validator failed for field \"path\": %w", err)}
+			return &ValidationError{Name: "path", err: fmt.Errorf(`ent: validator failed for field "File.path": %w`, err)}
 		}
 	}
 	if v, ok := fuo.mutation.Mime(); ok {
 		if err := file.MimeValidator(v); err != nil {
-			return &ValidationError{Name: "mime", err: fmt.Errorf("ent: validator failed for field \"mime\": %w", err)}
+			return &ValidationError{Name: "mime", err: fmt.Errorf(`ent: validator failed for field "File.mime": %w`, err)}
 		}
 	}
 	if v, ok := fuo.mutation.Status(); ok {
 		if err := file.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "File.status": %w`, err)}
 		}
 	}
 	if v, ok := fuo.mutation.Note(); ok {
 		if err := file.NoteValidator(v); err != nil {
-			return &ValidationError{Name: "note", err: fmt.Errorf("ent: validator failed for field \"note\": %w", err)}
+			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "File.note": %w`, err)}
 		}
 	}
 	if _, ok := fuo.mutation.AccountID(); fuo.mutation.AccountCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"account\"")
+		return errors.New(`ent: clearing a required unique edge "File.account"`)
 	}
 	return nil
 }
@@ -645,7 +658,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 	}
 	id, ok := fuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing File.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "File.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := fuo.fields; len(fields) > 0 {

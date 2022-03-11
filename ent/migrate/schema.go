@@ -37,8 +37,8 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
-		{Name: "episode_comments", Type: field.TypeUUID, Nullable: true},
-		{Name: "profile_commenter", Type: field.TypeUUID, Nullable: true},
+		{Name: "episode_comments", Type: field.TypeUUID},
+		{Name: "profile_commenter", Type: field.TypeUUID},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
@@ -50,13 +50,13 @@ var (
 				Symbol:     "comments_episodes_comments",
 				Columns:    []*schema.Column{CommentsColumns[5]},
 				RefColumns: []*schema.Column{EpisodesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "comments_profiles_commenter",
 				Columns:    []*schema.Column{CommentsColumns[6]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -70,7 +70,7 @@ var (
 		{Name: "title", Type: field.TypeString, Nullable: true, Size: 320},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
 		{Name: "files", Type: field.TypeBytes},
-		{Name: "profile_episode", Type: field.TypeUUID, Nullable: true},
+		{Name: "profile_episode", Type: field.TypeUUID},
 		{Name: "series_episodes", Type: field.TypeUUID, Nullable: true},
 	}
 	// EpisodesTable holds the schema information for the "episodes" table.
@@ -83,7 +83,7 @@ var (
 				Symbol:     "episodes_profiles_episode",
 				Columns:    []*schema.Column{EpisodesColumns[8]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "episodes_series_episodes",
@@ -105,7 +105,7 @@ var (
 		{Name: "size", Type: field.TypeInt},
 		{Name: "status", Type: field.TypeString, Size: 16, Default: "created"},
 		{Name: "note", Type: field.TypeString, Nullable: true, Size: 128},
-		{Name: "account_file", Type: field.TypeUUID, Nullable: true},
+		{Name: "account_file", Type: field.TypeUUID},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
@@ -117,7 +117,7 @@ var (
 				Symbol:     "files_accounts_file",
 				Columns:    []*schema.Column{FilesColumns[10]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -131,7 +131,7 @@ var (
 		{Name: "call", Type: field.TypeString, Unique: true, Size: 64},
 		{Name: "category", Type: field.TypeString, Size: 16},
 		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 64},
-		{Name: "account_profile", Type: field.TypeUUID, Nullable: true},
+		{Name: "account_profile", Type: field.TypeUUID},
 	}
 	// ProfilesTable holds the schema information for the "profiles" table.
 	ProfilesTable = &schema.Table{
@@ -143,7 +143,7 @@ var (
 				Symbol:     "profiles_accounts_profile",
 				Columns:    []*schema.Column{ProfilesColumns[8]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -167,7 +167,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "title", Type: field.TypeString, Size: 320},
 		{Name: "type", Type: field.TypeString, Nullable: true, Size: 32},
-		{Name: "profile_series", Type: field.TypeUUID, Nullable: true},
+		{Name: "profile_series", Type: field.TypeUUID},
 	}
 	// SeriesTable holds the schema information for the "series" table.
 	SeriesTable = &schema.Table{
@@ -179,7 +179,7 @@ var (
 				Symbol:     "series_profiles_series",
 				Columns:    []*schema.Column{SeriesColumns[6]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -192,7 +192,7 @@ var (
 		{Name: "body", Type: field.TypeString, Unique: true, Size: 320},
 		{Name: "type", Type: field.TypeString, Size: 16},
 		{Name: "expire", Type: field.TypeTime},
-		{Name: "account_token", Type: field.TypeUUID, Nullable: true},
+		{Name: "account_token", Type: field.TypeUUID},
 	}
 	// TokensTable holds the schema information for the "tokens" table.
 	TokensTable = &schema.Table{
@@ -204,7 +204,7 @@ var (
 				Symbol:     "tokens_accounts_token",
 				Columns:    []*schema.Column{TokensColumns[7]},
 				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{

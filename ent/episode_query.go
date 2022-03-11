@@ -182,7 +182,7 @@ func (eq *EpisodeQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single Episode entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Episode entity is not found.
+// Returns a *NotSingularError when more than one Episode entity is found.
 // Returns a *NotFoundError when no Episode entities are found.
 func (eq *EpisodeQuery) Only(ctx context.Context) (*Episode, error) {
 	nodes, err := eq.Limit(2).All(ctx)
@@ -209,7 +209,7 @@ func (eq *EpisodeQuery) OnlyX(ctx context.Context) *Episode {
 }
 
 // OnlyID is like Only, but returns the only Episode ID in the query.
-// Returns a *NotSingularError when exactly one Episode ID is not found.
+// Returns a *NotSingularError when more than one Episode ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (eq *EpisodeQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -321,8 +321,9 @@ func (eq *EpisodeQuery) Clone() *EpisodeQuery {
 		withComments: eq.withComments.Clone(),
 		withSeries:   eq.withSeries.Clone(),
 		// clone intermediate query.
-		sql:  eq.sql.Clone(),
-		path: eq.path,
+		sql:    eq.sql.Clone(),
+		path:   eq.path,
+		unique: eq.unique,
 	}
 }
 
@@ -549,6 +550,10 @@ func (eq *EpisodeQuery) sqlAll(ctx context.Context) ([]*Episode, error) {
 
 func (eq *EpisodeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := eq.querySpec()
+	_spec.Node.Columns = eq.fields
+	if len(eq.fields) > 0 {
+		_spec.Unique = eq.unique != nil && *eq.unique
+	}
 	return sqlgraph.CountNodes(ctx, eq.driver, _spec)
 }
 
@@ -619,6 +624,9 @@ func (eq *EpisodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if eq.sql != nil {
 		selector = eq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if eq.unique != nil && *eq.unique {
+		selector.Distinct()
 	}
 	for _, p := range eq.predicates {
 		p(selector)
@@ -898,9 +906,7 @@ func (egb *EpisodeGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range egb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(egb.fields...)...)

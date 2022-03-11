@@ -11,6 +11,7 @@ import (
 	"street/ent/profile"
 	"street/ent/schema"
 	"street/ent/series"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -42,6 +43,12 @@ func (su *SeriesUpdate) SetNillableSid(s *schema.ID) *SeriesUpdate {
 	if s != nil {
 		su.SetSid(*s)
 	}
+	return su
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (su *SeriesUpdate) SetUpdateTime(t time.Time) *SeriesUpdate {
+	su.mutation.SetUpdateTime(t)
 	return su
 }
 
@@ -238,16 +245,16 @@ func (su *SeriesUpdate) defaults() {
 func (su *SeriesUpdate) check() error {
 	if v, ok := su.mutation.Title(); ok {
 		if err := series.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Series.title": %w`, err)}
 		}
 	}
 	if v, ok := su.mutation.GetType(); ok {
 		if err := series.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Series.type": %w`, err)}
 		}
 	}
 	if _, ok := su.mutation.OwnerID(); su.mutation.OwnerCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"owner\"")
+		return errors.New(`ent: clearing a required unique edge "Series.owner"`)
 	}
 	return nil
 }
@@ -480,6 +487,12 @@ func (suo *SeriesUpdateOne) SetNillableSid(s *schema.ID) *SeriesUpdateOne {
 	return suo
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (suo *SeriesUpdateOne) SetUpdateTime(t time.Time) *SeriesUpdateOne {
+	suo.mutation.SetUpdateTime(t)
+	return suo
+}
+
 // SetTitle sets the "title" field.
 func (suo *SeriesUpdateOne) SetTitle(s string) *SeriesUpdateOne {
 	suo.mutation.SetTitle(s)
@@ -680,16 +693,16 @@ func (suo *SeriesUpdateOne) defaults() {
 func (suo *SeriesUpdateOne) check() error {
 	if v, ok := suo.mutation.Title(); ok {
 		if err := series.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Series.title": %w`, err)}
 		}
 	}
 	if v, ok := suo.mutation.GetType(); ok {
 		if err := series.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Series.type": %w`, err)}
 		}
 	}
 	if _, ok := suo.mutation.OwnerID(); suo.mutation.OwnerCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"owner\"")
+		return errors.New(`ent: clearing a required unique edge "Series.owner"`)
 	}
 	return nil
 }
@@ -707,7 +720,7 @@ func (suo *SeriesUpdateOne) sqlSave(ctx context.Context) (_node *Series, err err
 	}
 	id, ok := suo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Series.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Series.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := suo.fields; len(fields) > 0 {

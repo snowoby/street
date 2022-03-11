@@ -85,6 +85,14 @@ func (ac *AccountCreate) SetID(u uuid.UUID) *AccountCreate {
 	return ac
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableID(u *uuid.UUID) *AccountCreate {
+	if u != nil {
+		ac.SetID(*u)
+	}
+	return ac
+}
+
 // AddTokenIDs adds the "token" edge to the Token entity by IDs.
 func (ac *AccountCreate) AddTokenIDs(ids ...uuid.UUID) *AccountCreate {
 	ac.mutation.AddTokenIDs(ids...)
@@ -222,24 +230,24 @@ func (ac *AccountCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountCreate) check() error {
 	if _, ok := ac.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "sid"`)}
+		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Account.sid"`)}
 	}
 	if _, ok := ac.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Account.create_time"`)}
 	}
 	if _, ok := ac.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Account.update_time"`)}
 	}
 	if _, ok := ac.mutation.Email(); !ok {
-		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "email"`)}
+		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Account.email"`)}
 	}
 	if v, ok := ac.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
-			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "email": %w`, err)}
+			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Account.email": %w`, err)}
 		}
 	}
 	if _, ok := ac.mutation.Password(); !ok {
-		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "password"`)}
+		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "Account.password"`)}
 	}
 	return nil
 }
@@ -253,7 +261,11 @@ func (ac *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -271,7 +283,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := ac.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := ac.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
