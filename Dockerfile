@@ -26,7 +26,7 @@ RUN cd && \
   --disable-docs && \
   make -j$(nproc) && make install && \
   ldconfig /usr/local/lib
-RUN  rm -rf /var/lib/apt/lists/* && rm ${IMAGEMAGICK_VERSION}.tar.gz && rm ImageMagick* -rf
+RUN  rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ENV GO111MODULE=on
