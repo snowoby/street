@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.17.6-alpine3.15
+FROM golang:1.17.8-bullseye
 WORKDIR /app
 ENV GO111MODULE=on
 RUN apk --no-cache --update add imagemagick imagemagick-dev build-base && rm -rf /var/cache/apk/*
