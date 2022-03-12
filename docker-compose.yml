@@ -44,7 +44,7 @@ services:
   tasker:
     build:
       context: .
-    command: ./street tasker 
+    command: /street tasker 
     env_file:
       - ./.env
     restart: always
@@ -57,7 +57,7 @@ services:
   street:
     build: 
       context: .
-    command: ./street tasker 
+    command: /street tasker 
     env_file:
       - ./.env
     restart: always
