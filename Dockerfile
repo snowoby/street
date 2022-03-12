@@ -9,4 +9,5 @@ COPY go.sum ./
 RUN go mod download
 COPY . .
 RUN go build -o /street ./cmd/street
+RUN chmod +x /street
 EXPOSE 8088
