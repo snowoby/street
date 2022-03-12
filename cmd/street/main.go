@@ -1,12 +1,7 @@
-package main
+package street
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-	"github.com/mvrilo/go-redoc"
-	"github.com/mvrilo/go-redoc/gin"
 	"os"
 	"street/cmd/config"
 	"street/pkg/account"
@@ -17,6 +12,12 @@ import (
 	"street/pkg/series"
 	"street/pkg/site"
 	"street/pkg/storage"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/mvrilo/go-redoc"
+	ginredoc "github.com/mvrilo/go-redoc/gin"
 )
 
 func init() {
@@ -83,4 +84,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func Main() {
+	main()
 }

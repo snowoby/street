@@ -1,13 +1,13 @@
 package config
 
 import (
+	"os"
+	"street/ent"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/go-redis/redis/v8"
 	"github.com/hibiken/asynq"
-	"golang.org/x/net/context"
-	"os"
-	"street/ent"
 )
 
 func NewDefaultEnt() *ent.Client {
@@ -15,10 +15,10 @@ func NewDefaultEnt() *ent.Client {
 	if err != nil {
 		panic(err)
 	}
-	err = client.Schema.Create(context.Background())
-	if err != nil {
-		panic(err)
-	}
+	// err = client.Schema.Create(context.Background())
+	// if err != nil {
+	// 	panic(err)
+	// }
 	return client
 }
 

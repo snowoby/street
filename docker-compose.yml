@@ -41,10 +41,10 @@ services:
     command: --redis-addr=redis:6379 --redis-db=1
 
 
-  worker:
+  tasker:
     build:
       context: .
-      dockerfile: worker.Dockerfile
+      command: ./street tasker 
     env_file:
       - ./.env
     restart: always
@@ -55,7 +55,9 @@ services:
 
 
   street:
-    build: .
+    build: 
+      context: .
+      command: ./street tasker 
     env_file:
       - ./.env
     restart: always
@@ -65,7 +67,7 @@ services:
       - database
       - storage
       - redis
-      - worker
+      - tasker
 
 volumes:
   storage_volume:

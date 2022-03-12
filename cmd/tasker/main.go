@@ -1,13 +1,14 @@
-package main
+package tasker
 
 import (
 	"fmt"
-	"github.com/hibiken/asynq"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"os"
 	"street/cmd/config"
 	"street/pkg/factory"
+
+	"github.com/hibiken/asynq"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func init() {
@@ -36,4 +37,8 @@ func main() {
 	)
 
 	factory.New(server, config.NewDefaultEnt(), config.NewDefaultS3()).Run()
+}
+
+func Main() {
+	main()
 }
