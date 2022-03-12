@@ -1,8 +1,6 @@
 package episode
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
 	"street/ent"
 	"street/ent/episode"
@@ -11,6 +9,9 @@ import (
 	"street/pkg/composer"
 	"street/pkg/d"
 	"street/pkg/operator"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type service struct {
@@ -25,6 +26,7 @@ func (s *service) registerRouters() {
 	s.router.Use(s.auth.MustLogin)
 	s.router.POST("/", composer.Authed(s.create))
 	s.router.PUT("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.update))
+	s.router.DELETE("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.delete))
 
 }
 

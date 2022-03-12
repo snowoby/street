@@ -1,26 +1,32 @@
 package migrate
 
 import (
-	"context"
 	"log"
 	"street/cmd/config"
 
-	"ariga.io/atlas/sql/migrate"
-	"entgo.io/ent/dialect/sql/schema"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	ent := config.NewDefaultEnt()
-	defer ent.Close()
-	ctx := context.Background()
-	dir, err := migrate.NewLocalDir("migrations")
+
+	db := config.NewDefaultSql()
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		log.Fatalf("failed creating atlas migration directory: %v", err)
+		log.Fatalf("failed creating postgres driver: %v", err)
 	}
-	err = ent.Schema.Diff(ctx, schema.WithDir(dir))
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migrations",
+		"postgres", driver)
 	if err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
+		log.Fatalf("failed creating migrate instance: %v", err)
 	}
+
+	m.Up()
+
 	// migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306)/test up
 }
 

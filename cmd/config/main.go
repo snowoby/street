@@ -1,6 +1,7 @@
 package config
 
 import (
+	"database/sql"
 	"os"
 	"street/ent"
 
@@ -8,7 +9,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/go-redis/redis/v8"
 	"github.com/hibiken/asynq"
+	_ "github.com/lib/pq"
 )
+
+func NewDefaultSql() *sql.DB {
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
 
 func NewDefaultEnt() *ent.Client {
 	client, err := ent.Open("postgres", os.Getenv("DATABASE_URL"))
