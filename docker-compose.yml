@@ -42,8 +42,7 @@ services:
 
 
   tasker:
-    build:
-      context: .
+    image: street
     command: "/street tasker" 
     env_file:
       - ./.env
@@ -55,8 +54,7 @@ services:
 
 
   street:
-    build: 
-      context: .
+    image: street
     command: "/street street"
     env_file:
       - ./.env
