@@ -15,20 +15,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// width, height := utils.ResizeCalculator(mw.GetImageWidth(), mw.GetImageHeight(), 512)
-	// mw.ResizeImage(width, height, imagick.FILTER_UNDEFINED)
-	mw.SetImageCompressionQuality(85)
+	defer mw.Destroy()
+
+	err = mw.SetImageCompressionQuality(80)
 	if err != nil {
-		panic(err)
+		fmt.Printf("set compress quality failed: %v", err)
 	}
-	// mw.StripImage()
-	mw.SetSamplingFactors([]float64{4, 2, 0})
-	// err = mw.GaussianBlurImage(0.05, 0.05)
-	fmt.Printf("%v", err)
-	err = mw.SetFormat("webp")
+
+	err = mw.SetImageFormat("webp")
 	if err != nil {
-		panic(err)
+		fmt.Printf("set format failed: %v", err)
 	}
+
+	bytes := mw.GetImageBlob()
+	fmt.Println(len(bytes))
 	err = mw.WriteImage("./.develop/c")
 	if err != nil {
 		panic(err)
