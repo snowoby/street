@@ -12,7 +12,7 @@ RUN apt-get update && \
 RUN apt-get update && apt-get -q -y install libwebp-dev libjpeg-dev libpng-dev libtiff-dev libde265-dev \
   libgif-dev libx11-dev --no-install-recommends
 
-ENV IMAGEMAGICK_VERSION=7.0.6-9
+ENV IMAGEMAGICK_VERSION=7.0.10-27
 
 RUN cd && \
   wget https://github.com/ImageMagick/ImageMagick/archive/${IMAGEMAGICK_VERSION}.tar.gz && \
@@ -23,7 +23,6 @@ RUN cd && \
   --without-perl \
   --disable-openmp \
   --with-gvc=no \
-  --with-heic=yes \ 
   --with-webp=yes \
   --disable-docs && \
   make -j$(nproc) && make install && \
