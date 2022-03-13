@@ -7,10 +7,19 @@ import (
 	"street/cmd/migrate"
 	"street/cmd/street"
 	"street/cmd/tasker"
+
+	"github.com/joho/godotenv"
 )
 
 type run = func()
 
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
 func main() {
 	argsWithProg := os.Args
 	commandMap := map[string]run{

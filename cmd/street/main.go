@@ -1,7 +1,6 @@
 package street
 
 import (
-	"fmt"
 	"os"
 	"street/cmd/config"
 	"street/pkg/account"
@@ -14,19 +13,10 @@ import (
 	"street/pkg/storage"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/mvrilo/go-redoc"
 	ginredoc "github.com/mvrilo/go-redoc/gin"
 )
-
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-}
 
 func setup() *gin.Engine {
 

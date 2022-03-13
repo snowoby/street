@@ -3,13 +3,6 @@ package storage
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
-	"github.com/google/uuid"
-	"github.com/hibiken/asynq"
-	_ "github.com/lib/pq"
 	"io/ioutil"
 	"net/http"
 	"street/ent"
@@ -18,8 +11,17 @@ import (
 	"street/pkg/auth"
 	"street/pkg/composer"
 	"street/pkg/d"
+	"street/pkg/factory"
 	"street/pkg/operator"
 	"strings"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
+	_ "github.com/lib/pq"
 )
 
 type service struct {
@@ -127,12 +129,13 @@ func (s *service) put(ctx *gin.Context, id string) (int, interface{}, error) {
 	if err != nil {
 		return 0, nil, err
 	}
-
+	// TODO GIF
 	if strings.HasPrefix(file.Mime, "image/") {
 		if file.Path == "avatar" {
-			_, err = s.tasker.avatarCompress(file)
+			factory.AvatarCompress(file, raw, s.storageService)
 		} else {
-			_, err = s.tasker.imageCompress(file)
+			// _, err = s.tasker.imageCompress(file)
+			factory.ImageCompress(file, raw, s.storageService)
 		}
 
 	}
