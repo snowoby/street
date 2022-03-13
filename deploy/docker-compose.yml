@@ -7,7 +7,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
       PGDATA: /var/lib/postgresql/data/dbdata/
     env_file:
-      - ./.env
+      - .env
     volumes:
       - database_volume:/var/lib/postgresql/data
     healthcheck:
@@ -21,7 +21,7 @@ services:
       - "0.0.0.0:9000:9000"
       - "0.0.0.0:9001:9001"
     env_file:
-      - ./.env
+      - .env
     command: server /data --address 0.0.0.0:9000 --console-address ":9001"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -45,7 +45,7 @@ services:
     image: street
     command: "/street tasker" 
     env_file:
-      - ./.env
+      - .env
     restart: always
     depends_on:
       - database
@@ -57,7 +57,7 @@ services:
     image: street
     command: "/street street"
     env_file:
-      - ./.env
+      - .env
     restart: always
     ports:
       - "0.0.0.0:8088:8088"
