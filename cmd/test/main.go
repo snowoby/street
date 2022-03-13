@@ -29,7 +29,7 @@ func main() {
 
 	bytes := mw.GetImageBlob()
 	fmt.Println(len(bytes))
-	err = mw.WriteImage("./.develop/c")
+	err = mw.WriteImage("./.develop/c.webp")
 	if err != nil {
 		panic(err)
 	}
