@@ -35,7 +35,7 @@ func ImageCompress(p *ent.File, b []byte, s3Service base3.Prototype) error {
 			return fmt.Errorf("set compress quality failed: %v", err)
 		}
 
-		err = mw.SetFormat("webp")
+		err = mw.SetImageFormat("webp")
 		if err != nil {
 			return fmt.Errorf("set format failed: %v", err)
 		}
@@ -57,7 +57,7 @@ func ImageCompress(p *ent.File, b []byte, s3Service base3.Prototype) error {
 			return fmt.Errorf("set compress quality failed: %v", err)
 		}
 
-		err = mw.SetFormat("webp")
+		err = mw.SetImageFormat("webp")
 		if err != nil {
 			return fmt.Errorf("set format failed: %v", err)
 		}
@@ -84,6 +84,11 @@ func AvatarCompress(p *ent.File, b []byte, s3Service base3.Prototype) error {
 	err = mw.SetImageCompressionQuality(Quality)
 	if err != nil {
 		return fmt.Errorf("set compress quality failed: %v", err)
+	}
+
+	err = mw.SetImageFormat("webp")
+	if err != nil {
+		return fmt.Errorf("set format failed: %v", err)
 	}
 
 	if mw.GetImageWidth() > ResizeWidth || mw.GetImageHeight() > ResizeHeight {

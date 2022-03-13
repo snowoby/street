@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = mw.WriteImage("./.develop/c.webp")
+	err = mw.WriteImage("./.develop/c")
 	if err != nil {
 		panic(err)
 	}

@@ -9,7 +9,7 @@ RUN apt-get update && \
 
 # Install ImageMagick deps
 
-RUN apt-get update && apt-get -q -y install libjpeg-dev libpng-dev libtiff-dev \
+RUN apt-get update && apt-get -q -y install libjpeg-dev libpng-dev libtiff-dev webp \
   libgif-dev libx11-dev --no-install-recommends
 
 ENV IMAGEMAGICK_VERSION=7.1.0-27
