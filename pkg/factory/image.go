@@ -39,7 +39,7 @@ func ImageCompress(p *ent.File, b []byte, s3Service base3.Prototype) error {
 		if err != nil {
 			return fmt.Errorf("set format failed: %v", err)
 		}
-
+		mw.ResetIterator()
 		filename := fmt.Sprintf("%s_%s.%s", p.Filename, "thumbnail", "webp")
 		_, err = s3Service.PutSingle(bytes.NewReader(mw.GetImageBlob()), p.Path, p.ID, filename, d.StringThumbnail, "image/webp")
 		if err != nil {
@@ -61,7 +61,7 @@ func ImageCompress(p *ent.File, b []byte, s3Service base3.Prototype) error {
 		if err != nil {
 			return fmt.Errorf("set format failed: %v", err)
 		}
-
+		mw.ResetIterator()
 		filename := fmt.Sprintf("%s_%s.%s", p.Filename, "compressed", "webp")
 		_, err = s3Service.PutSingle(bytes.NewReader(mw.GetImageBlob()), p.Path, p.ID, filename, d.StringCompressed, "image/webp")
 		if err != nil {
