@@ -1,4 +1,4 @@
 deploy/
 README.md
-.vscode
+.vscode/
 .dockerignore
