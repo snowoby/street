@@ -4,7 +4,7 @@ services:
     image: "postgres:13-alpine3.15"
     restart: always
     env_file:
-      - .env
+      - ../.env
     volumes:
       - .develop/db:/var/lib/postgresql/data
     ports:
@@ -15,7 +15,7 @@ services:
   storage:
     image: "minio/minio"
     volumes:
-      - .develop/files:/data
+      - ../.develop/files:/data
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
@@ -32,7 +32,7 @@ services:
   redis:
     image: "redis:6.2.6-alpine3.15"
     volumes:
-      - .develop/redis:/data
+      - ../.develop/redis:/data
     ports:
       - "6379:6379"
 
