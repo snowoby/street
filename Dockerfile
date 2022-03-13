@@ -12,7 +12,7 @@ RUN apt-get update && \
 RUN apt-get update && apt-get -q -y install libjpeg-dev libpng-dev libtiff-dev webp \
   libgif-dev libx11-dev --no-install-recommends
 
-ENV IMAGEMAGICK_VERSION=7.1.0-27
+ENV IMAGEMAGICK_VERSION=7.0.6-9
 
 RUN cd && \
   wget https://github.com/ImageMagick/ImageMagick/archive/${IMAGEMAGICK_VERSION}.tar.gz && \
