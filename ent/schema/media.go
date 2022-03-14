@@ -6,9 +6,9 @@ import (
 )
 
 type Media struct {
-	ID   string `json:"id"`
-	NSFW bool   `json:"nsfw"`
-	MIME string `json:"mime"`
+	ID   string `json:"id" binding:"required,uuid"`
+	NSFW bool   `json:"nsfw" binding:"required,boolean"`
+	MIME string `json:"mime" binding:"required"`
 }
 type Medias []*Media
 

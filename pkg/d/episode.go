@@ -19,7 +19,7 @@ type EpisodeForm struct {
 	Title     *string       `json:"title" binding:"omitempty"`
 	Content   string        `json:"content"`
 	Cover     *string       `json:"cover" binding:"omitempty"`
-	Files     schema.Medias `json:"files" binding:"omitempty"`
+	Files     schema.Medias `json:"files" binding:"omitempty,dive"`
 }
 
 func EpisodeFromEnt(episode *ent.Episode) *Episode {
