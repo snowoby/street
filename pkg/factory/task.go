@@ -1,14 +1,14 @@
 package factory
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/hibiken/asynq"
-	"gopkg.in/gographics/imagick.v3/imagick"
 	"log"
 	"os"
 	"street/ent"
 	"street/pkg/base3"
-	"street/pkg/d"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/hibiken/asynq"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 func init() {
@@ -48,8 +48,8 @@ func New(server *asynq.Server, db *ent.Client, s3Config *aws.Config) *service {
 
 func (s *service) Run() {
 	mux := asynq.NewServeMux()
-	mux.HandleFunc(d.StringTaskImageCompress, s.HandleImageCompressTask)
-	mux.HandleFunc(d.StringTaskAvatar, s.HandleAvatarCompressTask)
+	// mux.HandleFunc(d.StringTaskImageCompress, s.HandleImageCompressTask)
+	// mux.HandleFunc(d.StringTaskAvatar, s.HandleAvatarCompressTask)
 
 	if err := s.server.Run(mux); err != nil {
 		log.Fatal(err)

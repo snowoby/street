@@ -3,8 +3,8 @@ module street
 go 1.17
 
 require (
-	ariga.io/atlas v0.3.7
-	entgo.io/ent v0.10.1
+	ariga.io/atlas v0.3.8-0.20220313134928-770640fc02bf
+	entgo.io/ent v0.10.2-0.20220314134713-41db628df3cf
 	github.com/alexedwards/argon2id v0.0.0-20211130144151-3585854a6387
 	github.com/aws/aws-sdk-go v1.43.16
 	github.com/gin-gonic/gin v1.7.7

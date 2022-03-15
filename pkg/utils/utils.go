@@ -2,8 +2,9 @@ package utils
 
 import (
 	"crypto/rand"
-	"github.com/alexedwards/argon2id"
 	"math/big"
+
+	"github.com/alexedwards/argon2id"
 )
 
 func HashPassword(password string) (string, error) {
@@ -49,14 +50,19 @@ func Validate(rawPassword string, recordPassword string) bool {
 	return CheckPassword(rawPassword, recordPassword)
 }
 
-func ResizeCalculator(originalWidth uint, originalHeight uint, max uint) (uint, uint) {
-	if originalWidth < max && originalHeight < max {
+func KeepRatioResizeCalculator(originalWidth uint, originalHeight uint, maxWidth uint, maxHeight uint) (uint, uint) {
+	if originalWidth < maxWidth && originalHeight < maxHeight {
 		return originalWidth, originalHeight
 	}
-
-	if originalWidth > originalHeight {
-		return max, uint(float64(max) * float64(originalHeight) / float64(originalWidth))
-	} else {
-		return uint(float64(max) * float64(originalWidth) / float64(originalHeight)), max
+	width, height := singleEdgeRatio(originalWidth, originalHeight, maxWidth)
+	if height > maxHeight {
+		height, width = singleEdgeRatio(height, width, maxHeight)
 	}
+	return width, height
+
+}
+
+func singleEdgeRatio(edge1 uint, edge2 uint, aimEdge1 uint) (uint, uint) {
+	ratio := float64(aimEdge1) / float64(edge1)
+	return uint(float64(edge1) * ratio), uint(float64(edge2) * ratio)
 }

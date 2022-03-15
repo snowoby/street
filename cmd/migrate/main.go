@@ -19,14 +19,16 @@ func main() {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		"file://./migrations",
 		"postgres", driver)
 	if err != nil {
 		log.Fatalf("failed creating migrate instance: %v", err)
 	}
 
-	m.Up()
-
+	err = m.Up()
+	if err != nil {
+		log.Fatalf("failed applying migrations: %v", err)
+	}
 	// migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306)/test up
 }
 
