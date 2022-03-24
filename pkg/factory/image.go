@@ -17,6 +17,7 @@ func ImageCompress(p *ent.File, b []byte, s3Service base3.Prototype) error {
 	}
 
 	for _, profile := range ImageProfiles {
+		mw := mw.Clone()
 		err := process(mw, &profile)
 		if err != nil {
 			return fmt.Errorf("process failed: %v", err)
