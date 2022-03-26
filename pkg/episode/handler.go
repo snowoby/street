@@ -170,7 +170,7 @@ func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {
 		return 0, nil, err
 	}
 	var epCommentCount []*d.IDCount
-	err = s.db.Debug().Episode.Query().
+	err = s.db.Episode.Query().
 		Order(ent.Desc(episode.FieldCreateTime)).
 		GroupBy(episode.FieldID).
 		Aggregate(func(s *sql.Selector) string {
