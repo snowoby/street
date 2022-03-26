@@ -3,6 +3,7 @@ package episode
 import (
 	"net/http"
 	"street/ent"
+	"street/ent/comment"
 	"street/ent/episode"
 	"street/errs"
 	"street/pkg/auth"
@@ -10,6 +11,7 @@ import (
 	"street/pkg/d"
 	"street/pkg/operator"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -142,6 +144,7 @@ func (s *service) get(ctx *gin.Context, id string) (int, interface{}, error) {
 		WithProfile().
 		WithSeries().
 		Only(ctx)
+
 	if err != nil {
 		return 0, nil, err
 	}
@@ -165,10 +168,22 @@ func (s *service) getAll(ctx *gin.Context) (int, interface{}, error) {
 		All(ctx)
 	if err != nil {
 		return 0, nil, err
-
+	}
+	var epCommentCount []*d.IDCount
+	err = s.db.Debug().Episode.Query().
+		Order(ent.Desc(episode.FieldCreateTime)).
+		GroupBy(episode.FieldID).
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(comment.Table)
+			s.Join(t).On(s.C(episode.FieldID), t.C(comment.EpisodeColumn))
+			return sql.As(sql.Count(t.C(comment.FieldID)), "count")
+		}).
+		Scan(ctx, &epCommentCount)
+	if err != nil {
+		return 0, nil, err
 	}
 
-	return http.StatusOK, d.EpisodesFromEnt(eps), nil
+	return http.StatusOK, d.EpisodeWithCommentCountsFromEnt(eps, epCommentCount), nil
 
 }
 

@@ -40,7 +40,7 @@ func (s *service) registerRouters() {
 }
 
 func (s *service) getByEpisodeID(ctx *gin.Context, id string) (int, interface{}, error) {
-	comments, err := s.db.Comment.Query().Where(comment.HasEpisodeWith(episode.ID(uuid.MustParse(id)))).WithAuthor().All(ctx)
+	comments, err := s.db.Comment.Query().Where(comment.HasEpisodeWith(episode.ID(uuid.MustParse(id)))).WithAuthor().Order(ent.Desc(comment.FieldCreateTime)).All(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
