@@ -1,8 +1,6 @@
 package comment
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
 	"street/ent"
 	"street/ent/comment"
@@ -11,6 +9,9 @@ import (
 	"street/pkg/composer"
 	"street/pkg/d"
 	"street/pkg/operator"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type service struct {
@@ -30,23 +31,23 @@ func New(db *ent.Client, auth auth.Service, router *gin.RouterGroup) *service {
 }
 
 func (s *service) registerRouters() {
-	s.router.GET("/:id", composer.ID(s.getByEpisodeID))
+	s.router.GET("/episode/:id", composer.ID(s.getByEpisodeID))
 	s.router.Use(s.auth.MustLogin)
-	s.router.POST("/", composer.Authed(s.create))
+	s.router.POST("/episode/:id", composer.AuthedID(s.create))
 	s.router.PUT("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.update))
 	s.router.DELETE("/:id", composer.AuthedIDCheck(s.owned), composer.ID(s.delete))
 
 }
 
 func (s *service) getByEpisodeID(ctx *gin.Context, id string) (int, interface{}, error) {
-	comments, err := s.db.Comment.Query().Where(comment.HasEpisodeWith(episode.ID(uuid.MustParse(id)))).All(ctx)
+	comments, err := s.db.Comment.Query().Where(comment.HasEpisodeWith(episode.ID(uuid.MustParse(id)))).WithAuthor().All(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
 	return http.StatusOK, d.CommentsFromEnt(comments), nil
 }
 
-func (s *service) create(ctx *gin.Context, operator *operator.Identity) (int, interface{}, error) {
+func (s *service) create(ctx *gin.Context, operator *operator.Identity, id string) (int, interface{}, error) {
 	var commentForm d.CommentForm
 	if err := ctx.ShouldBindJSON(&commentForm); err != nil {
 		return 0, nil, err
@@ -58,12 +59,16 @@ func (s *service) create(ctx *gin.Context, operator *operator.Identity) (int, in
 	c, err := s.db.Comment.Create().
 		SetContent(commentForm.Content).
 		SetAuthorID(uuid.MustParse(commentForm.From)).
-		SetEpisodeID(uuid.MustParse(commentForm.To)).
+		SetEpisodeID(uuid.MustParse(id)).
 		Save(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
-
+	p, err := c.QueryAuthor().Only(ctx)
+	if err != nil {
+		return 0, nil, err
+	}
+	c.Edges.Author = p
 	return http.StatusCreated, d.CommentFromEnt(c), nil
 }
 
@@ -76,7 +81,6 @@ func (s *service) update(ctx *gin.Context, id string) (int, interface{}, error) 
 	c, err := s.db.Comment.UpdateOneID(uuid.MustParse(id)).
 		SetContent(commentForm.Content).
 		SetAuthorID(uuid.MustParse(commentForm.From)).
-		SetEpisodeID(uuid.MustParse(commentForm.To)).
 		Save(ctx)
 
 	if err != nil {

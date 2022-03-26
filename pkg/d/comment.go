@@ -3,13 +3,13 @@ package d
 import "street/ent"
 
 type CommentForm struct {
-	To      string `json:"to" binding:"required"`
 	From    string `json:"from" binding:"required"`
 	Content string `json:"content" binding:"required"`
 }
 
 type Comment struct {
 	*ent.Comment
+	Author *Profile `json:"author"`
 	ValueType
 	NoEdges
 }
@@ -17,6 +17,7 @@ type Comment struct {
 func CommentFromEnt(c *ent.Comment) *Comment {
 	return &Comment{
 		Comment:   c,
+		Author:    ProfileFromEnt(c.Edges.Author),
 		ValueType: ValueType{"comment"},
 	}
 }
