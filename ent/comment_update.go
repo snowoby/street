@@ -58,6 +58,26 @@ func (cu *CommentUpdate) SetContent(s string) *CommentUpdate {
 	return cu
 }
 
+// SetPath sets the "path" field.
+func (cu *CommentUpdate) SetPath(s string) *CommentUpdate {
+	cu.mutation.SetPath(s)
+	return cu
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillablePath(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetPath(*s)
+	}
+	return cu
+}
+
+// ClearPath clears the value of the "path" field.
+func (cu *CommentUpdate) ClearPath() *CommentUpdate {
+	cu.mutation.ClearPath()
+	return cu
+}
+
 // SetEpisodeID sets the "episode" edge to the Episode entity by ID.
 func (cu *CommentUpdate) SetEpisodeID(id uuid.UUID) *CommentUpdate {
 	cu.mutation.SetEpisodeID(id)
@@ -80,6 +100,40 @@ func (cu *CommentUpdate) SetAuthor(p *Profile) *CommentUpdate {
 	return cu.SetAuthorID(p.ID)
 }
 
+// SetReplyToID sets the "replyTo" edge to the Comment entity by ID.
+func (cu *CommentUpdate) SetReplyToID(id uuid.UUID) *CommentUpdate {
+	cu.mutation.SetReplyToID(id)
+	return cu
+}
+
+// SetNillableReplyToID sets the "replyTo" edge to the Comment entity by ID if the given value is not nil.
+func (cu *CommentUpdate) SetNillableReplyToID(id *uuid.UUID) *CommentUpdate {
+	if id != nil {
+		cu = cu.SetReplyToID(*id)
+	}
+	return cu
+}
+
+// SetReplyTo sets the "replyTo" edge to the Comment entity.
+func (cu *CommentUpdate) SetReplyTo(c *Comment) *CommentUpdate {
+	return cu.SetReplyToID(c.ID)
+}
+
+// AddRepliedIDs adds the "replied" edge to the Comment entity by IDs.
+func (cu *CommentUpdate) AddRepliedIDs(ids ...uuid.UUID) *CommentUpdate {
+	cu.mutation.AddRepliedIDs(ids...)
+	return cu
+}
+
+// AddReplied adds the "replied" edges to the Comment entity.
+func (cu *CommentUpdate) AddReplied(c ...*Comment) *CommentUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return cu.AddRepliedIDs(ids...)
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
@@ -95,6 +149,33 @@ func (cu *CommentUpdate) ClearEpisode() *CommentUpdate {
 func (cu *CommentUpdate) ClearAuthor() *CommentUpdate {
 	cu.mutation.ClearAuthor()
 	return cu
+}
+
+// ClearReplyTo clears the "replyTo" edge to the Comment entity.
+func (cu *CommentUpdate) ClearReplyTo() *CommentUpdate {
+	cu.mutation.ClearReplyTo()
+	return cu
+}
+
+// ClearReplied clears all "replied" edges to the Comment entity.
+func (cu *CommentUpdate) ClearReplied() *CommentUpdate {
+	cu.mutation.ClearReplied()
+	return cu
+}
+
+// RemoveRepliedIDs removes the "replied" edge to Comment entities by IDs.
+func (cu *CommentUpdate) RemoveRepliedIDs(ids ...uuid.UUID) *CommentUpdate {
+	cu.mutation.RemoveRepliedIDs(ids...)
+	return cu
+}
+
+// RemoveReplied removes "replied" edges to Comment entities.
+func (cu *CommentUpdate) RemoveReplied(c ...*Comment) *CommentUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return cu.RemoveRepliedIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -221,6 +302,19 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: comment.FieldContent,
 		})
 	}
+	if value, ok := cu.mutation.Path(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldPath,
+		})
+	}
+	if cu.mutation.PathCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldPath,
+		})
+	}
 	if cu.mutation.EpisodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -291,6 +385,95 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.ReplyToCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ReplyToTable,
+			Columns: []string{comment.ReplyToColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.ReplyToIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ReplyToTable,
+			Columns: []string{comment.ReplyToColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.RepliedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.RepliedTable,
+			Columns: []string{comment.RepliedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedRepliedIDs(); len(nodes) > 0 && !cu.mutation.RepliedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.RepliedTable,
+			Columns: []string{comment.RepliedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RepliedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.RepliedTable,
+			Columns: []string{comment.RepliedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
@@ -336,6 +519,26 @@ func (cuo *CommentUpdateOne) SetContent(s string) *CommentUpdateOne {
 	return cuo
 }
 
+// SetPath sets the "path" field.
+func (cuo *CommentUpdateOne) SetPath(s string) *CommentUpdateOne {
+	cuo.mutation.SetPath(s)
+	return cuo
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillablePath(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetPath(*s)
+	}
+	return cuo
+}
+
+// ClearPath clears the value of the "path" field.
+func (cuo *CommentUpdateOne) ClearPath() *CommentUpdateOne {
+	cuo.mutation.ClearPath()
+	return cuo
+}
+
 // SetEpisodeID sets the "episode" edge to the Episode entity by ID.
 func (cuo *CommentUpdateOne) SetEpisodeID(id uuid.UUID) *CommentUpdateOne {
 	cuo.mutation.SetEpisodeID(id)
@@ -358,6 +561,40 @@ func (cuo *CommentUpdateOne) SetAuthor(p *Profile) *CommentUpdateOne {
 	return cuo.SetAuthorID(p.ID)
 }
 
+// SetReplyToID sets the "replyTo" edge to the Comment entity by ID.
+func (cuo *CommentUpdateOne) SetReplyToID(id uuid.UUID) *CommentUpdateOne {
+	cuo.mutation.SetReplyToID(id)
+	return cuo
+}
+
+// SetNillableReplyToID sets the "replyTo" edge to the Comment entity by ID if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableReplyToID(id *uuid.UUID) *CommentUpdateOne {
+	if id != nil {
+		cuo = cuo.SetReplyToID(*id)
+	}
+	return cuo
+}
+
+// SetReplyTo sets the "replyTo" edge to the Comment entity.
+func (cuo *CommentUpdateOne) SetReplyTo(c *Comment) *CommentUpdateOne {
+	return cuo.SetReplyToID(c.ID)
+}
+
+// AddRepliedIDs adds the "replied" edge to the Comment entity by IDs.
+func (cuo *CommentUpdateOne) AddRepliedIDs(ids ...uuid.UUID) *CommentUpdateOne {
+	cuo.mutation.AddRepliedIDs(ids...)
+	return cuo
+}
+
+// AddReplied adds the "replied" edges to the Comment entity.
+func (cuo *CommentUpdateOne) AddReplied(c ...*Comment) *CommentUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return cuo.AddRepliedIDs(ids...)
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
 	return cuo.mutation
@@ -373,6 +610,33 @@ func (cuo *CommentUpdateOne) ClearEpisode() *CommentUpdateOne {
 func (cuo *CommentUpdateOne) ClearAuthor() *CommentUpdateOne {
 	cuo.mutation.ClearAuthor()
 	return cuo
+}
+
+// ClearReplyTo clears the "replyTo" edge to the Comment entity.
+func (cuo *CommentUpdateOne) ClearReplyTo() *CommentUpdateOne {
+	cuo.mutation.ClearReplyTo()
+	return cuo
+}
+
+// ClearReplied clears all "replied" edges to the Comment entity.
+func (cuo *CommentUpdateOne) ClearReplied() *CommentUpdateOne {
+	cuo.mutation.ClearReplied()
+	return cuo
+}
+
+// RemoveRepliedIDs removes the "replied" edge to Comment entities by IDs.
+func (cuo *CommentUpdateOne) RemoveRepliedIDs(ids ...uuid.UUID) *CommentUpdateOne {
+	cuo.mutation.RemoveRepliedIDs(ids...)
+	return cuo
+}
+
+// RemoveReplied removes "replied" edges to Comment entities.
+func (cuo *CommentUpdateOne) RemoveReplied(c ...*Comment) *CommentUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return cuo.RemoveRepliedIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -523,6 +787,19 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Column: comment.FieldContent,
 		})
 	}
+	if value, ok := cuo.mutation.Path(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldPath,
+		})
+	}
+	if cuo.mutation.PathCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldPath,
+		})
+	}
 	if cuo.mutation.EpisodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -585,6 +862,95 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: profile.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.ReplyToCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ReplyToTable,
+			Columns: []string{comment.ReplyToColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.ReplyToIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ReplyToTable,
+			Columns: []string{comment.ReplyToColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.RepliedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.RepliedTable,
+			Columns: []string{comment.RepliedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedRepliedIDs(); len(nodes) > 0 && !cuo.mutation.RepliedCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.RepliedTable,
+			Columns: []string{comment.RepliedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RepliedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.RepliedTable,
+			Columns: []string{comment.RepliedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
 				},
 			},
 		}

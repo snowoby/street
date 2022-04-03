@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -30,6 +31,8 @@ type CommentQuery struct {
 	// eager-loading edges.
 	withEpisode *EpisodeQuery
 	withAuthor  *ProfileQuery
+	withReplyTo *CommentQuery
+	withReplied *CommentQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -104,6 +107,50 @@ func (cq *CommentQuery) QueryAuthor() *ProfileQuery {
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(profile.Table, profile.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, comment.AuthorTable, comment.AuthorColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryReplyTo chains the current query on the "replyTo" edge.
+func (cq *CommentQuery) QueryReplyTo() *CommentQuery {
+	query := &CommentQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ReplyToTable, comment.ReplyToColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryReplied chains the current query on the "replied" edge.
+func (cq *CommentQuery) QueryReplied() *CommentQuery {
+	query := &CommentQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.RepliedTable, comment.RepliedColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,6 +341,8 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		predicates:  append([]predicate.Comment{}, cq.predicates...),
 		withEpisode: cq.withEpisode.Clone(),
 		withAuthor:  cq.withAuthor.Clone(),
+		withReplyTo: cq.withReplyTo.Clone(),
+		withReplied: cq.withReplied.Clone(),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),
 		path:   cq.path,
@@ -320,6 +369,28 @@ func (cq *CommentQuery) WithAuthor(opts ...func(*ProfileQuery)) *CommentQuery {
 		opt(query)
 	}
 	cq.withAuthor = query
+	return cq
+}
+
+// WithReplyTo tells the query-builder to eager-load the nodes that are connected to
+// the "replyTo" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CommentQuery) WithReplyTo(opts ...func(*CommentQuery)) *CommentQuery {
+	query := &CommentQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withReplyTo = query
+	return cq
+}
+
+// WithReplied tells the query-builder to eager-load the nodes that are connected to
+// the "replied" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CommentQuery) WithReplied(opts ...func(*CommentQuery)) *CommentQuery {
+	query := &CommentQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withReplied = query
 	return cq
 }
 
@@ -389,12 +460,14 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 		nodes       = []*Comment{}
 		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			cq.withEpisode != nil,
 			cq.withAuthor != nil,
+			cq.withReplyTo != nil,
+			cq.withReplied != nil,
 		}
 	)
-	if cq.withEpisode != nil || cq.withAuthor != nil {
+	if cq.withEpisode != nil || cq.withAuthor != nil || cq.withReplyTo != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -475,6 +548,64 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 			for i := range nodes {
 				nodes[i].Edges.Author = n
 			}
+		}
+	}
+
+	if query := cq.withReplyTo; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Comment)
+		for i := range nodes {
+			if nodes[i].comment_replied == nil {
+				continue
+			}
+			fk := *nodes[i].comment_replied
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(comment.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "comment_replied" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.ReplyTo = n
+			}
+		}
+	}
+
+	if query := cq.withReplied; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Comment)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Replied = []*Comment{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Comment(func(s *sql.Selector) {
+			s.Where(sql.InValues(comment.RepliedColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.comment_replied
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "comment_replied" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "comment_replied" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Replied = append(node.Edges.Replied, n)
 		}
 	}
 

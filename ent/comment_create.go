@@ -72,6 +72,20 @@ func (cc *CommentCreate) SetContent(s string) *CommentCreate {
 	return cc
 }
 
+// SetPath sets the "path" field.
+func (cc *CommentCreate) SetPath(s string) *CommentCreate {
+	cc.mutation.SetPath(s)
+	return cc
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (cc *CommentCreate) SetNillablePath(s *string) *CommentCreate {
+	if s != nil {
+		cc.SetPath(*s)
+	}
+	return cc
+}
+
 // SetID sets the "id" field.
 func (cc *CommentCreate) SetID(u uuid.UUID) *CommentCreate {
 	cc.mutation.SetID(u)
@@ -106,6 +120,40 @@ func (cc *CommentCreate) SetAuthorID(id uuid.UUID) *CommentCreate {
 // SetAuthor sets the "author" edge to the Profile entity.
 func (cc *CommentCreate) SetAuthor(p *Profile) *CommentCreate {
 	return cc.SetAuthorID(p.ID)
+}
+
+// SetReplyToID sets the "replyTo" edge to the Comment entity by ID.
+func (cc *CommentCreate) SetReplyToID(id uuid.UUID) *CommentCreate {
+	cc.mutation.SetReplyToID(id)
+	return cc
+}
+
+// SetNillableReplyToID sets the "replyTo" edge to the Comment entity by ID if the given value is not nil.
+func (cc *CommentCreate) SetNillableReplyToID(id *uuid.UUID) *CommentCreate {
+	if id != nil {
+		cc = cc.SetReplyToID(*id)
+	}
+	return cc
+}
+
+// SetReplyTo sets the "replyTo" edge to the Comment entity.
+func (cc *CommentCreate) SetReplyTo(c *Comment) *CommentCreate {
+	return cc.SetReplyToID(c.ID)
+}
+
+// AddRepliedIDs adds the "replied" edge to the Comment entity by IDs.
+func (cc *CommentCreate) AddRepliedIDs(ids ...uuid.UUID) *CommentCreate {
+	cc.mutation.AddRepliedIDs(ids...)
+	return cc
+}
+
+// AddReplied adds the "replied" edges to the Comment entity.
+func (cc *CommentCreate) AddReplied(c ...*Comment) *CommentCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return cc.AddRepliedIDs(ids...)
 }
 
 // Mutation returns the CommentMutation object of the builder.
@@ -190,6 +238,10 @@ func (cc *CommentCreate) defaults() {
 	if _, ok := cc.mutation.UpdateTime(); !ok {
 		v := comment.DefaultUpdateTime()
 		cc.mutation.SetUpdateTime(v)
+	}
+	if _, ok := cc.mutation.Path(); !ok {
+		v := comment.DefaultPath
+		cc.mutation.SetPath(v)
 	}
 	if _, ok := cc.mutation.ID(); !ok {
 		v := comment.DefaultID()
@@ -290,6 +342,14 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		})
 		_node.Content = value
 	}
+	if value, ok := cc.mutation.Path(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldPath,
+		})
+		_node.Path = value
+	}
 	if nodes := cc.mutation.EpisodeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -328,6 +388,45 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.profile_commenter = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.ReplyToIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ReplyToTable,
+			Columns: []string{comment.ReplyToColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.comment_replied = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.RepliedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   comment.RepliedTable,
+			Columns: []string{comment.RepliedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

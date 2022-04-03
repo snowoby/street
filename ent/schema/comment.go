@@ -16,6 +16,7 @@ type Comment struct {
 func (Comment) Fields() []ent.Field {
 	return []ent.Field{
 		field.Text("content").NotEmpty(),
+		field.Text("path").Optional().Default(""),
 	}
 }
 func (Comment) Mixin() []ent.Mixin {
@@ -30,5 +31,6 @@ func (Comment) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("episode", Episode.Type).Ref("comments").Required().Unique(),
 		edge.From("author", Profile.Type).Ref("commenter").Required().Unique(),
+		edge.To("replied", Comment.Type).From("replyTo").Unique(),
 	}
 }

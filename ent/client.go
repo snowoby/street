@@ -421,6 +421,38 @@ func (c *CommentClient) QueryAuthor(co *Comment) *ProfileQuery {
 	return query
 }
 
+// QueryReplyTo queries the replyTo edge of a Comment.
+func (c *CommentClient) QueryReplyTo(co *Comment) *CommentQuery {
+	query := &CommentQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ReplyToTable, comment.ReplyToColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReplied queries the replied edge of a Comment.
+func (c *CommentClient) QueryReplied(co *Comment) *CommentQuery {
+	query := &CommentQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, comment.RepliedTable, comment.RepliedColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CommentClient) Hooks() []Hook {
 	return c.hooks.Comment

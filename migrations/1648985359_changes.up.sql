@@ -1,0 +1,1 @@
+ALTER TABLE "comments" ADD COLUMN "path" text NULL, ADD COLUMN "comment_replied" uuid NULL, ADD CONSTRAINT "comments_comments_replied" FOREIGN KEY ("comment_replied") REFERENCES "comments" ("id") ON DELETE SET NULL;

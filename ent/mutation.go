@@ -846,11 +846,17 @@ type CommentMutation struct {
 	create_time    *time.Time
 	update_time    *time.Time
 	content        *string
+	_path          *string
 	clearedFields  map[string]struct{}
 	episode        *uuid.UUID
 	clearedepisode bool
 	author         *uuid.UUID
 	clearedauthor  bool
+	replyTo        *uuid.UUID
+	clearedreplyTo bool
+	replied        map[uuid.UUID]struct{}
+	removedreplied map[uuid.UUID]struct{}
+	clearedreplied bool
 	done           bool
 	oldValue       func(context.Context) (*Comment, error)
 	predicates     []predicate.Comment
@@ -1104,6 +1110,55 @@ func (m *CommentMutation) ResetContent() {
 	m.content = nil
 }
 
+// SetPath sets the "path" field.
+func (m *CommentMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *CommentMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ClearPath clears the value of the "path" field.
+func (m *CommentMutation) ClearPath() {
+	m._path = nil
+	m.clearedFields[comment.FieldPath] = struct{}{}
+}
+
+// PathCleared returns if the "path" field was cleared in this mutation.
+func (m *CommentMutation) PathCleared() bool {
+	_, ok := m.clearedFields[comment.FieldPath]
+	return ok
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *CommentMutation) ResetPath() {
+	m._path = nil
+	delete(m.clearedFields, comment.FieldPath)
+}
+
 // SetEpisodeID sets the "episode" edge to the Episode entity by id.
 func (m *CommentMutation) SetEpisodeID(id uuid.UUID) {
 	m.episode = &id
@@ -1182,6 +1237,99 @@ func (m *CommentMutation) ResetAuthor() {
 	m.clearedauthor = false
 }
 
+// SetReplyToID sets the "replyTo" edge to the Comment entity by id.
+func (m *CommentMutation) SetReplyToID(id uuid.UUID) {
+	m.replyTo = &id
+}
+
+// ClearReplyTo clears the "replyTo" edge to the Comment entity.
+func (m *CommentMutation) ClearReplyTo() {
+	m.clearedreplyTo = true
+}
+
+// ReplyToCleared reports if the "replyTo" edge to the Comment entity was cleared.
+func (m *CommentMutation) ReplyToCleared() bool {
+	return m.clearedreplyTo
+}
+
+// ReplyToID returns the "replyTo" edge ID in the mutation.
+func (m *CommentMutation) ReplyToID() (id uuid.UUID, exists bool) {
+	if m.replyTo != nil {
+		return *m.replyTo, true
+	}
+	return
+}
+
+// ReplyToIDs returns the "replyTo" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ReplyToID instead. It exists only for internal usage by the builders.
+func (m *CommentMutation) ReplyToIDs() (ids []uuid.UUID) {
+	if id := m.replyTo; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetReplyTo resets all changes to the "replyTo" edge.
+func (m *CommentMutation) ResetReplyTo() {
+	m.replyTo = nil
+	m.clearedreplyTo = false
+}
+
+// AddRepliedIDs adds the "replied" edge to the Comment entity by ids.
+func (m *CommentMutation) AddRepliedIDs(ids ...uuid.UUID) {
+	if m.replied == nil {
+		m.replied = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.replied[ids[i]] = struct{}{}
+	}
+}
+
+// ClearReplied clears the "replied" edge to the Comment entity.
+func (m *CommentMutation) ClearReplied() {
+	m.clearedreplied = true
+}
+
+// RepliedCleared reports if the "replied" edge to the Comment entity was cleared.
+func (m *CommentMutation) RepliedCleared() bool {
+	return m.clearedreplied
+}
+
+// RemoveRepliedIDs removes the "replied" edge to the Comment entity by IDs.
+func (m *CommentMutation) RemoveRepliedIDs(ids ...uuid.UUID) {
+	if m.removedreplied == nil {
+		m.removedreplied = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.replied, ids[i])
+		m.removedreplied[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedReplied returns the removed IDs of the "replied" edge to the Comment entity.
+func (m *CommentMutation) RemovedRepliedIDs() (ids []uuid.UUID) {
+	for id := range m.removedreplied {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RepliedIDs returns the "replied" edge IDs in the mutation.
+func (m *CommentMutation) RepliedIDs() (ids []uuid.UUID) {
+	for id := range m.replied {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetReplied resets all changes to the "replied" edge.
+func (m *CommentMutation) ResetReplied() {
+	m.replied = nil
+	m.clearedreplied = false
+	m.removedreplied = nil
+}
+
 // Where appends a list predicates to the CommentMutation builder.
 func (m *CommentMutation) Where(ps ...predicate.Comment) {
 	m.predicates = append(m.predicates, ps...)
@@ -1201,7 +1349,7 @@ func (m *CommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CommentMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.sid != nil {
 		fields = append(fields, comment.FieldSid)
 	}
@@ -1213,6 +1361,9 @@ func (m *CommentMutation) Fields() []string {
 	}
 	if m.content != nil {
 		fields = append(fields, comment.FieldContent)
+	}
+	if m._path != nil {
+		fields = append(fields, comment.FieldPath)
 	}
 	return fields
 }
@@ -1230,6 +1381,8 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdateTime()
 	case comment.FieldContent:
 		return m.Content()
+	case comment.FieldPath:
+		return m.Path()
 	}
 	return nil, false
 }
@@ -1247,6 +1400,8 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdateTime(ctx)
 	case comment.FieldContent:
 		return m.OldContent(ctx)
+	case comment.FieldPath:
+		return m.OldPath(ctx)
 	}
 	return nil, fmt.Errorf("unknown Comment field %s", name)
 }
@@ -1284,6 +1439,13 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetContent(v)
 		return nil
+	case comment.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)
 }
@@ -1316,7 +1478,11 @@ func (m *CommentMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CommentMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(comment.FieldPath) {
+		fields = append(fields, comment.FieldPath)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1329,6 +1495,11 @@ func (m *CommentMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CommentMutation) ClearField(name string) error {
+	switch name {
+	case comment.FieldPath:
+		m.ClearPath()
+		return nil
+	}
 	return fmt.Errorf("unknown Comment nullable field %s", name)
 }
 
@@ -1348,18 +1519,27 @@ func (m *CommentMutation) ResetField(name string) error {
 	case comment.FieldContent:
 		m.ResetContent()
 		return nil
+	case comment.FieldPath:
+		m.ResetPath()
+		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CommentMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.episode != nil {
 		edges = append(edges, comment.EdgeEpisode)
 	}
 	if m.author != nil {
 		edges = append(edges, comment.EdgeAuthor)
+	}
+	if m.replyTo != nil {
+		edges = append(edges, comment.EdgeReplyTo)
+	}
+	if m.replied != nil {
+		edges = append(edges, comment.EdgeReplied)
 	}
 	return edges
 }
@@ -1376,13 +1556,26 @@ func (m *CommentMutation) AddedIDs(name string) []ent.Value {
 		if id := m.author; id != nil {
 			return []ent.Value{*id}
 		}
+	case comment.EdgeReplyTo:
+		if id := m.replyTo; id != nil {
+			return []ent.Value{*id}
+		}
+	case comment.EdgeReplied:
+		ids := make([]ent.Value, 0, len(m.replied))
+		for id := range m.replied {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CommentMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
+	if m.removedreplied != nil {
+		edges = append(edges, comment.EdgeReplied)
+	}
 	return edges
 }
 
@@ -1390,18 +1583,30 @@ func (m *CommentMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *CommentMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case comment.EdgeReplied:
+		ids := make([]ent.Value, 0, len(m.removedreplied))
+		for id := range m.removedreplied {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CommentMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.clearedepisode {
 		edges = append(edges, comment.EdgeEpisode)
 	}
 	if m.clearedauthor {
 		edges = append(edges, comment.EdgeAuthor)
+	}
+	if m.clearedreplyTo {
+		edges = append(edges, comment.EdgeReplyTo)
+	}
+	if m.clearedreplied {
+		edges = append(edges, comment.EdgeReplied)
 	}
 	return edges
 }
@@ -1414,6 +1619,10 @@ func (m *CommentMutation) EdgeCleared(name string) bool {
 		return m.clearedepisode
 	case comment.EdgeAuthor:
 		return m.clearedauthor
+	case comment.EdgeReplyTo:
+		return m.clearedreplyTo
+	case comment.EdgeReplied:
+		return m.clearedreplied
 	}
 	return false
 }
@@ -1428,6 +1637,9 @@ func (m *CommentMutation) ClearEdge(name string) error {
 	case comment.EdgeAuthor:
 		m.ClearAuthor()
 		return nil
+	case comment.EdgeReplyTo:
+		m.ClearReplyTo()
+		return nil
 	}
 	return fmt.Errorf("unknown Comment unique edge %s", name)
 }
@@ -1441,6 +1653,12 @@ func (m *CommentMutation) ResetEdge(name string) error {
 		return nil
 	case comment.EdgeAuthor:
 		m.ResetAuthor()
+		return nil
+	case comment.EdgeReplyTo:
+		m.ResetReplyTo()
+		return nil
+	case comment.EdgeReplied:
+		m.ResetReplied()
 		return nil
 	}
 	return fmt.Errorf("unknown Comment edge %s", name)

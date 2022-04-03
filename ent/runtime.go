@@ -88,6 +88,10 @@ func init() {
 	commentDescContent := commentFields[0].Descriptor()
 	// comment.ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	comment.ContentValidator = commentDescContent.Validators[0].(func(string) error)
+	// commentDescPath is the schema descriptor for path field.
+	commentDescPath := commentFields[1].Descriptor()
+	// comment.DefaultPath holds the default value on creation for the path field.
+	comment.DefaultPath = commentDescPath.Default.(string)
 	// commentDescID is the schema descriptor for id field.
 	commentDescID := commentMixinFields0[1].Descriptor()
 	// comment.DefaultID holds the default value on creation for the id field.

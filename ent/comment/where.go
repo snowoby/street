@@ -123,6 +123,13 @@ func Content(v string) predicate.Comment {
 	})
 }
 
+// Path applies equality check predicate on the "path" field. It's identical to PathEQ.
+func Path(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPath), v))
+	})
+}
+
 // SidEQ applies the EQ predicate on the "sid" field.
 func SidEQ(v schema.ID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
@@ -462,6 +469,131 @@ func ContentContainsFold(v string) predicate.Comment {
 	})
 }
 
+// PathEQ applies the EQ predicate on the "path" field.
+func PathEQ(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPath), v))
+	})
+}
+
+// PathNEQ applies the NEQ predicate on the "path" field.
+func PathNEQ(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPath), v))
+	})
+}
+
+// PathIn applies the In predicate on the "path" field.
+func PathIn(vs ...string) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPath), v...))
+	})
+}
+
+// PathNotIn applies the NotIn predicate on the "path" field.
+func PathNotIn(vs ...string) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPath), v...))
+	})
+}
+
+// PathGT applies the GT predicate on the "path" field.
+func PathGT(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPath), v))
+	})
+}
+
+// PathGTE applies the GTE predicate on the "path" field.
+func PathGTE(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPath), v))
+	})
+}
+
+// PathLT applies the LT predicate on the "path" field.
+func PathLT(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPath), v))
+	})
+}
+
+// PathLTE applies the LTE predicate on the "path" field.
+func PathLTE(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPath), v))
+	})
+}
+
+// PathContains applies the Contains predicate on the "path" field.
+func PathContains(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldPath), v))
+	})
+}
+
+// PathHasPrefix applies the HasPrefix predicate on the "path" field.
+func PathHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldPath), v))
+	})
+}
+
+// PathHasSuffix applies the HasSuffix predicate on the "path" field.
+func PathHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldPath), v))
+	})
+}
+
+// PathIsNil applies the IsNil predicate on the "path" field.
+func PathIsNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPath)))
+	})
+}
+
+// PathNotNil applies the NotNil predicate on the "path" field.
+func PathNotNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPath)))
+	})
+}
+
+// PathEqualFold applies the EqualFold predicate on the "path" field.
+func PathEqualFold(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldPath), v))
+	})
+}
+
+// PathContainsFold applies the ContainsFold predicate on the "path" field.
+func PathContainsFold(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldPath), v))
+	})
+}
+
 // HasEpisode applies the HasEdge predicate on the "episode" edge.
 func HasEpisode() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
@@ -509,6 +641,62 @@ func HasAuthorWith(preds ...predicate.Profile) predicate.Comment {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(AuthorInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, AuthorTable, AuthorColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasReplyTo applies the HasEdge predicate on the "replyTo" edge.
+func HasReplyTo() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ReplyToTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ReplyToTable, ReplyToColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasReplyToWith applies the HasEdge predicate on the "replyTo" edge with a given conditions (other predicates).
+func HasReplyToWith(preds ...predicate.Comment) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ReplyToTable, ReplyToColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasReplied applies the HasEdge predicate on the "replied" edge.
+func HasReplied() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RepliedTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RepliedTable, RepliedColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRepliedWith applies the HasEdge predicate on the "replied" edge with a given conditions (other predicates).
+func HasRepliedWith(preds ...predicate.Comment) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RepliedTable, RepliedColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

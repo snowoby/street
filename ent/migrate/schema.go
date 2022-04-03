@@ -37,6 +37,8 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "content", Type: field.TypeString, Size: 2147483647},
+		{Name: "path", Type: field.TypeString, Nullable: true, Size: 2147483647, Default: ""},
+		{Name: "comment_replied", Type: field.TypeUUID, Nullable: true},
 		{Name: "episode_comments", Type: field.TypeUUID},
 		{Name: "profile_commenter", Type: field.TypeUUID},
 	}
@@ -47,14 +49,20 @@ var (
 		PrimaryKey: []*schema.Column{CommentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "comments_comments_replied",
+				Columns:    []*schema.Column{CommentsColumns[6]},
+				RefColumns: []*schema.Column{CommentsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "comments_episodes_comments",
-				Columns:    []*schema.Column{CommentsColumns[5]},
+				Columns:    []*schema.Column{CommentsColumns[7]},
 				RefColumns: []*schema.Column{EpisodesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "comments_profiles_commenter",
-				Columns:    []*schema.Column{CommentsColumns[6]},
+				Columns:    []*schema.Column{CommentsColumns[8]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -254,8 +262,9 @@ var (
 )
 
 func init() {
-	CommentsTable.ForeignKeys[0].RefTable = EpisodesTable
-	CommentsTable.ForeignKeys[1].RefTable = ProfilesTable
+	CommentsTable.ForeignKeys[0].RefTable = CommentsTable
+	CommentsTable.ForeignKeys[1].RefTable = EpisodesTable
+	CommentsTable.ForeignKeys[2].RefTable = ProfilesTable
 	EpisodesTable.ForeignKeys[0].RefTable = ProfilesTable
 	EpisodesTable.ForeignKeys[1].RefTable = SeriesTable
 	FilesTable.ForeignKeys[0].RefTable = AccountsTable

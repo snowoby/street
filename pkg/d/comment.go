@@ -3,20 +3,27 @@ package d
 import "street/ent"
 
 type CommentForm struct {
-	From    string `json:"from" binding:"required"`
-	Content string `json:"content" binding:"required"`
+	From    string  `json:"from" binding:"uuid"`
+	Content string  `json:"content" binding:"required"`
+	ReplyTo *string `json:"replyTo" binding:"omitempty,uuid"`
 }
 
 type Comment struct {
 	*ent.Comment
-	Author *Profile `json:"author"`
+	ReplyTo *Comment `json:"replyTo,omitempty"`
+	Author  *Profile `json:"author"`
 	ValueType
 	NoEdges
+	NoPath
 }
 
 func CommentFromEnt(c *ent.Comment) *Comment {
+	if c == nil {
+		return nil
+	}
 	return &Comment{
 		Comment:   c,
+		ReplyTo:   CommentFromEnt(c.Edges.ReplyTo),
 		Author:    ProfileFromEnt(c.Edges.Author),
 		ValueType: ValueType{"comment"},
 	}

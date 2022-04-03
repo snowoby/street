@@ -28,9 +28,12 @@ type Comment struct {
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Content holds the value of the "content" field.
 	Content string `json:"content,omitempty"`
+	// Path holds the value of the "path" field.
+	Path string `json:"path,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
 	Edges             CommentEdges `json:"edges"`
+	comment_replied   *uuid.UUID
 	episode_comments  *uuid.UUID
 	profile_commenter *uuid.UUID
 }
@@ -41,9 +44,13 @@ type CommentEdges struct {
 	Episode *Episode `json:"episode,omitempty"`
 	// Author holds the value of the author edge.
 	Author *Profile `json:"author,omitempty"`
+	// ReplyTo holds the value of the replyTo edge.
+	ReplyTo *Comment `json:"replyTo,omitempty"`
+	// Replied holds the value of the replied edge.
+	Replied []*Comment `json:"replied,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // EpisodeOrErr returns the Episode value or an error if the edge
@@ -74,6 +81,29 @@ func (e CommentEdges) AuthorOrErr() (*Profile, error) {
 	return nil, &NotLoadedError{edge: "author"}
 }
 
+// ReplyToOrErr returns the ReplyTo value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CommentEdges) ReplyToOrErr() (*Comment, error) {
+	if e.loadedTypes[2] {
+		if e.ReplyTo == nil {
+			// The edge replyTo was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: comment.Label}
+		}
+		return e.ReplyTo, nil
+	}
+	return nil, &NotLoadedError{edge: "replyTo"}
+}
+
+// RepliedOrErr returns the Replied value or an error if the edge
+// was not loaded in eager-loading.
+func (e CommentEdges) RepliedOrErr() ([]*Comment, error) {
+	if e.loadedTypes[3] {
+		return e.Replied, nil
+	}
+	return nil, &NotLoadedError{edge: "replied"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -81,15 +111,17 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case comment.FieldSid:
 			values[i] = new(schema.ID)
-		case comment.FieldContent:
+		case comment.FieldContent, comment.FieldPath:
 			values[i] = new(sql.NullString)
 		case comment.FieldCreateTime, comment.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case comment.FieldID:
 			values[i] = new(uuid.UUID)
-		case comment.ForeignKeys[0]: // episode_comments
+		case comment.ForeignKeys[0]: // comment_replied
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case comment.ForeignKeys[1]: // profile_commenter
+		case comment.ForeignKeys[1]: // episode_comments
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case comment.ForeignKeys[2]: // profile_commenter
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
@@ -136,14 +168,27 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.Content = value.String
 			}
+		case comment.FieldPath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field path", values[i])
+			} else if value.Valid {
+				c.Path = value.String
+			}
 		case comment.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field comment_replied", values[i])
+			} else if value.Valid {
+				c.comment_replied = new(uuid.UUID)
+				*c.comment_replied = *value.S.(*uuid.UUID)
+			}
+		case comment.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field episode_comments", values[i])
 			} else if value.Valid {
 				c.episode_comments = new(uuid.UUID)
 				*c.episode_comments = *value.S.(*uuid.UUID)
 			}
-		case comment.ForeignKeys[1]:
+		case comment.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field profile_commenter", values[i])
 			} else if value.Valid {
@@ -163,6 +208,16 @@ func (c *Comment) QueryEpisode() *EpisodeQuery {
 // QueryAuthor queries the "author" edge of the Comment entity.
 func (c *Comment) QueryAuthor() *ProfileQuery {
 	return (&CommentClient{config: c.config}).QueryAuthor(c)
+}
+
+// QueryReplyTo queries the "replyTo" edge of the Comment entity.
+func (c *Comment) QueryReplyTo() *CommentQuery {
+	return (&CommentClient{config: c.config}).QueryReplyTo(c)
+}
+
+// QueryReplied queries the "replied" edge of the Comment entity.
+func (c *Comment) QueryReplied() *CommentQuery {
+	return (&CommentClient{config: c.config}).QueryReplied(c)
 }
 
 // Update returns a builder for updating this Comment.
@@ -196,6 +251,8 @@ func (c *Comment) String() string {
 	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", content=")
 	builder.WriteString(c.Content)
+	builder.WriteString(", path=")
+	builder.WriteString(c.Path)
 	builder.WriteByte(')')
 	return builder.String()
 }

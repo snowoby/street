@@ -22,10 +22,16 @@ const (
 	FieldUpdateTime = "update_time"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
+	// FieldPath holds the string denoting the path field in the database.
+	FieldPath = "path"
 	// EdgeEpisode holds the string denoting the episode edge name in mutations.
 	EdgeEpisode = "episode"
 	// EdgeAuthor holds the string denoting the author edge name in mutations.
 	EdgeAuthor = "author"
+	// EdgeReplyTo holds the string denoting the replyto edge name in mutations.
+	EdgeReplyTo = "replyTo"
+	// EdgeReplied holds the string denoting the replied edge name in mutations.
+	EdgeReplied = "replied"
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
 	// EpisodeTable is the table that holds the episode relation/edge.
@@ -42,6 +48,14 @@ const (
 	AuthorInverseTable = "profiles"
 	// AuthorColumn is the table column denoting the author relation/edge.
 	AuthorColumn = "profile_commenter"
+	// ReplyToTable is the table that holds the replyTo relation/edge.
+	ReplyToTable = "comments"
+	// ReplyToColumn is the table column denoting the replyTo relation/edge.
+	ReplyToColumn = "comment_replied"
+	// RepliedTable is the table that holds the replied relation/edge.
+	RepliedTable = "comments"
+	// RepliedColumn is the table column denoting the replied relation/edge.
+	RepliedColumn = "comment_replied"
 )
 
 // Columns holds all SQL columns for comment fields.
@@ -51,11 +65,13 @@ var Columns = []string{
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldContent,
+	FieldPath,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "comments"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"comment_replied",
 	"episode_comments",
 	"profile_commenter",
 }
@@ -86,6 +102,8 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// ContentValidator is a validator for the "content" field. It is called by the builders before save.
 	ContentValidator func(string) error
+	// DefaultPath holds the default value on creation for the "path" field.
+	DefaultPath string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
